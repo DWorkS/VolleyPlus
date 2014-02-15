@@ -14,21 +14,37 @@
  * limitations under the License.
  */
 
-package com.android.volley;
+package com.android.volley.error;
 
 import com.android.volley.NetworkResponse;
-import com.android.volley.VolleyError;
 
 /**
- * Indicates that the error responded with an error response.
+ * Exception style class encapsulating Volley errors
  */
 @SuppressWarnings("serial")
-public class ServerError extends VolleyError {
-    public ServerError(NetworkResponse networkResponse) {
-        super(networkResponse);
+public class VolleyError extends Exception {
+    public final NetworkResponse networkResponse;
+
+    public VolleyError() {
+        networkResponse = null;
     }
 
-    public ServerError() {
-        super();
+    public VolleyError(NetworkResponse response) {
+        networkResponse = response;
+    }
+
+    public VolleyError(String exceptionMessage) {
+       super(exceptionMessage);
+       networkResponse = null;
+    }
+
+    public VolleyError(String exceptionMessage, Throwable reason) {
+        super(exceptionMessage, reason);
+        networkResponse = null;
+    }
+
+    public VolleyError(Throwable cause) {
+        super(cause);
+        networkResponse = null;
     }
 }

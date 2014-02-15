@@ -16,6 +16,8 @@
 
 package com.android.volley;
 
+import com.android.volley.error.VolleyError;
+
 /**
  * An interface for performing requests.
  */

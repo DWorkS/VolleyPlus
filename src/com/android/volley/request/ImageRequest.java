@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.volley.toolbox;
+package com.android.volley.request;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
+import com.android.volley.error.ParseError;
+import com.android.volley.toolbox.HttpHeaderParser;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

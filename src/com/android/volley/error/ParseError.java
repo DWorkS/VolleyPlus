@@ -14,35 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.volley;
+package com.android.volley.error;
+
+import com.android.volley.NetworkResponse;
+import com.android.volley.error.VolleyError;
 
 /**
- * Exception style class encapsulating Volley errors
+ * Indicates that the server's response could not be parsed.
  */
 @SuppressWarnings("serial")
-public class VolleyError extends Exception {
-    public final NetworkResponse networkResponse;
+public class ParseError extends VolleyError {
+    public ParseError() { }
 
-    public VolleyError() {
-        networkResponse = null;
+    public ParseError(NetworkResponse networkResponse) {
+        super(networkResponse);
     }
 
-    public VolleyError(NetworkResponse response) {
-        networkResponse = response;
-    }
-
-    public VolleyError(String exceptionMessage) {
-       super(exceptionMessage);
-       networkResponse = null;
-    }
-
-    public VolleyError(String exceptionMessage, Throwable reason) {
-        super(exceptionMessage, reason);
-        networkResponse = null;
-    }
-
-    public VolleyError(Throwable cause) {
+    public ParseError(Throwable cause) {
         super(cause);
-        networkResponse = null;
     }
 }

@@ -14,23 +14,36 @@
  * limitations under the License.
  */
 
-package com.android.volley;
+package com.android.volley.cache;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.VolleyError;
+import com.android.volley.Cache;
 
 /**
- * Indicates that the server's response could not be parsed.
+ * A cache that doesn't.
  */
-@SuppressWarnings("serial")
-public class ParseError extends VolleyError {
-    public ParseError() { }
+public class NoCache implements Cache {
+	@Override
+	public void clear() {
+	}
 
-    public ParseError(NetworkResponse networkResponse) {
-        super(networkResponse);
-    }
+	@Override
+	public Entry get(String key) {
+		return null;
+	}
 
-    public ParseError(Throwable cause) {
-        super(cause);
-    }
+	@Override
+	public void put(String key, Entry entry) {
+	}
+
+	@Override
+	public void invalidate(String key, boolean fullExpire) {
+	}
+
+	@Override
+	public void remove(String key) {
+	}
+
+	@Override
+	public void initialize() {
+	}
 }

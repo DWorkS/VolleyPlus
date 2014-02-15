@@ -19,7 +19,7 @@ package com.android.volley;
 import android.content.Intent;
 
 import com.android.volley.NetworkResponse;
-import com.android.volley.VolleyError;
+import com.android.volley.error.VolleyError;
 
 /**
  * Error indicating that there was an authentication failure when performing a Request.

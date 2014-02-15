@@ -24,6 +24,8 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.android.volley.VolleyLog.MarkerLog;
+import com.android.volley.error.TimeoutError;
+import com.android.volley.error.VolleyError;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -51,6 +53,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         int POST = 1;
         int PUT = 2;
         int DELETE = 3;
+        int PATCH = 4;
     }
 
     /** An event log tracing the lifetime of this request; for debugging. */

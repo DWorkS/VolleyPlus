@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.toolbox;
+package com.android.volley.cache;
 
 import android.os.SystemClock;
 

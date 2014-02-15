@@ -16,7 +16,7 @@
  * Added by Vinay S Shenoy on 19/5/13
  */
 
-package com.android.volley.toolbox;
+package com.android.volley.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;

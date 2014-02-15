@@ -18,22 +18,23 @@ package com.android.volley.toolbox;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.util.LruCache;
 import android.widget.ImageView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
+import com.android.volley.cache.ImageCache;
+import com.android.volley.cache.LruImageCache;
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.ImageRequest;
+import com.android.volley.ui.AnimateImageView;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
@@ -75,22 +76,12 @@ public class ImageLoader {
     private Resources mResources;
 
     /**
-     * Simple cache adapter interface. If provided to the ImageLoader, it
-     * will be used as an L1 cache before dispatch to Volley. Implementations
-     * must not block. Implementation with an LruCache is recommended.
-     */
-    public interface ImageCache {
-        public Bitmap getBitmap(String url);
-        public void putBitmap(String url, Bitmap bitmap);
-    }
-
-    /**
      * Constructs a new ImageLoader with a default LruCache
      * implementation
      * @param queue The RequestQueue to use for making image requests.
      */
     public ImageLoader(RequestQueue queue) {
-        this(queue, new BitmapLruCache());
+        this(queue, new LruImageCache());
     }
 
     /**
@@ -113,7 +104,11 @@ public class ImageLoader {
         mCache = imageCache;
         mResources = resources;
     }
-
+    
+    protected RequestQueue getRequestQueue() {
+		return mRequestQueue;
+	}
+    
     /**
      * The default implementation of ImageListener which handles basic functionality
      * of showing a default image until the network response is received, at which point
@@ -545,53 +540,5 @@ public class ImageLoader {
      */
     public void setResources(Resources resources) {
     	mResources = resources;
-    }
-
-    /**
-     * Basic implementation of a Bitmap LRU cache to use
-     * with {@link ImageLoader#ImageLoader(com.android.volley.RequestQueue)}
-     *
-     * Added by Vinay S Shenoy on 19/5/13
-     */
-    public static final class BitmapLruCache implements ImageCache {
-
-        private LruCache<String, Bitmap> mLruCache;
-
-        public BitmapLruCache() {
-
-            final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-            final int cacheSize = maxMemory / 8;
-
-            mLruCache = new LruCache<String, Bitmap>(cacheSize) {
-                @SuppressLint("NewApi")
-				@Override
-                protected int sizeOf(String key, Bitmap bitmap) {
-                    // The cache size will be measured in kilobytes rather than
-                    // number of items.
-                	
-                	if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-                		return bitmap.getByteCount() / 1024;
-                	}
-                	
-                	else {
-                		return (bitmap.getRowBytes() * bitmap.getHeight()) / 1024;
-                	}
-                    
-                }
-            };
-
-        }
-
-        @Override
-        public Bitmap getBitmap(String key) {
-            return mLruCache.get(key);
-        }
-
-        @Override
-        public void putBitmap(String key, Bitmap bitmap) {
-            if(mLruCache.get(key) == null) {
-                mLruCache.put(key, bitmap);
-            }
-        }
     }
 }

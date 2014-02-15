@@ -51,26 +51,28 @@ import android.text.TextUtils;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
-import com.android.volley.toolbox.MultiPartRequest.MultiPartParam;
+import com.android.volley.request.MultiPartRequest;
+import com.android.volley.request.MultiPartRequest.MultiPartParam;
 
 /**
  * An {@link HttpStack} based on {@link HttpURLConnection}.
  */
 public class HurlStack implements HttpStack {
 
-    private static final String    HEADER_CONTENT_TYPE              = "Content-Type";
-    private static final String    HEADER_USER_AGENT                = "User-Agent";
-    private static final String    HEADER_CONTENT_DISPOSITION       = "Content-Disposition";
-    private static final String    HEADER_CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding";
-    private static final String    CONTENT_TYPE_MULTIPART           = "multipart/form-data; charset=%s; boundary=%s";
-    private static final String    BINARY                           = "binary";
-    private static final String    CRLF                             = "\r\n";
-    private static final String    FORM_DATA                        = "form-data; name=\"%s\"";
-    private static final String    BOUNDARY_PREFIX                  = "--";
-    private static final String    CONTENT_TYPE_OCTET_STREAM        = "application/octet-stream";
-    private static final String    FILENAME                         = "filename=%s";
-    private static final String    COLON_SPACE                      = ": ";
-    private static final String    SEMICOLON_SPACE                  = "; ";
+	private static final String HEADER_CONTENT_TYPE = "Content-Type";
+	private static final String HEADER_USER_AGENT = "User-Agent";
+	private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+	private static final String HEADER_CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding";
+	private static final String CONTENT_TYPE_MULTIPART = "multipart/form-data; charset=%s; boundary=%s";
+	private static final String BINARY = "binary";
+	private static final String CRLF = "\r\n";
+	private static final String FORM_DATA = "form-data; name=\"%s\"";
+	private static final String BOUNDARY_PREFIX = "--";
+	private static final String CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
+	private static final String FILENAME = "filename=%s";
+	private static final String COLON_SPACE = ": ";
+	private static final String SEMICOLON_SPACE = "; ";
+	private static final String PATCH_HEADER = "X-HTTP-Method-Override";
 
     private UrlRewriter            mUrlRewriter;
     private final SSLSocketFactory mSslSocketFactory;
@@ -369,6 +371,11 @@ public class HurlStack implements HttpStack {
                 break;
             case Method.POST:
                 connection.setRequestMethod("POST");
+                addBodyIfExists(connection, request);
+                break;
+            case Method.PATCH:
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty(PATCH_HEADER, "PATCH");
                 addBodyIfExists(connection, request);
                 break;
             case Method.PUT:

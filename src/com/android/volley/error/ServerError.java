@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.volley;
+package com.android.volley.error;
+
+import com.android.volley.NetworkResponse;
+import com.android.volley.error.VolleyError;
 
 /**
- * Indicates that the connection or the socket timed out.
+ * Indicates that the error responded with an error response.
  */
 @SuppressWarnings("serial")
-public class TimeoutError extends VolleyError { }
+public class ServerError extends VolleyError {
+    public ServerError(NetworkResponse networkResponse) {
+        super(networkResponse);
+    }
+
+    public ServerError() {
+        super();
+    }
+}

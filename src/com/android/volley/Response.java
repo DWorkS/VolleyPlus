@@ -16,6 +16,8 @@
 
 package com.android.volley;
 
+import com.android.volley.error.VolleyError;
+
 /**
  * Encapsulates a parsed response for delivery.
  *

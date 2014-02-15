@@ -14,36 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.volley.toolbox;
-
-import com.android.volley.Cache;
+package com.android.volley.error;
 
 /**
- * A cache that doesn't.
+ * Indicates that the connection or the socket timed out.
  */
-public class NoCache implements Cache {
-    @Override
-    public void clear() {
-    }
-
-    @Override
-    public Entry get(String key) {
-        return null;
-    }
-
-    @Override
-    public void put(String key, Entry entry) {
-    }
-
-    @Override
-    public void invalidate(String key, boolean fullExpire) {
-    }
-
-    @Override
-    public void remove(String key) {
-    }
-
-    @Override
-    public void initialize() {
-    }
-}
+@SuppressWarnings("serial")
+public class TimeoutError extends VolleyError { }

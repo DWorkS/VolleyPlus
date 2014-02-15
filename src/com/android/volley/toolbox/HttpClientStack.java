@@ -40,7 +40,8 @@ import org.apache.http.params.HttpParams;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
-import com.android.volley.toolbox.MultiPartRequest.MultiPartParam;
+import com.android.volley.request.MultiPartRequest;
+import com.android.volley.request.MultiPartRequest.MultiPartParam;
 import com.android.volley.toolbox.multipart.FilePart;
 import com.android.volley.toolbox.multipart.MultipartEntity;
 import com.android.volley.toolbox.multipart.StringPart;
@@ -121,6 +122,12 @@ public class HttpClientStack implements HttpStack {
                 setEntityIfNonEmptyBody(postRequest, request);
                 return postRequest;
             }
+            case Method.PATCH: {
+                HttpPatch postRequest = new HttpPatch(request.getUrl());
+                postRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
+                setEntityIfNonEmptyBody(postRequest, request);
+                return postRequest;
+            }
             case Method.PUT: {
                 HttpPut putRequest = new HttpPut(request.getUrl());
                 putRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
@@ -132,42 +139,42 @@ public class HttpClientStack implements HttpStack {
         }
     }
 
-    private static void setEntityIfNonEmptyBody(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) throws IOException, AuthFailureError {
+	private static void setEntityIfNonEmptyBody(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) throws IOException, AuthFailureError {
 
-        if (request instanceof MultiPartRequest) {
+		if (request instanceof MultiPartRequest) {
 
-            final Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
-            final Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
+			final Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
+			final Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
 
-            MultipartEntity multipartEntity = new MultipartEntity();
+			MultipartEntity multipartEntity = new MultipartEntity();
 
-            for (String key : multipartParams.keySet()) {
-                multipartEntity.addPart(new StringPart(key, multipartParams.get(key).value));
-            }
+			for (String key : multipartParams.keySet()) {
+				multipartEntity.addPart(new StringPart(key, multipartParams.get(key).value));
+			}
 
-            for (String key : filesToUpload.keySet()) {
-                File file = new File(filesToUpload.get(key));
-                
-                if(!file.exists()) {
-                    throw new IOException(String.format("File not found: %s", file.getAbsolutePath()));
-                }
-                
-                if(file.isDirectory()) {
-                    throw new IOException(String.format("File is a directory: %s", file.getAbsolutePath()));
-                }
-                
-                multipartEntity.addPart(new FilePart(key, file, null, null));
-            }
-            httpRequest.setEntity(multipartEntity);
+			for (String key : filesToUpload.keySet()) {
+				File file = new File(filesToUpload.get(key));
 
-        } else {
-            byte[] body = request.getBody();
-            if (body != null) {
-                HttpEntity entity = new ByteArrayEntity(body);
-                httpRequest.setEntity(entity);
-            }
-        }
-    }
+				if (!file.exists()) {
+					throw new IOException(String.format("File not found: %s", file.getAbsolutePath()));
+				}
+
+				if (file.isDirectory()) {
+					throw new IOException(String.format("File is a directory: %s", file.getAbsolutePath()));
+				}
+
+				multipartEntity.addPart(new FilePart(key, file, null, null));
+			}
+			httpRequest.setEntity(multipartEntity);
+
+		} else {
+			byte[] body = request.getBody();
+			if (body != null) {
+				HttpEntity entity = new ByteArrayEntity(body);
+				httpRequest.setEntity(entity);
+			}
+		}
+	}
 
     /**
      * Called before the request is executed using the underlying HttpClient.

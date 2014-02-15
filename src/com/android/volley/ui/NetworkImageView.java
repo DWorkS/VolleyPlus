@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.volley.toolbox;
+package com.android.volley.ui;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -21,7 +21,8 @@ import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
-import com.android.volley.VolleyError;
+import com.android.volley.error.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
 

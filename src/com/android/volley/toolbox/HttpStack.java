@@ -41,15 +41,4 @@ public interface HttpStack {
      */
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
         throws IOException, AuthFailureError;
-
-    /**
-     * An interface for transforming URLs before use.
-     */
-    interface UrlRewriter {
-        /**
-         * Returns a URL to use instead of the provided one, or null to indicate
-         * this URL should not be used at all.
-         */
-        public String rewriteUrl(Request<?> request) throws IOException;
-    }
 }
