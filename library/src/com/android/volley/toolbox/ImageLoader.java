@@ -30,8 +30,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
-import com.android.volley.cache.ImageCache;
-import com.android.volley.cache.LruImageCache;
+import com.android.volley.cache.BitmapCache;
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.ImageRequest;
 import com.android.volley.ui.AnimateImageView;
@@ -81,7 +80,7 @@ public class ImageLoader {
      * @param queue The RequestQueue to use for making image requests.
      */
     public ImageLoader(RequestQueue queue) {
-        this(queue, new LruImageCache());
+        this(queue, BitmapCache.getInstance(null));
     }
 
     /**
@@ -331,10 +330,10 @@ public class ImageLoader {
         // Remove this request from the list of in-flight requests.
         BatchedImageRequest request = mInFlightRequests.remove(cacheKey);
 
-        // Set the error for this request
-        request.setError(error);
-
         if (request != null) {
+            // Set the error for this request
+            request.setError(error);
+            
             // Send the batched response
             batchResponse(cacheKey, request);
         }

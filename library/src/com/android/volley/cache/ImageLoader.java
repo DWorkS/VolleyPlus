@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.cache.image;
+package com.android.volley.cache;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,8 +40,6 @@ import android.widget.ImageView;
 import com.android.volley.Cache;
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
-import com.android.volley.cache.BitmapCache;
-import com.android.volley.cache.DiskBasedCache;
 import com.android.volley.error.VolleyError;
 import com.android.volley.misc.NetUtils;
 import com.android.volley.misc.Utils;

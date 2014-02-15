@@ -1,4 +1,4 @@
-package com.android.volley.cache;
+package com.android.volley.toolbox;
 
 import android.graphics.Bitmap;
 

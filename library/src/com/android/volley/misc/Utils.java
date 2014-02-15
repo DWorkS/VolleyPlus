@@ -70,6 +70,10 @@ public class Utils {
     public static boolean hasJellyBean() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
     }
+    
+    public static boolean hasJellyBeanMR2() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
+    }
 
     public static boolean hasKitKat() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;

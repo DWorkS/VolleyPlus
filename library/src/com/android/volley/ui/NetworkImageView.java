@@ -19,7 +19,6 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.ImageView;
 
 import com.android.volley.error.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -30,7 +29,7 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
  * Handles fetching an image from a URL as well as the life-cycle of the
  * associated request.
  */
-public class NetworkImageView extends ImageView {
+public class NetworkImageView extends AnimateImageView {
     /** The URL of the network image to load */
     private String mUrl;
 

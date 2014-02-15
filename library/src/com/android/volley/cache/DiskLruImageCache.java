@@ -16,12 +16,11 @@ import android.util.Log;
 
 import com.android.volley.BuildConfig;
 import com.android.volley.misc.DiskLruCache;
+import com.android.volley.toolbox.ImageCache;
 
 /**
  * Implementation of DiskLruCache by Jake Wharton modified from
- * http://stackoverflow
- * .com/questions/10185898/using-disklrucache-in-android-4-0-
- * does-not-provide-for-opencache-method
+ * http://stackoverflow.com/questions/10185898/using-disklrucache-in-android-4-0-does-not-provide-for-opencache-method
  */
 public class DiskLruImageCache implements ImageCache {
 
@@ -94,7 +93,6 @@ public class DiskLruImageCache implements ImageCache {
 			} catch (IOException ignored) {
 			}
 		}
-
 	}
 
 	@Override
@@ -126,7 +124,6 @@ public class DiskLruImageCache implements ImageCache {
 		}
 
 		return bitmap;
-
 	}
 
 	public boolean containsKey(String key) {
@@ -145,7 +142,6 @@ public class DiskLruImageCache implements ImageCache {
 		}
 
 		return contained;
-
 	}
 
 	public void clearCache() {
@@ -162,5 +158,4 @@ public class DiskLruImageCache implements ImageCache {
 	public File getCacheFolder() {
 		return mDiskCache.getDirectory();
 	}
-
 }

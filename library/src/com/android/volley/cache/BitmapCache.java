@@ -16,16 +16,20 @@
 
 package com.android.volley.cache;
 
+import java.io.File;
+
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.os.Build;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.StatFs;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.LruCache;
 
 import com.android.volley.VolleyLog;
 import com.android.volley.misc.Utils;
+import com.android.volley.toolbox.ImageCache;
 
 /**
  * This class holds our bitmap caches (memory and disk).
@@ -34,7 +38,7 @@ public class BitmapCache implements ImageCache {
     private static final String TAG = "BitmapCache";
 
     // Default memory cache size as a percent of device memory class
-    private static final float DEFAULT_MEM_CACHE_PERCENT = 0.15f;
+    private static final float DEFAULT_MEM_CACHE_PERCENT = 0.25f;
 
     private LruCache<String, Bitmap> mMemoryCache;
 
@@ -184,13 +188,49 @@ public class BitmapCache implements ImageCache {
     /**
      * Get the size in bytes of a bitmap.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    @TargetApi(19)
     public static int getBitmapSize(Bitmap bitmap) {
+        // From KitKat onward use getAllocationByteCount() as allocated bytes can potentially be
+        // larger than bitmap byte count.
+        if (Utils.hasKitKat()) {
+            return bitmap.getAllocationByteCount();
+        }
+
         if (Utils.hasHoneycombMR1()) {
             return bitmap.getByteCount();
         }
+
         // Pre HC-MR1
         return bitmap.getRowBytes() * bitmap.getHeight();
+    }
+    
+    /**
+     * Get the size in bytes of a bitmap in a BitmapDrawable. Note that from Android 4.4 (KitKat)
+     * onward this returns the allocated memory size of the bitmap which can be larger than the
+     * actual bitmap data byte count (in the case it was re-used).
+     *
+     * @param value
+     * @return size in bytes
+     */
+    public static int getBitmapSize(BitmapDrawable value) {
+    	Bitmap bitmap = value.getBitmap();
+    	return getBitmapSize(bitmap);
+    }
+    
+    /**
+     * Check how much usable space is available at a given path.
+     *
+     * @param path The path to check
+     * @return The space available in bytes
+     */
+    @SuppressWarnings("deprecation")
+	@TargetApi(9)
+    public static long getUsableSpace(File path) {
+        if (Utils.hasGingerbread()) {
+            return path.getUsableSpace();
+        }
+        final StatFs stats = new StatFs(path.getPath());
+        return (long) stats.getBlockSize() * (long) stats.getAvailableBlocks();
     }
 
     /**
@@ -264,5 +304,4 @@ public class BitmapCache implements ImageCache {
             return mObject;
         }
     }
-
 }

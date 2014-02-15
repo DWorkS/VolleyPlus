@@ -34,6 +34,7 @@ import android.widget.ImageView;
 import com.android.volley.BuildConfig;
 import com.android.volley.misc.AsyncTask;
 import com.android.volley.misc.Utils;
+import com.android.volley.misc.ViewCompat;
 import com.android.volley.ui.RecyclingBitmapDrawable;
 
 /**
@@ -388,8 +389,8 @@ public abstract class ImageWorker {
                             drawable
                     });
             // Set background to loading bitmap
-            imageView.setBackgroundDrawable(
-                    new BitmapDrawable(mResources, mLoadingBitmap));
+            ViewCompat.setBackground(imageView, new BitmapDrawable(mResources, mLoadingBitmap));
+			//imageView.setBackgroundDrawable(new BitmapDrawable(mResources, mLoadingBitmap));
 
             imageView.setImageDrawable(td);
             td.startTransition(FADE_IN_TIME);

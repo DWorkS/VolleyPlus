@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.util.LruCache;
 
+import com.android.volley.toolbox.ImageCache;
 import com.android.volley.toolbox.ImageLoader;
 
 
@@ -14,11 +15,11 @@ import com.android.volley.toolbox.ImageLoader;
  *
  * Added by Vinay S Shenoy on 19/5/13
  */
-public class LruImageCache implements ImageCache {
+public class LruBitmapCache implements ImageCache {
 
     private LruCache<String, Bitmap> mLruCache;
 
-    public LruImageCache() {
+    public LruBitmapCache() {
 
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         final int cacheSize = maxMemory / 8;
@@ -37,7 +38,6 @@ public class LruImageCache implements ImageCache {
             	else {
             		return (bitmap.getRowBytes() * bitmap.getHeight()) / 1024;
             	}
-                
             }
         };
 

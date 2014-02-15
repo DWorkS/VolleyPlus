@@ -653,7 +653,8 @@ public class ImageCache {
      * @param path The path to check
      * @return The space available in bytes
      */
-    @TargetApi(9)
+    @SuppressWarnings("deprecation")
+	@TargetApi(9)
     public static long getUsableSpace(File path) {
         if (Utils.hasGingerbread()) {
             return path.getUsableSpace();
@@ -721,5 +722,4 @@ public class ImageCache {
             return mObject;
         }
     }
-
 }

@@ -32,8 +32,18 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Cache implementation that caches files directly onto the hard disk in the specified
@@ -41,12 +51,11 @@ import java.util.Map;
  */
 public class DiskBasedCache implements Cache {
 
-    /** Map of the Key, CacheHeader pairs */
-    private final Map<String, CacheHeader> mEntries =
-            new LinkedHashMap<String, CacheHeader>(16, .75f, true);
+    /** Number of threads to use when loading cache from disk */
+    private final int CACHE_LOAD_THREADS = 2;
 
-    /** Total amount of space currently used by the cache in bytes. */
-    private long mTotalSize = 0;
+    /** Map of the Key, CacheHeader pairs */
+    private final CacheContainer mEntries = new CacheContainer();
 
     /** The root directory to use for the cache. */
     private final File mRootDirectory;
@@ -94,7 +103,6 @@ public class DiskBasedCache implements Cache {
             }
         }
         mEntries.clear();
-        mTotalSize = 0;
         VolleyLog.d("Cache cleared.");
     }
 
@@ -137,36 +145,7 @@ public class DiskBasedCache implements Cache {
      */
     @Override
     public synchronized void initialize() {
-        if (!mRootDirectory.exists()) {
-            if (!mRootDirectory.mkdirs()) {
-                VolleyLog.e("Unable to create cache dir %s", mRootDirectory.getAbsolutePath());
-            }
-            return;
-        }
-
-        File[] files = mRootDirectory.listFiles();
-        if (files == null) {
-            return;
-        }
-        for (File file : files) {
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(file);
-                CacheHeader entry = CacheHeader.readHeader(fis);
-                entry.size = file.length();
-                putEntry(entry.key, entry);
-            } catch (IOException e) {
-                if (file != null) {
-                   file.delete();
-                }
-            } finally {
-                try {
-                    if (fis != null) {
-                        fis.close();
-                    }
-                } catch (IOException ignored) { }
-            }
-        }
+        mEntries.initialize();
     }
 
     /**
@@ -247,14 +226,18 @@ public class DiskBasedCache implements Cache {
      * @param neededSpace The amount of bytes we are trying to fit into the cache.
      */
     private void pruneIfNeeded(int neededSpace) {
-        if ((mTotalSize + neededSpace) < mMaxCacheSizeInBytes) {
+        if (!mEntries.isLoaded()) {
+            // the lru cache can go slightly above neededSpace if putting entries during cache initialization
+            return;
+        }
+        if ((mEntries.getTotalSize() + neededSpace) < mMaxCacheSizeInBytes) {
             return;
         }
         if (VolleyLog.DEBUG) {
             VolleyLog.v("Pruning old cache entries.");
         }
 
-        long before = mTotalSize;
+        long before = mEntries.getTotalSize();
         int prunedFiles = 0;
         long startTime = SystemClock.elapsedRealtime();
 
@@ -263,23 +246,21 @@ public class DiskBasedCache implements Cache {
             Map.Entry<String, CacheHeader> entry = iterator.next();
             CacheHeader e = entry.getValue();
             boolean deleted = getFileForKey(e.key).delete();
-            if (deleted) {
-                mTotalSize -= e.size;
-            } else {
-               VolleyLog.d("Could not delete cache entry for key=%s, filename=%s",
-                       e.key, getFilenameForKey(e.key));
+            if (!deleted) {
+                VolleyLog.d("Could not delete cache entry for key=%s, filename=%s",
+                        e.key, getFilenameForKey(e.key));
             }
             iterator.remove();
             prunedFiles++;
 
-            if ((mTotalSize + neededSpace) < mMaxCacheSizeInBytes * HYSTERESIS_FACTOR) {
+            if ((mEntries.getTotalSize() + neededSpace) < mMaxCacheSizeInBytes * HYSTERESIS_FACTOR) {
                 break;
             }
         }
 
         if (VolleyLog.DEBUG) {
             VolleyLog.v("pruned %d files, %d bytes, %d ms",
-                    prunedFiles, (mTotalSize - before), SystemClock.elapsedRealtime() - startTime);
+                    prunedFiles, (mEntries.getTotalSize() - before), SystemClock.elapsedRealtime() - startTime);
         }
     }
 
@@ -289,12 +270,6 @@ public class DiskBasedCache implements Cache {
      * @param entry The entry to cache.
      */
     private void putEntry(String key, CacheHeader entry) {
-        if (!mEntries.containsKey(key)) {
-            mTotalSize += entry.size;
-        } else {
-            CacheHeader oldEntry = mEntries.get(key);
-            mTotalSize += (entry.size - oldEntry.size);
-        }
         mEntries.put(key, entry);
     }
 
@@ -304,7 +279,6 @@ public class DiskBasedCache implements Cache {
     private void removeEntry(String key) {
         CacheHeader entry = mEntries.get(key);
         if (entry != null) {
-            mTotalSize -= entry.size;
             mEntries.remove(key);
         }
     }
@@ -323,6 +297,220 @@ public class DiskBasedCache implements Cache {
             throw new IOException("Expected " + length + " bytes, read " + pos + " bytes");
         }
         return bytes;
+    }
+
+    /**
+     * Container for CacheHeader, both before and after loading them into memory.
+     */
+    @SuppressWarnings("serial")
+	private class CacheContainer extends ConcurrentHashMap<String, CacheHeader> {
+        private final PriorityBlockingQueue<Runnable> mQueue = new PriorityBlockingQueue<Runnable>();
+        private final Map<String, Future<CacheHeader>> mLoadingFiles = new ConcurrentHashMap<String, Future<CacheHeader>>();
+
+        /** Total amount of space currently used by the cache in bytes. */
+        private AtomicLong mTotalSize = new AtomicLong(0);
+
+        /** Whether or not cache initialization has been started */
+        private boolean mInitialized = false;
+
+        public CacheContainer() {
+            super(16, .75f, CACHE_LOAD_THREADS);
+        }
+
+
+        /**
+         * Initializes the DiskBasedCache by scanning for all files currently in the
+         * specified root directory. Creates the root directory if necessary.
+         */
+        public synchronized void initialize() {
+            if (mInitialized) {
+                return;
+            }
+            mInitialized = true;
+            if (!mRootDirectory.exists()) {
+                if (!mRootDirectory.mkdirs()) {
+                    VolleyLog.e("Unable to create cache dir %s", mRootDirectory.getAbsolutePath());
+                }
+                return;
+            }
+
+            File[] files = mRootDirectory.listFiles();
+            if (files == null) {
+                return;
+            }
+            VolleyLog.d("Loading %d files from cache", files.length);
+
+            ExecutorService executor = new ThreadPoolExecutor(CACHE_LOAD_THREADS, CACHE_LOAD_THREADS, 10, TimeUnit.MILLISECONDS, mQueue);
+            for (File file : files) {
+                Callable<CacheHeader> callable = new HeaderParserCallable(file);
+                RunnableFuture<CacheHeader> submit = new ReorderingFutureTask(callable);
+                mLoadingFiles.put(file.getName(), submit);
+                executor.execute(submit);
+            }
+        }
+
+        /** A task that reorders itself to the top of the queue if a thread requests access to it */
+        private class ReorderingFutureTask extends FutureTask<CacheHeader> implements Comparable<ReorderingFutureTask> {
+            private int mGetRequests = 0;
+
+            public ReorderingFutureTask(Callable<CacheHeader> callable) {
+                super(callable);
+            }
+
+            @Override
+            public CacheHeader get() throws InterruptedException, ExecutionException {
+                mGetRequests++;
+                if (mQueue.contains(this)) {
+                    mQueue.remove(this);
+                    mQueue.add(this);
+                }
+                return super.get();
+            }
+
+            @Override
+            public int compareTo(ReorderingFutureTask another) {
+                return  mGetRequests > another.mGetRequests ? - 1 : mGetRequests < another.mGetRequests ? + 1 : 0;
+            }
+        }
+
+        /** A callable that parses CacheHeader and returns a valid cache entry. */
+        private class HeaderParserCallable implements Callable<CacheHeader> {
+            private final File file;
+
+            public HeaderParserCallable(File file) {
+                this.file = file;
+            }
+
+            @Override
+            public CacheHeader call() throws Exception {
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(file);
+                    CacheHeader entry = CacheHeader.readHeader(fis);
+                    entry.size = file.length();
+                    CacheContainer.super.put(entry.key, entry);
+                    mTotalSize.getAndAdd(entry.size);
+                    return entry;
+                } catch (IOException e) {
+                    if (file != null) {
+                        file.delete();
+                    }
+                } finally {
+                    try {
+                        if (fis != null) {
+                            fis.close();
+                        }
+                    } catch (IOException ignored) {
+                    }
+                    mLoadingFiles.remove(file.getName());
+                }
+                return null;
+            }
+        }
+
+        /** Waits until the cache is ready and loaded */
+        private void waitForCache() {
+            while (mLoadingFiles.size() > 0) {
+                Iterator<Map.Entry<String, Future<CacheHeader>>> iterator = mLoadingFiles.entrySet().iterator();
+                if (iterator.hasNext()) {
+                    Map.Entry<String, Future<CacheHeader>> entry = iterator.next();
+                    try {
+                        entry.getValue().get();
+                    } catch (InterruptedException ignored) {
+                    } catch (ExecutionException ignored) {
+                    }
+                }
+            }
+        }
+
+        /** Waits until the specified cache key is ready and loaded. */
+        private void waitForKey(Object key) {
+            if (isLoaded()) {
+                return;
+            }
+            String filename = getFilenameForKey((String) key);
+            Future<CacheHeader> future = mLoadingFiles.get(filename);
+            if (future != null) {
+                try {
+                    future.get();
+                } catch (InterruptedException ignored) {
+                } catch (ExecutionException ignored) {
+                }
+            }
+        }
+
+        /** Returns true if the cache is 100% loaded. */
+        public boolean isLoaded() {
+            return mLoadingFiles.size() == 0;
+        }
+
+        /** Returns the total size of the cache */
+        public long getTotalSize() {
+            return mTotalSize.get();
+        }
+
+        /**
+         * Gets an entry from the cache
+         *
+         * @param key   The key to identify the entry by.
+         */
+        @Override
+        public CacheHeader get(Object key) {
+            waitForKey(key);
+            return super.get(key);
+        }
+
+        /**
+         * Checks if an entry exists in the cache and returns true/false accordingly.
+         *
+         * @param key   The key to identify the entry by.
+         */
+        @Override
+        public boolean containsKey(Object key) {
+            waitForKey(key);
+            return super.containsKey(key);
+        }
+
+        /**
+         * Puts the entry with the specified key into the cache without waiting for cache key.
+         *
+         * @param key   The key to identify the entry by.
+         * @param entry The entry to cache.
+         */
+        @Override
+        public CacheHeader put(String key, CacheHeader entry) {
+            waitForKey(key);
+            if (super.containsKey(key)) {
+                mTotalSize.getAndAdd(entry.size - super.get(key).size);
+            } else {
+                mTotalSize.getAndAdd(entry.size);
+            }
+            return super.put(key, entry);
+        }
+
+        /**
+         * Remove an entry from the cache
+         *
+         * @param key   The key to identify the entry by.
+         */
+        @Override
+        public CacheHeader remove(Object key) {
+            waitForKey(key);
+            if (super.containsKey(key)) {
+                mTotalSize.getAndAdd(-1 * super.get(key).size);
+            }
+            return super.remove(key);
+        }
+
+        /**
+         * Clears the cache
+         */
+        @Override
+        public void clear() {
+            waitForCache();
+            mTotalSize.getAndSet(0);
+            super.clear();
+        }
     }
 
     /**
@@ -551,6 +739,4 @@ public class DiskBasedCache implements Cache {
         }
         return result;
     }
-
-
 }
