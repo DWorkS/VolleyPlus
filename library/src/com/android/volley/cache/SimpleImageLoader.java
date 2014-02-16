@@ -56,7 +56,7 @@ import com.android.volley.toolbox.HurlStack;
  * you must store the {@link com.android.volley.Request} in your ViewHolder type class and pass it
  * into loadImage to ensure the request is canceled as views are recycled.
  */
-public class ImageLoader extends com.android.volley.toolbox.ImageLoader {
+public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
     private static final ColorDrawable transparentDrawable = new ColorDrawable(
             android.R.color.transparent);
     private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
@@ -72,7 +72,7 @@ public class ImageLoader extends com.android.volley.toolbox.ImageLoader {
      * Creates an ImageLoader with Bitmap memory cache. No default placeholder image will be shown
      * while the image is being fetched and loaded.
      */
-    public ImageLoader(FragmentActivity activity) {
+    public SimpleImageLoader(FragmentActivity activity) {
         super(newRequestQueue(activity),
                 BitmapCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
@@ -82,7 +82,7 @@ public class ImageLoader extends com.android.volley.toolbox.ImageLoader {
      * Creates an ImageLoader with Bitmap memory cache and a default placeholder image while the
      * image is being fetched and loaded.
      */
-    public ImageLoader(FragmentActivity activity, int defaultPlaceHolderResId) {
+    public SimpleImageLoader(FragmentActivity activity, int defaultPlaceHolderResId) {
         super(newRequestQueue(activity),
                 BitmapCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
@@ -94,7 +94,7 @@ public class ImageLoader extends com.android.volley.toolbox.ImageLoader {
     /**
      * Creates an ImageLoader with Bitmap memory cache and a list of default placeholder drawables.
      */
-    public ImageLoader(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables) {
+    public SimpleImageLoader(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables) {
         super(newRequestQueue(activity),
                 BitmapCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
@@ -115,18 +115,18 @@ public class ImageLoader extends com.android.volley.toolbox.ImageLoader {
         getRequestQueue().stop();
     }
 
-	public ImageLoader setFadeInImage(boolean fadeInImage) {
+	public SimpleImageLoader setFadeInImage(boolean fadeInImage) {
         mFadeInImage = fadeInImage;
         return this;
     }
 
-    public ImageLoader setMaxImageSize(int maxImageWidth, int maxImageHeight) {
+    public SimpleImageLoader setMaxImageSize(int maxImageWidth, int maxImageHeight) {
         mMaxImageWidth = maxImageWidth;
         mMaxImageHeight = maxImageHeight;
         return this;
     }
 
-    public ImageLoader setMaxImageSize(int maxImageSize) {
+    public SimpleImageLoader setMaxImageSize(int maxImageSize) {
         return setMaxImageSize(maxImageSize, maxImageSize);
     }
 
@@ -285,8 +285,7 @@ public class ImageLoader extends com.android.volley.toolbox.ImageLoader {
         // TODO: getCacheDir() should be moved to a background thread as it attempts to create the
         // directory if it does not exist (no disk access should happen on the main/UI thread).
     	final String cachePath ;
-    	if(isExternalMounted()
-    			&& null != getExternalCacheDir(context)){
+    	if(isExternalMounted() && null != getExternalCacheDir(context)){
     		cachePath = getExternalCacheDir(context).getPath();
     	}
     	else{
@@ -324,7 +323,7 @@ public class ImageLoader extends com.android.volley.toolbox.ImageLoader {
      * Interface an activity can implement to provide an ImageLoader to its children fragments.
      */
     public interface ImageLoaderProvider {
-        public ImageLoader getImageLoaderInstance();
+        public SimpleImageLoader getImageLoaderInstance();
     }
 
 }

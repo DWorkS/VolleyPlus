@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.cache.image;
+package com.android.volley.cache.efficient;
 
 import java.io.FileDescriptor;
 
@@ -114,7 +114,7 @@ public class ImageResizer extends ImageWorker {
      *         that are equal to or greater than the requested width and height
      */
     public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
-            int reqWidth, int reqHeight, ImageCache cache) {
+            int reqWidth, int reqHeight, EfficientImageCache cache) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -145,7 +145,7 @@ public class ImageResizer extends ImageWorker {
      *         that are equal to or greater than the requested width and height
      */
     public static Bitmap decodeSampledBitmapFromFile(String filename,
-            int reqWidth, int reqHeight, ImageCache cache) {
+            int reqWidth, int reqHeight, EfficientImageCache cache) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -176,7 +176,7 @@ public class ImageResizer extends ImageWorker {
      *         that are equal to or greater than the requested width and height
      */
     public static Bitmap decodeSampledBitmapFromDescriptor(
-            FileDescriptor fileDescriptor, int reqWidth, int reqHeight, ImageCache cache) {
+            FileDescriptor fileDescriptor, int reqWidth, int reqHeight, EfficientImageCache cache) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -198,7 +198,7 @@ public class ImageResizer extends ImageWorker {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private static void addInBitmapOptions(BitmapFactory.Options options, ImageCache cache) {
+    private static void addInBitmapOptions(BitmapFactory.Options options, EfficientImageCache cache) {
         // inBitmap only works with mutable bitmaps so force the decoder to
         // return mutable bitmaps.
         options.inMutable = true;

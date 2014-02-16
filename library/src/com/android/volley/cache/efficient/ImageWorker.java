@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.cache.image;
+package com.android.volley.cache.efficient;
 
 import java.lang.ref.WeakReference;
 
@@ -46,8 +46,8 @@ public abstract class ImageWorker {
     private static final String TAG = "ImageWorker";
     private static final int FADE_IN_TIME = 200;
 
-    private ImageCache mImageCache;
-    private ImageCache.ImageCacheParams mImageCacheParams;
+    private EfficientImageCache mImageCache;
+    private EfficientImageCache.ImageCacheParams mImageCacheParams;
     private Bitmap mLoadingBitmap;
     private boolean mFadeInBitmap = true;
     private boolean mExitTasksEarly = false;
@@ -68,8 +68,8 @@ public abstract class ImageWorker {
     /**
      * Load an image specified by the data parameter into an ImageView (override
      * {@link ImageWorker#processBitmap(Object)} to define the processing logic). A memory and
-     * disk cache will be used if an {@link ImageCache} has been added using
-     * {@link ImageWorker#addImageCache(FragmentManager, ImageCache.ImageCacheParams)}. If the
+     * disk cache will be used if an {@link EfficientImageCache} has been added using
+     * {@link ImageWorker#addImageCache(FragmentManager, EfficientImageCache.ImageCacheParams)}. If the
      * image is found in the memory cache, it is set immediately, otherwise an {@link AsyncTask}
      * will be created to asynchronously load the bitmap.
      *
@@ -122,28 +122,28 @@ public abstract class ImageWorker {
     }
 
     /**
-     * Adds an {@link ImageCache} to this {@link ImageWorker} to handle disk and memory bitmap
+     * Adds an {@link EfficientImageCache} to this {@link ImageWorker} to handle disk and memory bitmap
      * caching.
      * @param fragmentManager
      * @param cacheParams The cache parameters to use for the image cache.
      */
     public void addImageCache(FragmentManager fragmentManager,
-            ImageCache.ImageCacheParams cacheParams) {
+            EfficientImageCache.ImageCacheParams cacheParams) {
         mImageCacheParams = cacheParams;
-        mImageCache = ImageCache.getInstance(fragmentManager, mImageCacheParams);
+        mImageCache = EfficientImageCache.getInstance(fragmentManager, mImageCacheParams);
         new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
     }
 
     /**
-     * Adds an {@link ImageCache} to this {@link ImageWorker} to handle disk and memory bitmap
+     * Adds an {@link EfficientImageCache} to this {@link ImageWorker} to handle disk and memory bitmap
      * caching.
      * @param activity
      * @param diskCacheDirectoryName See
-     * {@link ImageCache.ImageCacheParams#ImageCacheParams(Context, String)}.
+     * {@link EfficientImageCache.ImageCacheParams#ImageCacheParams(Context, String)}.
      */
     public void addImageCache(FragmentActivity activity, String diskCacheDirectoryName) {
-        mImageCacheParams = new ImageCache.ImageCacheParams(activity, diskCacheDirectoryName);
-        mImageCache = ImageCache.getInstance(activity.getSupportFragmentManager(), mImageCacheParams);
+        //mImageCacheParams = new ImageCache.ImageCacheParams(activity, diskCacheDirectoryName);
+        mImageCache = EfficientImageCache.getInstance(activity.getSupportFragmentManager(), mImageCacheParams);
         new CacheAsyncTask().execute(MESSAGE_INIT_DISK_CACHE);
     }
 
@@ -171,9 +171,9 @@ public abstract class ImageWorker {
     protected abstract Bitmap processBitmap(Object data);
 
     /**
-     * @return The {@link ImageCache} object currently being used by this ImageWorker.
+     * @return The {@link EfficientImageCache} object currently being used by this ImageWorker.
      */
-    protected ImageCache getImageCache() {
+    protected EfficientImageCache getImageCache() {
         return mImageCache;
     }
 

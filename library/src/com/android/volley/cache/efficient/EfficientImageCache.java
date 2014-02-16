@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.cache.image;
+package com.android.volley.cache.efficient;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -46,6 +46,7 @@ import android.support.v4.util.LruCache;
 import android.util.Log;
 
 import com.android.volley.BuildConfig;
+import com.android.volley.Cache;
 import com.android.volley.misc.DiskLruCache;
 import com.android.volley.misc.Utils;
 import com.android.volley.ui.RecyclingBitmapDrawable;
@@ -53,11 +54,11 @@ import com.android.volley.ui.RecyclingBitmapDrawable;
 /**
  * This class handles disk and memory caching of bitmaps in conjunction with the
  * {@link ImageWorker} class and its subclasses. Use
- * {@link ImageCache#getInstance(FragmentManager, ImageCacheParams)} to get an instance of this
+ * {@link EfficientImageCache#getInstance(FragmentManager, ImageCacheParams)} to get an instance of this
  * class, although usually a cache should be added directly to an {@link ImageWorker} by calling
  * {@link ImageWorker#addImageCache(FragmentManager, ImageCacheParams)}.
  */
-public class ImageCache {
+public class EfficientImageCache implements com.android.volley.cache.efficient.ImageCachePlus, Cache{
     private static final String TAG = "ImageCache";
 
     // Default memory cache size in kilobytes
@@ -65,7 +66,10 @@ public class ImageCache {
 
     // Default disk cache size in bytes
     private static final int DEFAULT_DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
-
+    
+    //Default memory cache size as a percent of device memory class
+    //private static final float DEFAULT_MEM_CACHE_PERCENT = 0.25f;
+    
     // Compression settings when writing images to disk cache
     private static final CompressFormat DEFAULT_COMPRESS_FORMAT = CompressFormat.JPEG;
     private static final int DEFAULT_COMPRESS_QUALITY = 70;
@@ -84,44 +88,64 @@ public class ImageCache {
 
     private Set<SoftReference<Bitmap>> mReusableBitmaps;
 
+    private static final int HTTP_CACHE_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final String HTTP_CACHE_DIR = "http";
+    private static final int IO_BUFFER_SIZE = 8 * 1024;
+
+    private DiskLruCache mHttpDiskCache;
+    private File mHttpCacheDir;
+    private boolean mHttpDiskCacheStarting = true;
+    private final Object mHttpDiskCacheLock = new Object();
+
     /**
      * Create a new ImageCache object using the specified parameters. This should not be
      * called directly by other classes, instead use
-     * {@link ImageCache#getInstance(FragmentManager, ImageCacheParams)} to fetch an ImageCache
+     * {@link EfficientImageCache#getInstance(FragmentManager, ImageCacheParams)} to fetch an ImageCache
      * instance.
      *
      * @param cacheParams The cache parameters to use to initialize the cache
      */
-    private ImageCache(ImageCacheParams cacheParams) {
+    private EfficientImageCache(ImageCacheParams cacheParams) {
         init(cacheParams);
     }
 
     /**
-     * Return an {@link ImageCache} instance. A {@link RetainFragment} is used to retain the
+     * Return an {@link EfficientImageCache} instance. A {@link RetainFragment} is used to retain the
      * ImageCache object across configuration changes such as a change in device orientation.
      *
      * @param fragmentManager The fragment manager to use when dealing with the retained fragment.
      * @param cacheParams The cache parameters to use if the ImageCache needs instantiation.
      * @return An existing retained ImageCache object or a new one if one did not exist
      */
-    public static ImageCache getInstance(
-            FragmentManager fragmentManager, ImageCacheParams cacheParams) {
+    public static EfficientImageCache getInstance(FragmentManager fragmentManager, ImageCacheParams cacheParams) {
 
         // Search for, or create an instance of the non-UI RetainFragment
         final RetainFragment mRetainFragment = findOrCreateRetainFragment(fragmentManager);
 
         // See if we already have an ImageCache stored in RetainFragment
-        ImageCache imageCache = (ImageCache) mRetainFragment.getObject();
+        EfficientImageCache imageCache = (EfficientImageCache) mRetainFragment.getObject();
 
         // No existing ImageCache, create one and store it in RetainFragment
         if (imageCache == null) {
-            imageCache = new ImageCache(cacheParams);
+            imageCache = new EfficientImageCache(cacheParams);
             mRetainFragment.setObject(imageCache);
         }
 
         return imageCache;
     }
+    
+    public static EfficientImageCache getInstance(FragmentManager fragmentManager, File file, int memCacheSize) {
+        return getInstance(fragmentManager, new ImageCacheParams(file, memCacheSize));
+    }
 
+    public static EfficientImageCache getInstance(FragmentManager fragmentManger, File file) {
+        return getInstance(fragmentManger, new ImageCacheParams(file, DEFAULT_DISK_CACHE_SIZE));
+    }
+
+/*    public static EfficientImageCache getInstance(FragmentManager fragmentManger) {
+        return getInstance(fragmentManger, new ImageCacheParams(file, DEFAULT_DISK_CACHE_SIZE));
+    }*/
+    
     /**
      * Initialize the cache, providing all parameters.
      *
@@ -467,17 +491,22 @@ public class ImageCache {
 
         /**
          * Create a set of image cache parameters that can be provided to
-         * {@link ImageCache#getInstance(FragmentManager, ImageCacheParams)} or
+         * {@link EfficientImageCache#getInstance(FragmentManager, ImageCacheParams)} or
          * {@link ImageWorker#addImageCache(FragmentManager, ImageCacheParams)}.
          * @param context A context to use.
          * @param diskCacheDirectoryName A unique subdirectory name that will be appended to the
          *                               application cache directory. Usually "cache" or "images"
          *                               is sufficient.
          */
-        public ImageCacheParams(Context context, String diskCacheDirectoryName) {
-            diskCacheDir = getDiskCacheDir(context, diskCacheDirectoryName);
+        public ImageCacheParams(File rootDirectory, int maxCacheSizeInBytes) {
+            diskCacheDir = rootDirectory;
+            memCacheSize = maxCacheSizeInBytes;
         }
 
+        public ImageCacheParams(File rootDirectory) {
+            diskCacheDir = rootDirectory;
+        }
+        
         /**
          * Sets the memory cache size based on a percentage of the max available VM memory.
          * Eg. setting percent to 0.2 would set the memory cache to one fifth of the available
@@ -722,4 +751,50 @@ public class ImageCache {
             return mObject;
         }
     }
+
+	@Override
+	public BitmapDrawable getBitmap(String data) {
+		return getBitmapFromMemCache(data);
+	}
+
+	@Override
+	public void putBitmap(String data, BitmapDrawable bitmap) {
+		addBitmapToCache(data, bitmap);
+	}
+
+	@Override
+	public Entry get(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void put(String key, Entry entry) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void initialize() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void invalidate(String key, boolean fullExpire) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void remove(String key) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void clear() {
+		// TODO Auto-generated method stub
+		
+	}
 }
