@@ -24,14 +24,18 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
+import com.android.volley.cache.efficient.EfficientImageCache;
 import com.android.volley.error.ParseError;
+import com.android.volley.misc.Utils;
 import com.android.volley.toolbox.HttpHeaderParser;
 
+import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 
 /**
  * A canned request for getting an image at a given URL and calling
@@ -46,6 +50,8 @@ public class ImageRequest extends Request<Bitmap> {
 
     /** Default backoff multiplier for image requests */
     private static final float IMAGE_BACKOFF_MULT = 2f;
+    
+    private static final boolean PREFER_QUALITY_OVER_SPEED = false;
 
     private final Response.Listener<Bitmap> mListener;
     private final Config mDecodeConfig;
@@ -174,14 +180,12 @@ public class ImageRequest extends Request<Bitmap> {
 		Bitmap bitmap = null;
 		if (mMaxWidth == 0 && mMaxHeight == 0) {
 
-			bitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(),
-					decodeOptions);
+			bitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
 			addMarker("read-full-size-image-from-file");
 		} else {
 			// If we have to resize this image, first get the natural bounds.
 			decodeOptions.inJustDecodeBounds = true;
-			BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(),
-					decodeOptions);
+			BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
 			int actualWidth = decodeOptions.outWidth;
 			int actualHeight = decodeOptions.outHeight;
 
@@ -193,16 +197,13 @@ public class ImageRequest extends Request<Bitmap> {
 
 			// Decode to the nearest power of two scaling factor.
 			decodeOptions.inJustDecodeBounds = false;
-			decodeOptions.inSampleSize = findBestSampleSize(actualWidth,
-					actualHeight, desiredWidth, desiredHeight);
-			Bitmap tempBitmap = BitmapFactory.decodeFile(
-					bitmapFile.getAbsolutePath(), decodeOptions);
+			decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			Bitmap tempBitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
 			addMarker(String.format("read-from-file-scaled-times-%d",
 					decodeOptions.inSampleSize));
 			// If necessary, scale down to the maximal acceptable size.
 			if (tempBitmap != null
-					&& (tempBitmap.getWidth() > desiredWidth || tempBitmap
-							.getHeight() > desiredHeight)) {
+					&& (tempBitmap.getWidth() > desiredWidth || tempBitmap.getHeight() > desiredHeight)) {
 				bitmap = Bitmap.createScaledBitmap(tempBitmap, desiredWidth,
 						desiredHeight, true);
 				tempBitmap.recycle();
@@ -252,26 +253,18 @@ public class ImageRequest extends Request<Bitmap> {
 			int actualHeight = decodeOptions.outHeight;
 
 			// Then compute the dimensions we would ideally like to decode to.
-			int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
-					actualWidth, actualHeight);
-			int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,
-					actualHeight, actualWidth);
+			int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight, actualWidth, actualHeight);
+			int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth, actualHeight, actualWidth);
 
 			// Decode to the nearest power of two scaling factor.
 			decodeOptions.inJustDecodeBounds = false;
 
-			decodeOptions.inSampleSize = findBestSampleSize(actualWidth,
-					actualHeight, desiredWidth, desiredHeight);
-			Bitmap tempBitmap = BitmapFactory.decodeResource(mResources,
-					resourceId, decodeOptions);
-			addMarker(String.format("read-from-resource-scaled-times-%d",
-					decodeOptions.inSampleSize));
+			decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			Bitmap tempBitmap = BitmapFactory.decodeResource(mResources, resourceId, decodeOptions);
+			addMarker(String.format("read-from-resource-scaled-times-%d", decodeOptions.inSampleSize));
 			// If necessary, scale down to the maximal acceptable size.
-			if (tempBitmap != null
-					&& (tempBitmap.getWidth() > desiredWidth || tempBitmap
-							.getHeight() > desiredHeight)) {
-				bitmap = Bitmap.createScaledBitmap(tempBitmap, desiredWidth,
-						desiredHeight, true);
+			if (tempBitmap != null && (tempBitmap.getWidth() > desiredWidth || tempBitmap.getHeight() > desiredHeight)) {
+				bitmap = Bitmap.createScaledBitmap(tempBitmap, desiredWidth, desiredHeight, true);
 				tempBitmap.recycle();
 				addMarker("scaling-read-from-resource-bitmap");
 			} else {
@@ -290,6 +283,7 @@ public class ImageRequest extends Request<Bitmap> {
     /**
      * The real guts of parseNetworkResponse. Broken out for readability.
      */
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD_MR1) 
     private Response<Bitmap> doParse(NetworkResponse response) {
         byte[] data = response.data;
         BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
@@ -298,36 +292,35 @@ public class ImageRequest extends Request<Bitmap> {
             decodeOptions.inPreferredConfig = mDecodeConfig;
             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
         } else {
-            // If we have to resize this image, first get the natural bounds.
-            decodeOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
-            int actualWidth = decodeOptions.outWidth;
-            int actualHeight = decodeOptions.outHeight;
+			// If we have to resize this image, first get the natural bounds.
+			decodeOptions.inJustDecodeBounds = true;
+			BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+			int actualWidth = decodeOptions.outWidth;
+			int actualHeight = decodeOptions.outHeight;
 
-            // Then compute the dimensions we would ideally like to decode to.
-            int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
-                    actualWidth, actualHeight);
-            int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,
-                    actualHeight, actualWidth);
+			// Then compute the dimensions we would ideally like to decode to.
+			int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight, actualWidth, actualHeight);
+			int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth, actualHeight, actualWidth);
 
-            // Decode to the nearest power of two scaling factor.
-            decodeOptions.inJustDecodeBounds = false;
-            // TODO(ficus): Do we need this or is it okay since API 8 doesn't support it?
-            // decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;
-            decodeOptions.inSampleSize =
-                findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
-            Bitmap tempBitmap =
-                BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+			// Decode to the nearest power of two scaling factor.
+			decodeOptions.inJustDecodeBounds = false;
 
-            // If necessary, scale down to the maximal acceptable size.
-            if (tempBitmap != null && (tempBitmap.getWidth() > desiredWidth ||
-                    tempBitmap.getHeight() > desiredHeight)) {
-                bitmap = Bitmap.createScaledBitmap(tempBitmap,
-                        desiredWidth, desiredHeight, true);
-                tempBitmap.recycle();
-            } else {
-                bitmap = tempBitmap;
-            }
+			// TODO(ficus): Do we need this or is it okay since API 8 doesn't
+			// support it?
+			if (Utils.hasGingerbreadMR1()) {
+				decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;
+			}
+
+			decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+
+			// If necessary, scale down to the maximal acceptable size.
+			if (tempBitmap != null && (tempBitmap.getWidth() > desiredWidth || tempBitmap.getHeight() > desiredHeight)) {
+				bitmap = Bitmap.createScaledBitmap(tempBitmap, desiredWidth, desiredHeight, true);
+				tempBitmap.recycle();
+			} else {
+				bitmap = tempBitmap;
+			}
         }
 
         if (bitmap == null) {
@@ -364,4 +357,67 @@ public class ImageRequest extends Request<Bitmap> {
 
         return (int) n;
     }
+    
+    /**
+     * Calculate the closest inSampleSize that is a power of 2 and will result in the final decoded bitmap
+     * having a width and height equal to or larger than the requested width and height.
+     *
+     * @param actualHeight Actual height of the bitmap
+     * @param actualWidth Actual width of the bitmap
+     * @param reqWidth The requested width of the resulting bitmap
+     * @param reqHeight The requested height of the resulting bitmap
+     * @return The value to be used for inSampleSize
+     */
+    public static int findSampleSize(int actualHeight, int actualWidth,
+            int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        int inSampleSize = 1;
+
+        if (actualHeight > reqHeight || actualWidth > reqWidth) {
+
+            final int halfHeight = actualHeight / 2;
+            final int halfWidth = actualWidth / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+
+            // This offers some additional logic in case the image has a strange
+            // aspect ratio. For example, a panorama may have a much larger
+            // width than height. In these cases the total pixels might still
+            // end up being too large to fit comfortably in memory, so we should
+            // be more aggressive with sample down the image (=larger inSampleSize).
+
+            long totalPixels = actualWidth * actualHeight / inSampleSize;
+
+            // Anything more than 2x the requested pixels we'll sample down further
+            final long totalReqPixelsCap = reqWidth * reqHeight * 2;
+
+            while (totalPixels > totalReqPixelsCap) {
+                inSampleSize *= 2;
+                totalPixels /= 2;
+            }
+        }
+        return inSampleSize;
+    }
+    
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private static void addInBitmapOptions(BitmapFactory.Options options, EfficientImageCache cache) {
+        // inBitmap only works with mutable bitmaps so force the decoder to
+        // return mutable bitmaps.
+        options.inMutable = true;
+
+        if (cache != null) {
+            // Try and find a bitmap to use for inBitmap
+            Bitmap inBitmap = cache.getBitmapFromReusableSet(options);
+
+            if (inBitmap != null) {
+                options.inBitmap = inBitmap;
+            }
+        }
+    }
+
 }
