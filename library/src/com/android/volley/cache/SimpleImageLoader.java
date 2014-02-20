@@ -16,12 +16,10 @@
 
 package com.android.volley.cache;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -32,14 +30,13 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
-import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
+import com.android.volley.cache.DiskLruBasedCache.ImageCacheParams;
 import com.android.volley.error.VolleyError;
 import com.android.volley.misc.NetUtils;
 import com.android.volley.misc.Utils;
@@ -67,6 +64,7 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
     private boolean mFadeInImage = true;
     private int mMaxImageHeight = 0;
     private int mMaxImageWidth = 0;
+    private static ImageCacheParams mImageCacheParams;
 
     /**
      * Creates an ImageLoader with Bitmap memory cache. No default placeholder image will be shown
@@ -114,7 +112,16 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
     public void stopProcessingQueue() {
         getRequestQueue().stop();
     }
+    
+    public void clearCache() {
+    	// TODO Auto-generated method stub
+	}
 
+	public SimpleImageLoader setImageCacheParams(ImageCacheParams imageCacheParams) {
+        mImageCacheParams = imageCacheParams;
+        return this;
+    }
+	
 	public SimpleImageLoader setFadeInImage(boolean fadeInImage) {
         mFadeInImage = fadeInImage;
         return this;
@@ -211,7 +218,13 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
                         new HttpClientStack(AndroidHttpClient.newInstance(
                                 NetUtils.getUserAgent(context))));
 
-        Cache cache = new DiskBasedCache(getDiskCacheDir(context, CACHE_DIR));
+        Cache cache; 
+        if(null != mImageCacheParams){
+            cache = new DiskLruBasedCache(mImageCacheParams);	
+        }
+        else{
+        	cache = new DiskLruBasedCache(Utils.getDiskCacheDir(context, CACHE_DIR));
+        }
         RequestQueue queue = new RequestQueue(cache, network);
         queue.start();
         return queue;
@@ -272,58 +285,9 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
     }
 
     /**
-     * Get a usable cache directory (external if available, internal otherwise).
-     *
-     * @param context The context to use
-     * @param uniqueName A unique directory name to append to the cache dir
-     * @return The cache dir
-     */
-    public static File getDiskCacheDir(Context context, String uniqueName) {
-        // Check if media is mounted or storage is built-in, if so, try and use external cache dir
-        // otherwise use internal cache dir
-
-        // TODO: getCacheDir() should be moved to a background thread as it attempts to create the
-        // directory if it does not exist (no disk access should happen on the main/UI thread).
-    	final String cachePath ;
-    	if(isExternalMounted() && null != getExternalCacheDir(context)){
-    		cachePath = getExternalCacheDir(context).getPath();
-    	}
-    	else{
-    		cachePath = context.getCacheDir().getPath();
-    	}
-
-        Log.i("Cache dir", cachePath + File.separator + uniqueName);
-        return new File(cachePath + File.separator + uniqueName);
-    }
-    
-    @SuppressLint("NewApi") 
-    private static boolean isExternalMounted(){
-    	if(Utils.hasGingerbread()){
-            return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-            !Environment.isExternalStorageRemovable();
-    	}
-    	return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
-    }
-
-    /**
-     * Get the external app cache directory.
-     *
-     * @param context The context to use
-     * @return The external cache dir
-     */
-    private static File getExternalCacheDir(Context context) {
-        // TODO: This needs to be moved to a background thread to ensure no disk access on the
-        // main/UI thread as unfortunately getExternalCacheDir() calls mkdirs() for us (even
-        // though the Volley library will later try and call mkdirs() as well from a background
-        // thread).
-        return context.getExternalCacheDir();
-    }
-
-    /**
      * Interface an activity can implement to provide an ImageLoader to its children fragments.
      */
     public interface ImageLoaderProvider {
         public SimpleImageLoader getImageLoaderInstance();
     }
-
 }

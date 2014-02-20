@@ -22,14 +22,17 @@ import android.util.Log;
 import com.android.volley.BuildConfig;
 import com.android.volley.Cache;
 import com.android.volley.VolleyLog;
-import com.android.volley.cache.efficient.EfficientImageCache;
-import com.android.volley.cache.efficient.ImageWorker;
+import com.android.volley.cache.DiskBasedCache.CacheHeader;
+import com.android.volley.cache.DiskLruBasedCache.ImageCacheParams;
 import com.android.volley.misc.DiskLruCache;
+import com.android.volley.misc.IOUtils;
+import com.android.volley.misc.IOUtils.CountingInputStream;
+import com.android.volley.misc.ImageUtils;
 import com.android.volley.misc.Utils;
 
 /**
- * Implementation of DiskLruCache by Jake Wharton modified from
- * http://stackoverflow.com/questions/10185898/using-disklrucache-in-android-4-0-does-not-provide-for-opencache-method
+ * Cache implementation that caches files directly onto the hard disk in the specified directory
+ * using DiskLruCache
  */
 public class DiskLruBasedCache implements Cache {
 
@@ -40,11 +43,11 @@ public class DiskLruBasedCache implements Cache {
     // Default disk cache size in bytes
     private static final int DEFAULT_DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
     // Constants to easily toggle various caches
+    
     private static final boolean DEFAULT_MEM_CACHE_ENABLED = true;
     private static final boolean DEFAULT_DISK_CACHE_ENABLED = true;
     private static final boolean DEFAULT_INIT_DISK_CACHE_ON_CREATE = false;
     
-	private DiskLruCache mDiskLruCache;
     // Compression settings when writing images to disk cache
     private static final CompressFormat DEFAULT_COMPRESS_FORMAT = CompressFormat.JPEG;
     private static final int DEFAULT_COMPRESS_QUALITY = 70;
@@ -52,6 +55,7 @@ public class DiskLruBasedCache implements Cache {
 	private static final int APP_VERSION = 1;
 	private static final int VALUE_COUNT = 1;
 	
+	private DiskLruCache mDiskLruCache;
 	private CompressFormat mCompressFormat = DEFAULT_COMPRESS_FORMAT;
 	private static int IO_BUFFER_SIZE = 8 * 1024;
 	private int mCompressQuality = DEFAULT_COMPRESS_QUALITY;
@@ -59,7 +63,11 @@ public class DiskLruBasedCache implements Cache {
     private boolean mDiskCacheStarting = true;
     private ImageCacheParams mCacheParams;
     
-	public DiskLruBasedCache(Context context, ImageCacheParams cacheParams) {
+    public DiskLruBasedCache(File root) {
+		mCacheParams = new ImageCacheParams(root);
+	}
+    
+	public DiskLruBasedCache(ImageCacheParams cacheParams) {
 		mCacheParams = cacheParams;
 	}
 
@@ -127,7 +135,7 @@ public class DiskLruBasedCache implements Cache {
 
                             // Decode bitmap, but we don't want to sample so give
                             // MAX_VALUE as the target dimensions
-                            //bitmap = ImageResizer.decodeSampledBitmapFromDescriptor(fd, Integer.MAX_VALUE, Integer.MAX_VALUE, this);
+                            bitmap = ImageUtils.decodeSampledBitmapFromDescriptor(fd, Integer.MAX_VALUE, Integer.MAX_VALUE);
                         }
                     }
                 } catch (final IOException e) {
@@ -192,7 +200,7 @@ public class DiskLruBasedCache implements Cache {
                     if (!diskCacheDir.exists()) {
                         diskCacheDir.mkdirs();
                     }
-                    if (getUsableSpace(diskCacheDir) > mCacheParams.diskCacheSize) {
+                    if (Utils.getUsableSpace(diskCacheDir) > mCacheParams.diskCacheSize) {
                         try {
                             mDiskLruCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, mCacheParams.diskCacheSize);
                             if (BuildConfig.DEBUG) {
@@ -236,6 +244,15 @@ public class DiskLruBasedCache implements Cache {
             diskCacheDir = rootDirectory;
             memCacheSize = maxCacheSizeInBytes;
         }
+        
+        public ImageCacheParams(Context context, String rootDirectory, int maxCacheSizeInBytes) {
+            diskCacheDir = Utils.getDiskCacheDir(context, rootDirectory);
+            memCacheSize = maxCacheSizeInBytes;
+        }
+
+        public ImageCacheParams(Context context, String rootDirectory) {
+            diskCacheDir = Utils.getDiskCacheDir(context, rootDirectory);
+        }
 
         public ImageCacheParams(File rootDirectory) {
             diskCacheDir = rootDirectory;
@@ -261,76 +278,6 @@ public class DiskLruBasedCache implements Cache {
             }
             memCacheSize = Math.round(percent * Runtime.getRuntime().maxMemory() / 1024);
         }
-    }
-    
-    /**
-     * Check how much usable space is available at a given path.
-     *
-     * @param path The path to check
-     * @return The space available in bytes
-     */
-    @SuppressWarnings("deprecation")
-	@TargetApi(9)
-    public static long getUsableSpace(File path) {
-        if (Utils.hasGingerbread()) {
-            return path.getUsableSpace();
-        }
-        final StatFs stats = new StatFs(path.getPath());
-        return (long) stats.getBlockSize() * (long) stats.getAvailableBlocks();
-    }
-    
-/*	private File getDiskCacheDir(Context context, String uniqueName) {
-		final String cachePath = context.getCacheDir().getPath();
-		return new File(cachePath + File.separator + uniqueName);
-	}
-	*/
-
-    /**
-     * Get a usable cache directory (external if available, internal otherwise).
-     *
-     * @param context The context to use
-     * @param uniqueName A unique directory name to append to the cache dir
-     * @return The cache dir
-     */
-    public static File getDiskCacheDir(Context context, String uniqueName) {
-        // Check if media is mounted or storage is built-in, if so, try and use external cache dir
-        // otherwise use internal cache dir
-
-        // TODO: getCacheDir() should be moved to a background thread as it attempts to create the
-        // directory if it does not exist (no disk access should happen on the main/UI thread).
-    	final String cachePath ;
-    	if(isExternalMounted() && null != getExternalCacheDir(context)){
-    		cachePath = getExternalCacheDir(context).getPath();
-    	}
-    	else{
-    		cachePath = context.getCacheDir().getPath();
-    	}
-
-        Log.i("Cache dir", cachePath + File.separator + uniqueName);
-        return new File(cachePath + File.separator + uniqueName);
-    }
-    
-    /**
-     * Get the external app cache directory.
-     *
-     * @param context The context to use
-     * @return The external cache dir
-     */
-    private static File getExternalCacheDir(Context context) {
-        // TODO: This needs to be moved to a background thread to ensure no disk access on the
-        // main/UI thread as unfortunately getExternalCacheDir() calls mkdirs() for us (even
-        // though the Volley library will later try and call mkdirs() as well from a background
-        // thread).
-        return context.getExternalCacheDir();
-    }
-    
-    @SuppressLint("NewApi") 
-    private static boolean isExternalMounted(){
-    	if(Utils.hasGingerbread()){
-            return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-            !Environment.isExternalStorageRemovable();
-    	}
-    	return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 
     /**
@@ -379,19 +326,95 @@ public class DiskLruBasedCache implements Cache {
      * Returns a file object for the given cache key.
      */
     public File getFileForKey(String key) {
-        return new File(mCacheParams.diskCacheDir, getFilenameForKey(key));
+        return new File(mCacheParams.diskCacheDir, key+".0");
     }
 
 	@Override
-	public Entry get(String key) {
-		// TODO Auto-generated method stub
+	public Entry get(String data) {
+        final String key = hashKeyForDisk(data);
+        // if the entry does not exist, return.
+        if (data == null) {
+            return null;
+        }
+
+        synchronized (mDiskCacheLock) {
+            while (mDiskCacheStarting) {
+                try {
+                    mDiskCacheLock.wait();
+                } catch (InterruptedException e) {}
+            }
+            if (mDiskLruCache != null) {
+                InputStream inputStream = null;
+                try {
+                    final DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
+                    if (snapshot != null) {
+                        if (BuildConfig.DEBUG) {
+                            Log.d(TAG, "Disk cache hit");
+                        }
+                        inputStream = snapshot.getInputStream(DISK_CACHE_INDEX);
+                        if (inputStream != null) {
+                        	File file = getFileForKey(key);
+                            CountingInputStream cis = new CountingInputStream(inputStream);
+                            CacheHeader entry = CacheHeader.readHeader(cis); // eat header
+                            byte[] dataBytes = IOUtils.streamToBytes(cis, (int) (file.length() - cis.getBytesRead()));
+							return entry.toCacheEntry(dataBytes);
+                        }
+                    }
+                } catch (final IOException e) {
+                    remove(key);
+                    Log.e(TAG, "getBitmapFromDiskCache - " + e);
+                    return null;
+                } finally {
+                    try {
+                        if (inputStream != null) {
+                            inputStream.close();
+                        }
+                    } catch (IOException e) {}
+                }
+            }
+        }
 		return null;
 	}
 
 	@Override
-	public void put(String key, Entry entry) {
-		// TODO Auto-generated method stub
-		
+	public void put(String data, Entry value) {
+        if (data == null || value == null) {
+            return;
+        }
+
+        synchronized (mDiskCacheLock) {
+            // Add to disk cache
+            if (mDiskLruCache != null) {
+                final String key = hashKeyForDisk(data);
+                OutputStream out = null;
+                try {
+                    DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
+                    if (snapshot == null) {
+                        final DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+                        if (editor != null) {
+                            out = editor.newOutputStream(DISK_CACHE_INDEX);
+                            CacheHeader e = new CacheHeader(key, value);
+                            e.writeHeader(out);
+                            out.write(value.data);
+                            editor.commit();
+                            out.close();
+                        }
+                    } else {
+                        snapshot.getInputStream(DISK_CACHE_INDEX).close();
+                    }
+                } catch (final IOException e) {
+                    Log.e(TAG, "addBitmapToCache - " + e);
+                } catch (Exception e) {
+                    Log.e(TAG, "addBitmapToCache - " + e);
+                } finally {
+                    try {
+                        if (out != null) {
+                            out.close();
+                        }
+                    } catch (IOException e) {}
+                }
+            }
+        }
 	}
 
 	@Override
@@ -401,14 +424,19 @@ public class DiskLruBasedCache implements Cache {
 
 	@Override
 	public void invalidate(String key, boolean fullExpire) {
-		// TODO Auto-generated method stub
-		
+        Entry entry = get(key);
+        if (entry != null) {
+            entry.softTtl = 0;
+            if (fullExpire) {
+                entry.ttl = 0;
+            }
+            put(key, entry);
+        }
 	}
 
 	@Override
 	public void remove(String key) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 	}
 
 	@Override

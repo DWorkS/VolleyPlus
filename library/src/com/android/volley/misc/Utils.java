@@ -16,9 +16,16 @@
 
 package com.android.volley.misc;
 
+import java.io.File;
+
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
+import android.os.Environment;
+import android.os.StatFs;
 import android.os.StrictMode;
+import android.util.Log;
 
 /**
  * Class containing some static utility methods.
@@ -82,5 +89,76 @@ public class Utils {
 
     public static boolean hasKitKat() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    }
+    
+    
+    /**
+     * Check how much usable space is available at a given path.
+     *
+     * @param path The path to check
+     * @return The space available in bytes
+     */
+    @SuppressWarnings("deprecation")
+	@TargetApi(9)
+    public static long getUsableSpace(File path) {
+        if (Utils.hasGingerbread()) {
+            return path.getUsableSpace();
+        }
+        final StatFs stats = new StatFs(path.getPath());
+        return (long) stats.getBlockSize() * (long) stats.getAvailableBlocks();
+    }
+    
+/*	private File getDiskCacheDir(Context context, String uniqueName) {
+		final String cachePath = context.getCacheDir().getPath();
+		return new File(cachePath + File.separator + uniqueName);
+	}
+	*/
+
+    /**
+     * Get a usable cache directory (external if available, internal otherwise).
+     *
+     * @param context The context to use
+     * @param uniqueName A unique directory name to append to the cache dir
+     * @return The cache dir
+     */
+    public static File getDiskCacheDir(Context context, String uniqueName) {
+        // Check if media is mounted or storage is built-in, if so, try and use external cache dir
+        // otherwise use internal cache dir
+
+        // TODO: getCacheDir() should be moved to a background thread as it attempts to create the
+        // directory if it does not exist (no disk access should happen on the main/UI thread).
+    	final String cachePath ;
+    	if(isExternalMounted() && null != getExternalCacheDir(context)){
+    		cachePath = getExternalCacheDir(context).getPath();
+    	}
+    	else{
+    		cachePath = context.getCacheDir().getPath();
+    	}
+
+        Log.i("Cache dir", cachePath + File.separator + uniqueName);
+        return new File(cachePath + File.separator + uniqueName);
+    }
+    
+    /**
+     * Get the external app cache directory.
+     *
+     * @param context The context to use
+     * @return The external cache dir
+     */
+    private static File getExternalCacheDir(Context context) {
+        // TODO: This needs to be moved to a background thread to ensure no disk access on the
+        // main/UI thread as unfortunately getExternalCacheDir() calls mkdirs() for us (even
+        // though the Volley library will later try and call mkdirs() as well from a background
+        // thread).
+        return context.getExternalCacheDir();
+    }
+
+    @SuppressLint("NewApi") 
+    private static boolean isExternalMounted(){
+    	if(Utils.hasGingerbread()){
+            return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
+            !Environment.isExternalStorageRemovable();
+    	}
+    	return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 }

@@ -120,7 +120,7 @@ public class DiskBasedCache implements Cache {
         try {
             cis = new CountingInputStream(new FileInputStream(file));
             CacheHeader.readHeader(cis); // eat header
-            byte[] data = IOUtils.streamToBytes(cis, (int) (file.length() - cis.bytesRead));
+            byte[] data = IOUtils.streamToBytes(cis, (int) (file.length() - cis.getBytesRead()));
             return entry.toCacheEntry(data);
         } catch (IOException e) {
             VolleyLog.d("%s: %s", file.getAbsolutePath(), e.toString());
@@ -597,6 +597,5 @@ public class DiskBasedCache implements Cache {
                 return false;
             }
         }
-
     }
 }

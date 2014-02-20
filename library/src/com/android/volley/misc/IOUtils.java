@@ -124,7 +124,7 @@ public class IOUtils {
     }
     
     public static class CountingInputStream extends FilterInputStream {
-        public int bytesRead = 0;
+        private int bytesRead = 0;
 
         public CountingInputStream(InputStream in) {
             super(in);
@@ -146,6 +146,10 @@ public class IOUtils {
                 bytesRead += result;
             }
             return result;
+        }
+        
+        public long getBytesRead() {  
+            return bytesRead;  
         }
     }
 }

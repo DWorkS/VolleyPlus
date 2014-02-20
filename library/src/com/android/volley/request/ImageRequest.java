@@ -19,15 +19,6 @@ package com.android.volley.request;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyLog;
-import com.android.volley.error.ParseError;
-import com.android.volley.misc.Utils;
-import com.android.volley.toolbox.HttpHeaderParser;
-
 import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -35,6 +26,16 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
+
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyLog;
+import com.android.volley.error.ParseError;
+import com.android.volley.misc.ImageUtils;
+import com.android.volley.misc.Utils;
+import com.android.volley.toolbox.HttpHeaderParser;
 
 /**
  * A canned request for getting an image at a given URL and calling
@@ -196,7 +197,7 @@ public class ImageRequest extends Request<Bitmap> {
 
 			// Decode to the nearest power of two scaling factor.
 			decodeOptions.inJustDecodeBounds = false;
-			decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			decodeOptions.inSampleSize = ImageUtils.findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
 			Bitmap tempBitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
 			addMarker(String.format("read-from-file-scaled-times-%d",
 					decodeOptions.inSampleSize));
@@ -258,7 +259,7 @@ public class ImageRequest extends Request<Bitmap> {
 			// Decode to the nearest power of two scaling factor.
 			decodeOptions.inJustDecodeBounds = false;
 
-			decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			decodeOptions.inSampleSize = ImageUtils.findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
 			Bitmap tempBitmap = BitmapFactory.decodeResource(mResources, resourceId, decodeOptions);
 			addMarker(String.format("read-from-resource-scaled-times-%d", decodeOptions.inSampleSize));
 			// If necessary, scale down to the maximal acceptable size.
@@ -310,7 +311,7 @@ public class ImageRequest extends Request<Bitmap> {
 				decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;
 			}
 
-			decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			decodeOptions.inSampleSize = ImageUtils.findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
 			Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
 
 			// If necessary, scale down to the maximal acceptable size.
@@ -332,28 +333,5 @@ public class ImageRequest extends Request<Bitmap> {
     @Override
     protected void deliverResponse(Bitmap response) {
         mListener.onResponse(response);
-    }
-
-    /**
-     * Returns the largest power-of-two divisor for use in downscaling a bitmap
-     * that will not result in the scaling past the desired dimensions.
-     *
-     * @param actualWidth Actual width of the bitmap
-     * @param actualHeight Actual height of the bitmap
-     * @param desiredWidth Desired width of the bitmap
-     * @param desiredHeight Desired height of the bitmap
-     */
-    // Visible for testing.
-    static int findBestSampleSize(
-            int actualWidth, int actualHeight, int desiredWidth, int desiredHeight) {
-        double wr = (double) actualWidth / desiredWidth;
-        double hr = (double) actualHeight / desiredHeight;
-        double ratio = Math.min(wr, hr);
-        float n = 1.0f;
-        while ((n * 2) <= ratio) {
-            n *= 2;
-        }
-
-        return (int) n;
     }
 }
