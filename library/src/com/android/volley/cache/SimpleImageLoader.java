@@ -74,7 +74,7 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
      */
     public SimpleImageLoader(FragmentActivity activity) {
         super(newRequestQueue(activity),
-                BitmapCache.getInstance(activity.getSupportFragmentManager()));
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
     }
 
@@ -84,7 +84,7 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
      */
     public SimpleImageLoader(FragmentActivity activity, int defaultPlaceHolderResId) {
         super(newRequestQueue(activity),
-                BitmapCache.getInstance(activity.getSupportFragmentManager()));
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
         mPlaceHolderDrawables = new ArrayList<Drawable>(1);
         mPlaceHolderDrawables.add(defaultPlaceHolderResId == -1 ?
@@ -96,7 +96,7 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
      */
     public SimpleImageLoader(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables) {
         super(newRequestQueue(activity),
-                BitmapCache.getInstance(activity.getSupportFragmentManager()));
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
         mPlaceHolderDrawables = placeHolderDrawables;
     }

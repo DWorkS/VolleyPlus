@@ -40,7 +40,7 @@ import android.widget.ImageView;
 import com.android.volley.Cache;
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
-import com.android.volley.cache.BitmapCache;
+import com.android.volley.cache.BitmapImageCache;
 import com.android.volley.cache.DiskBasedCache;
 import com.android.volley.error.VolleyError;
 import com.android.volley.misc.NetUtils;
@@ -77,7 +77,7 @@ public class EfficientImageLoader extends ImageLoader {
      */
     public EfficientImageLoader(FragmentActivity activity) {
         super(newRequestQueue(activity),
-                BitmapCache.getInstance(activity.getSupportFragmentManager()));
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
     }
 
@@ -87,7 +87,7 @@ public class EfficientImageLoader extends ImageLoader {
      */
     public EfficientImageLoader(FragmentActivity activity, int defaultPlaceHolderResId) {
         super(newRequestQueue(activity),
-                BitmapCache.getInstance(activity.getSupportFragmentManager()));
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
         mPlaceHolderDrawables = new ArrayList<Drawable>(1);
         mPlaceHolderDrawables.add(defaultPlaceHolderResId == -1 ?
@@ -99,7 +99,7 @@ public class EfficientImageLoader extends ImageLoader {
      */
     public EfficientImageLoader(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables) {
         super(newRequestQueue(activity),
-                BitmapCache.getInstance(activity.getSupportFragmentManager()));
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
         mPlaceHolderDrawables = placeHolderDrawables;
     }

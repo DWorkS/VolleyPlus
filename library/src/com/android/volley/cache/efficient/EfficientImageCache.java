@@ -377,7 +377,7 @@ public class EfficientImageCache implements com.android.volley.cache.efficient.I
      * @param options - BitmapFactory.Options with out* options populated
      * @return Bitmap that case be used for inBitmap
      */
-    protected Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {
+    public Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {
         Bitmap bitmap = null;
 
         if (mReusableBitmaps != null && !mReusableBitmaps.isEmpty()) {

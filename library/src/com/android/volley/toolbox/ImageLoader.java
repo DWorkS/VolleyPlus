@@ -30,7 +30,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
-import com.android.volley.cache.BitmapCache;
+import com.android.volley.cache.BitmapImageCache;
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.ImageRequest;
 import com.android.volley.ui.AnimateImageView;
@@ -80,7 +80,7 @@ public class ImageLoader {
      * @param queue The RequestQueue to use for making image requests.
      */
     public ImageLoader(RequestQueue queue) {
-        this(queue, BitmapCache.getInstance(null));
+        this(queue, BitmapImageCache.getInstance(null));
     }
 
     /**

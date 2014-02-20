@@ -24,7 +24,6 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
-import com.android.volley.cache.efficient.EfficientImageCache;
 import com.android.volley.error.ParseError;
 import com.android.volley.misc.Utils;
 import com.android.volley.toolbox.HttpHeaderParser;
@@ -357,67 +356,4 @@ public class ImageRequest extends Request<Bitmap> {
 
         return (int) n;
     }
-    
-    /**
-     * Calculate the closest inSampleSize that is a power of 2 and will result in the final decoded bitmap
-     * having a width and height equal to or larger than the requested width and height.
-     *
-     * @param actualHeight Actual height of the bitmap
-     * @param actualWidth Actual width of the bitmap
-     * @param reqWidth The requested width of the resulting bitmap
-     * @param reqHeight The requested height of the resulting bitmap
-     * @return The value to be used for inSampleSize
-     */
-    public static int findSampleSize(int actualHeight, int actualWidth,
-            int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        int inSampleSize = 1;
-
-        if (actualHeight > reqHeight || actualWidth > reqWidth) {
-
-            final int halfHeight = actualHeight / 2;
-            final int halfWidth = actualWidth / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-
-            // This offers some additional logic in case the image has a strange
-            // aspect ratio. For example, a panorama may have a much larger
-            // width than height. In these cases the total pixels might still
-            // end up being too large to fit comfortably in memory, so we should
-            // be more aggressive with sample down the image (=larger inSampleSize).
-
-            long totalPixels = actualWidth * actualHeight / inSampleSize;
-
-            // Anything more than 2x the requested pixels we'll sample down further
-            final long totalReqPixelsCap = reqWidth * reqHeight * 2;
-
-            while (totalPixels > totalReqPixelsCap) {
-                inSampleSize *= 2;
-                totalPixels /= 2;
-            }
-        }
-        return inSampleSize;
-    }
-    
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private static void addInBitmapOptions(BitmapFactory.Options options, EfficientImageCache cache) {
-        // inBitmap only works with mutable bitmaps so force the decoder to
-        // return mutable bitmaps.
-        options.inMutable = true;
-
-        if (cache != null) {
-            // Try and find a bitmap to use for inBitmap
-            Bitmap inBitmap = cache.getBitmapFromReusableSet(options);
-
-            if (inBitmap != null) {
-                options.inBitmap = inBitmap;
-            }
-        }
-    }
-
 }

@@ -34,7 +34,7 @@ import com.android.volley.toolbox.ImageCache;
 /**
  * This class holds our bitmap caches (memory and disk).
  */
-public class BitmapCache implements ImageCache {
+public class BitmapImageCache implements ImageCache {
     private static final String TAG = "BitmapCache";
 
     // Default memory cache size as a percent of device memory class
@@ -47,7 +47,7 @@ public class BitmapCache implements ImageCache {
      * {@link #getInstance(android.support.v4.app.FragmentManager, float)}.
      * @param memCacheSize Memory cache size in KB.
      */
-    private BitmapCache(int memCacheSize) {
+    private BitmapImageCache(int memCacheSize) {
         init(memCacheSize);
     }
 
@@ -60,9 +60,9 @@ public class BitmapCache implements ImageCache {
      *                    that needs to be retained).
      * @param memCacheSize Memory cache size in KB.
      */
-    public static BitmapCache getInstance(FragmentManager fragmentManager, String fragmentTag,
+    public static BitmapImageCache getInstance(FragmentManager fragmentManager, String fragmentTag,
             int memCacheSize) {
-        BitmapCache bitmapCache = null;
+        BitmapImageCache bitmapImageCache = null;
         RetainFragment mRetainFragment = null;
 
         if (fragmentManager != null) {
@@ -70,28 +70,28 @@ public class BitmapCache implements ImageCache {
             mRetainFragment = getRetainFragment(fragmentManager, fragmentTag);
 
             // See if we already have a BitmapCache stored in RetainFragment
-            bitmapCache = (BitmapCache) mRetainFragment.getObject();
+            bitmapImageCache = (BitmapImageCache) mRetainFragment.getObject();
         }
 
         // No existing BitmapCache, create one and store it in RetainFragment
-        if (bitmapCache == null) {
-            bitmapCache = new BitmapCache(memCacheSize);
+        if (bitmapImageCache == null) {
+            bitmapImageCache = new BitmapImageCache(memCacheSize);
             if (mRetainFragment != null) {
-                mRetainFragment.setObject(bitmapCache);
+                mRetainFragment.setObject(bitmapImageCache);
             }
         }
-        return bitmapCache;
+        return bitmapImageCache;
     }
 
-    public static BitmapCache getInstance(FragmentManager fragmentManager, int memCacheSize) {
+    public static BitmapImageCache getInstance(FragmentManager fragmentManager, int memCacheSize) {
         return getInstance(fragmentManager, TAG, memCacheSize);
     }
 
-    public static BitmapCache getInstance(FragmentManager fragmentManager, float memCachePercent) {
+    public static BitmapImageCache getInstance(FragmentManager fragmentManager, float memCachePercent) {
         return getInstance(fragmentManager, calculateMemCacheSize(memCachePercent));
     }
 
-    public static BitmapCache getInstance(FragmentManager fragmentManger) {
+    public static BitmapImageCache getInstance(FragmentManager fragmentManger) {
         return getInstance(fragmentManger, DEFAULT_MEM_CACHE_PERCENT);
     }
 
