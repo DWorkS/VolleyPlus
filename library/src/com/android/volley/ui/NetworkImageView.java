@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 
+import com.android.volley.cache.SimpleImageLoader;
 import com.android.volley.error.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
@@ -48,6 +49,9 @@ public class NetworkImageView extends AnimateImageView {
 
     /** Current ImageContainer. (either in-flight or finished) */
     private ImageContainer mImageContainer;
+    private boolean mFadeInImage = true;
+    private int mMaxImageHeight = 0;
+    private int mMaxImageWidth = 0;
 
     public NetworkImageView(Context context) {
         this(context, null);
@@ -94,6 +98,19 @@ public class NetworkImageView extends AnimateImageView {
      */
     public void setErrorImageResId(int errorImage) {
         mErrorImageId = errorImage;
+    }
+    
+    public void setMaxImageSize(int maxImageWidth, int maxImageHeight) {
+        mMaxImageWidth = maxImageWidth;
+        mMaxImageHeight = maxImageHeight;
+    }
+
+    public void setMaxImageSize(int maxImageSize) {
+        setMaxImageSize(maxImageSize, maxImageSize);
+    }
+    
+	public void setFadeInImage(boolean fadeInImage) {
+        mFadeInImage = fadeInImage;
     }
 
     /**
@@ -178,7 +195,9 @@ public class NetworkImageView extends AnimateImageView {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        loadImageIfNecessary(true);
+        if (mImageLoader != null) {
+        	loadImageIfNecessary(true);
+        }
     }
 
     @Override

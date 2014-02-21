@@ -32,7 +32,7 @@ import android.util.Log;
  */
 public class Utils {
 	
-    public static final int ANIMATION_FADE_IN_TIME = 250;
+    public static final int ANIMATION_FADE_IN_TIME = 200;
     
     private Utils() {};
 

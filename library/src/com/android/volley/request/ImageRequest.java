@@ -217,7 +217,7 @@ public class ImageRequest extends Request<Bitmap> {
 		if (bitmap == null) {
 			return Response.error(new ParseError());
 		} else {
-			return Response.success(bitmap, null);
+			return Response.success(bitmap, HttpHeaderParser.parseIgnoreCacheHeaders());
 		}
 	}
 
@@ -276,7 +276,7 @@ public class ImageRequest extends Request<Bitmap> {
 		if (bitmap == null) {
 			return Response.error(new ParseError());
 		} else {
-			return Response.success(bitmap, null);
+			return Response.success(bitmap, HttpHeaderParser.parseIgnoreCacheHeaders());
 		}
 	}
 	
