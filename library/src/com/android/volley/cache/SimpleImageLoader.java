@@ -43,6 +43,8 @@ import com.android.volley.misc.Utils;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.ui.PhotoView;
 
 /**
  * A class that wraps up remote image loading requests using the Volley library combined with a
@@ -53,7 +55,7 @@ import com.android.volley.toolbox.HurlStack;
  * you must store the {@link com.android.volley.Request} in your ViewHolder type class and pass it
  * into loadImage to ensure the request is canceled as views are recycled.
  */
-public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
+public class SimpleImageLoader extends ImageLoader {
     private static final ColorDrawable transparentDrawable = new ColorDrawable(
             android.R.color.transparent);
     private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
@@ -142,7 +144,8 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
     }
 
     public ImageContainer get(String requestUrl, ImageView imageView, int placeHolderIndex) {
-        return get(requestUrl, imageView, mPlaceHolderDrawables.get(placeHolderIndex),
+        return get(requestUrl, imageView, 
+        		mPlaceHolderDrawables != null ? mPlaceHolderDrawables.get(placeHolderIndex) : null,
                 mMaxImageWidth, mMaxImageHeight);
     }
 
@@ -178,7 +181,9 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
                 // Store request in ImageView tag
                 imageView.setTag(imageContainer);
             } else {
-                imageView.setImageDrawable(placeHolder);
+            	if(!(imageView instanceof PhotoView)){
+            		imageView.setImageDrawable(placeHolder);
+            	}
                 imageView.setTag(null);
             }
         }
@@ -193,10 +198,19 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
             public void onResponse(ImageContainer response, boolean isImmediate) {
                 imageView.setTag(null);
                 if (response.getBitmap() != null) {
-                    setImageBitmap(imageView, response.getBitmap(), resources,
-                            fadeInImage && !isImmediate);
+                	
+                	if(imageView instanceof PhotoView){
+                        setPhotoImageBitmap((PhotoView) imageView, response.getBitmap(), resources,
+                                fadeInImage && !isImmediate);		
+                	}
+                	else{
+                        setImageBitmap(imageView, response.getBitmap(), resources,
+                                fadeInImage && !isImmediate);	
+                	}
                 } else {
-                    imageView.setImageDrawable(placeHolder);
+                	if(!(imageView instanceof PhotoView)){
+                		imageView.setImageDrawable(placeHolder);
+                	}
                 }
             }
 
@@ -281,6 +295,59 @@ public class SimpleImageLoader extends com.android.volley.toolbox.ImageLoader {
         } else {
             // No fade in, just set bitmap directly
             imageView.setImageBitmap(bitmap);
+        }
+    }
+    
+    /**
+     * Sets a {@link android.graphics.Bitmap} to an {@link android.widget.ImageView} using a
+     * fade-in animation. If there is a {@link android.graphics.drawable.Drawable} already set on
+     * the ImageView then use that as the image to fade from. Otherwise fade in from a transparent
+     * Drawable.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    private static void setPhotoImageBitmap(final PhotoView imageView, final Bitmap bitmap,
+            Resources resources, boolean fadeIn) {
+        // If we're fading in and on HC MR1+
+        if (fadeIn && Utils.hasHoneycombMR1()) {
+            // Use ViewPropertyAnimator to run a simple fade in + fade out animation to update the
+            // ImageView
+            imageView.animate()
+                    .scaleY(0.95f)
+                    .scaleX(0.95f)
+                    .alpha(0f)
+                    .setDuration(imageView.getDrawable() == null ? 0 : HALF_FADE_IN_TIME)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            imageView.bindPhoto(bitmap);
+                            imageView.animate()
+                                    .alpha(1f)
+                                    .scaleY(1f)
+                                    .scaleX(1f)
+                                    .setDuration(HALF_FADE_IN_TIME)
+                                    .setListener(null);
+                        }
+                    });
+        } else if (fadeIn) {
+            // Otherwise use a TransitionDrawable to fade in
+            Drawable initialDrawable;
+            if (imageView.getDrawable() != null) {
+                initialDrawable = imageView.getDrawable();
+            } else {
+                initialDrawable = transparentDrawable;
+            }
+            BitmapDrawable bitmapDrawable = new BitmapDrawable(resources, bitmap);
+            // Use TransitionDrawable to fade in
+            final TransitionDrawable td =
+                    new TransitionDrawable(new Drawable[] {
+                            initialDrawable,
+                            bitmapDrawable
+                    });
+            imageView.bindDrawable(td);
+            td.startTransition(Utils.ANIMATION_FADE_IN_TIME);
+        } else {
+            // No fade in, just set bitmap directly
+            imageView.bindPhoto(bitmap);
         }
     }
 

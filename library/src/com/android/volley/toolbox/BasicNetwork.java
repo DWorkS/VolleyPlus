@@ -98,10 +98,18 @@ public class BasicNetwork implements Network {
                 // Handle cache validation.
                 if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
                     return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED,
-                            request.getCacheEntry().data, responseHeaders, true);
+                    		request.getCacheEntry() == null ? null : request.getCacheEntry().data, 
+                    		responseHeaders, true);
                 }
 
-                responseContents = entityToBytes(httpResponse.getEntity());
+	            // Some responses such as 204s do not have content.  We must check.
+	            if (httpResponse.getEntity() != null) {
+	              responseContents = entityToBytes(httpResponse.getEntity());
+	            } else {
+	              // Add 0 byte response as a way of honestly representing a
+	              // no-content request.
+	              responseContents = new byte[0];
+	            }
                 // if the request is slow, log it.
                 long requestLifetime = SystemClock.elapsedRealtime() - requestStart;
                 logSlowRequests(requestLifetime, request, responseContents, statusLine);

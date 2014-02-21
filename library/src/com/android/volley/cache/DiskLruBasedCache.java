@@ -9,13 +9,9 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.os.Environment;
-import android.os.StatFs;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
@@ -23,7 +19,6 @@ import com.android.volley.BuildConfig;
 import com.android.volley.Cache;
 import com.android.volley.VolleyLog;
 import com.android.volley.cache.DiskBasedCache.CacheHeader;
-import com.android.volley.cache.DiskLruBasedCache.ImageCacheParams;
 import com.android.volley.misc.DiskLruCache;
 import com.android.volley.misc.IOUtils;
 import com.android.volley.misc.IOUtils.CountingInputStream;
@@ -56,8 +51,11 @@ public class DiskLruBasedCache implements Cache {
 	private static final int VALUE_COUNT = 1;
 	
 	private DiskLruCache mDiskLruCache;
+	@SuppressWarnings("unused")
 	private CompressFormat mCompressFormat = DEFAULT_COMPRESS_FORMAT;
+	@SuppressWarnings("unused")
 	private static int IO_BUFFER_SIZE = 8 * 1024;
+	@SuppressWarnings("unused")
 	private int mCompressQuality = DEFAULT_COMPRESS_QUALITY;
     private final Object mDiskCacheLock = new Object();
     private boolean mDiskCacheStarting = true;
@@ -315,7 +313,8 @@ public class DiskLruBasedCache implements Cache {
      * @param key The key to generate a file name for.
      * @return A pseudo-unique filename.
      */
-    private String getFilenameForKey(String key) {
+    @SuppressWarnings("unused")
+	private String getFilenameForKey(String key) {
         int firstHalfLength = key.length() / 2;
         String localFilename = String.valueOf(key.substring(0, firstHalfLength).hashCode());
         localFilename += String.valueOf(key.substring(firstHalfLength).hashCode());

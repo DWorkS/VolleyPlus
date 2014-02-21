@@ -36,6 +36,29 @@ public class Utils {
     
     private Utils() {};
 
+    /**
+     * Interface for components that are internally scrollable left-to-right.
+     */
+    public static interface HorizontallyScrollable {
+        /**
+         * Return {@code true} if the component needs to receive right-to-left
+         * touch movements.
+         *
+         * @param origX the raw x coordinate of the initial touch
+         * @param origY the raw y coordinate of the initial touch
+         */
+
+        public boolean interceptMoveLeft(float origX, float origY);
+
+        /**
+         * Return {@code true} if the component needs to receive left-to-right
+         * touch movements.
+         *
+         * @param origX the raw x coordinate of the initial touch
+         * @param origY the raw y coordinate of the initial touch
+         */
+        public boolean interceptMoveRight(float origX, float origY);
+    }
     @TargetApi(11)
     public static void enableStrictMode() {
         if (Utils.hasGingerbread()) {
