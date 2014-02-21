@@ -361,7 +361,7 @@ public class DiskLruBasedCache implements Cache {
                     }
                 } catch (final IOException e) {
                     remove(key);
-                    Log.e(TAG, "getBitmapFromDiskCache - " + e);
+                    Log.e(TAG, "getDiskLruBasedCache - " + e);
                     return null;
                 } finally {
                     try {
@@ -387,8 +387,8 @@ public class DiskLruBasedCache implements Cache {
                 final String key = hashKeyForDisk(data);
                 OutputStream out = null;
                 try {
-                    DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
-                    if (snapshot == null) {
+                    //DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
+                    //if (snapshot == null) {
                         final DiskLruCache.Editor editor = mDiskLruCache.edit(key);
                         if (editor != null) {
                             out = editor.newOutputStream(DISK_CACHE_INDEX);
@@ -398,13 +398,13 @@ public class DiskLruBasedCache implements Cache {
                             editor.commit();
                             out.close();
                         }
-                    } else {
+/*                    } else {
                         snapshot.getInputStream(DISK_CACHE_INDEX).close();
-                    }
+                    }*/
                 } catch (final IOException e) {
-                    Log.e(TAG, "addBitmapToCache - " + e);
+                    Log.e(TAG, "putDiskLruBasedCache - " + e);
                 } catch (Exception e) {
-                    Log.e(TAG, "addBitmapToCache - " + e);
+                    Log.e(TAG, "putDiskLruBasedCache - " + e);
                 } finally {
                     try {
                         if (out != null) {
@@ -434,8 +434,24 @@ public class DiskLruBasedCache implements Cache {
 	}
 
 	@Override
-	public void remove(String key) {
-		// TODO Auto-generated method stub	
+	public void remove(String data) {
+        if (data == null) {
+            return;
+        }
+
+        synchronized (mDiskCacheLock) {
+            // remove to disk cache
+            if (mDiskLruCache != null) {
+                final String key = hashKeyForDisk(data);
+                try {
+                    mDiskLruCache.remove(key);
+                } catch (final IOException e) {
+                    Log.e(TAG, "removeDiskLruBasedCache - " + e);
+                } catch (Exception e) {
+                    Log.e(TAG, "removeDiskLruBasedCache - " + e);
+                }
+            }
+        }	
 	}
 
 	@Override

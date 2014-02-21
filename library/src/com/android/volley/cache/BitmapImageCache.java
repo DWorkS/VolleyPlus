@@ -126,10 +126,10 @@ public class BitmapImageCache implements ImageCache {
 
         synchronized (mMemoryCache) {
             // Add to memory cache
-            if (mMemoryCache.get(data) == null) {
+            //if (mMemoryCache.get(data) == null) {
             	VolleyLog.d(TAG, "Memory cache put - " + data);
                 mMemoryCache.put(data, bitmap);
-            }
+            //}
         }
     }
 
@@ -265,7 +265,7 @@ public class BitmapImageCache implements ImageCache {
     public void putBitmap(String key, Bitmap bitmap) {
         addBitmapToCache(key, bitmap);
     }
-
+	
     /**
      * A simple non-UI Fragment that stores a single Object and is retained over configuration
      * changes. It will be used to retain the BitmapCache object.

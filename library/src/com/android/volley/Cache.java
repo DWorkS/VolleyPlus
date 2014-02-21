@@ -62,6 +62,16 @@ public interface Cache {
     public void clear();
 
     /**
+     * Flushes the cache.
+     */
+    public void flush();
+    
+    /**
+     * Closes the cache.
+     */
+    public void close();
+
+    /**
      * Data and metadata for an entry returned by the cache.
      */
     public static class Entry {
@@ -93,5 +103,4 @@ public interface Cache {
             return this.softTtl < System.currentTimeMillis();
         }
     }
-
 }

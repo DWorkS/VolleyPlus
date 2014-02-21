@@ -50,8 +50,8 @@ public class LruImageCache implements ImageCache {
 
     @Override
     public void putBitmap(String key, Bitmap bitmap) {
-        if(mLruCache.get(key) == null) {
+        //if(mLruCache.get(key) == null) {
             mLruCache.put(key, bitmap);
-        }
+        //}
     }
 }

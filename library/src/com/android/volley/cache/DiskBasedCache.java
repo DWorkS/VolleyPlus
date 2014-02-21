@@ -598,4 +598,14 @@ public class DiskBasedCache implements Cache {
             }
         }
     }
+
+	@Override
+	public void flush() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+	}
 }

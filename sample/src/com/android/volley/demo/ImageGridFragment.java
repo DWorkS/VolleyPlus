@@ -58,7 +58,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
     private int mImageThumbSize;
     private int mImageThumbSpacing;
     private ImageAdapter mAdapter;
-    private SimpleImageLoader mImageFetcher;
+    private SimpleImageLoader mImageLoader;
 
     /**
      * Empty constructor as per the Fragment documentation
@@ -76,7 +76,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
         mAdapter = new ImageAdapter(getActivity());
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageFetcher = new SimpleImageLoader(getActivity(), R.drawable.empty_photo);
+        mImageLoader = new SimpleImageLoader(getActivity(), R.drawable.empty_photo);
     }
 
     @Override
@@ -94,10 +94,10 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
                 if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
                     // Before Honeycomb pause image loading on scroll to help with performance
                     if (!Utils.hasHoneycomb()) {
-                        mImageFetcher.stopProcessingQueue();
+                        mImageLoader.stopProcessingQueue();
                     }
                 } else {
-                    mImageFetcher.startProcessingQueue();
+                    mImageLoader.startProcessingQueue();
                 }
             }
 
@@ -178,6 +178,7 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
             case R.id.clear_cache:
                 Toast.makeText(getActivity(), R.string.clear_cache_complete_toast,
                         Toast.LENGTH_SHORT).show();
+                mImageLoader.clearCache();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -273,9 +274,14 @@ public class ImageGridFragment extends Fragment implements AdapterView.OnItemCli
 
             // Finally load the image asynchronously into the ImageView, this also takes care of
             // setting a placeholder image while the background thread runs
-            //mImageFetcher.get(Images.imageThumbUrls[position - mNumColumns], imageView);
-            imageView.setImageUrl(Images.imageThumbUrls[position - mNumColumns], mImageFetcher);
-            imageView.setDefaultImageResId(R.drawable.empty_photo);
+            if(Utils.hasHoneycomb()){
+                mImageLoader.get(Images.imageThumbUrls[position - mNumColumns], imageView);
+            }
+            else{
+                imageView.setImageUrl(Images.imageThumbUrls[position - mNumColumns], mImageLoader);
+                imageView.setDefaultImageResId(R.drawable.empty_photo);
+            }
+
             return imageView;
         }
 

@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageView;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
@@ -106,6 +107,14 @@ public class ImageLoader {
     
     protected RequestQueue getRequestQueue() {
 		return mRequestQueue;
+	}
+
+    protected ImageCache getImageCache() {
+		return mCache;
+	}
+    
+    protected Cache getCache() {
+		return mRequestQueue.getCache();
 	}
     
     /**
@@ -292,6 +301,35 @@ public class ImageLoader {
     }
 
     /**
+     * Issues a bitmap request with the given URL if that image is not available
+     * in the cache, and returns a bitmap container that contains all of the data
+     * relating to the request (as well as the default image if the requested
+     * image is not available).
+     * @param requestUrl The url of the remote image
+     * @param imageListener The listener to call when the remote image is loaded
+     * @param maxWidth The maximum width of the returned image.
+     * @param maxHeight The maximum height of the returned image.
+     * @return A container object that contains all of the properties of the request, as well as
+     *     the currently available image (default if remote is not loaded).
+     */
+    public ImageContainer set(String requestUrl, ImageListener imageListener,
+            int maxWidth, int maxHeight, Bitmap bitmap) {
+        // only fulfill requests that were initiated from the main thread.
+        throwIfNotOnMainThread();
+
+        final String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight);
+
+        // The bitmap did not exist in the cache, fetch it!
+        ImageContainer imageContainer =
+                new ImageContainer(bitmap, requestUrl, cacheKey, imageListener);
+
+        // Update the caller to let them know that they should use the default bitmap.
+        imageListener.onResponse(imageContainer, true);
+        setImageSuccess(cacheKey, bitmap);
+        return imageContainer;
+    }
+    
+    /**
      * Sets the amount of time to wait after the first response arrives before delivering all
      * responses. Batching can be disabled entirely by passing in 0.
      * @param newBatchedResponseDelayMs The time in milliseconds to wait.
@@ -306,6 +344,27 @@ public class ImageLoader {
      * @param response The bitmap that was returned from the network.
      */
     private void onGetImageSuccess(String cacheKey, Bitmap response) {
+        // cache the image that was fetched.
+        mCache.putBitmap(cacheKey, response);
+
+        // remove the request from the list of in-flight requests.
+        BatchedImageRequest request = mInFlightRequests.remove(cacheKey);
+
+        if (request != null) {
+            // Update the response bitmap.
+            request.mResponseBitmap = response;
+
+            // Send the batched response
+            batchResponse(cacheKey, request);
+        }
+    }
+    
+    /**
+     * Handler for when an image was successfully loaded.
+     * @param cacheKey The cache key that is associated with the image request.
+     * @param response The bitmap that was returned from the network.
+     */
+    private void setImageSuccess(String cacheKey, Bitmap response) {
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, response);
 

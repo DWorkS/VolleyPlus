@@ -18,6 +18,7 @@ package com.android.volley.demo;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -43,10 +44,10 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
     public static final String EXTRA_IMAGE = "extra_image";
 
     private ImagePagerAdapter mAdapter;
-    private SimpleImageLoader mImageFetcher;
+    private SimpleImageLoader mImageLoader;
     private ViewPager mPager;
 
-    @TargetApi(11)
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (BuildConfig.DEBUG) {
@@ -75,10 +76,10 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
         
-        mImageFetcher = new SimpleImageLoader(this);//, R.drawable.empty_photo);
+        mImageLoader = new SimpleImageLoader(this);//, R.drawable.empty_photo);
         //mImageFetcher.setFadeInImage(false);
-        mImageFetcher.setImageCacheParams(cacheParams);
-        mImageFetcher.setMaxImageSize(longest);
+        mImageLoader.setImageCacheParams(cacheParams);
+        mImageLoader.setMaxImageSize(longest);
 
         // Set up ViewPager and backing adapter
         mAdapter = new ImagePagerAdapter(getSupportFragmentManager(), Images.imageUrls.length);
@@ -146,7 +147,7 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
             case R.id.clear_cache:
-                mImageFetcher.clearCache();
+                mImageLoader.clearCache();
                 Toast.makeText(
                         this, R.string.clear_cache_complete_toast,Toast.LENGTH_SHORT).show();
                 return true;
@@ -164,7 +165,7 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
      * Called by the ViewPager child fragments to load images via the one ImageFetcher
      */
     public SimpleImageLoader getImageFetcher() {
-        return mImageFetcher;
+        return mImageLoader;
     }
 
     /**
@@ -195,7 +196,7 @@ public class ImageDetailActivity extends FragmentActivity implements OnClickList
      * Set on the ImageView in the ViewPager children fragments, to enable/disable low profile mode
      * when the ImageView is touched.
      */
-    @TargetApi(11)
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void onClick(View v) {
         final int vis = mPager.getSystemUiVisibility();

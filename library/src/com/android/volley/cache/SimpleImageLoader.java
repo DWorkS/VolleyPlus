@@ -116,7 +116,15 @@ public class SimpleImageLoader extends ImageLoader {
     }
     
     public void clearCache() {
-    	// TODO Auto-generated method stub
+    	getCache().clear();
+	}
+    
+    public void flushCache() {
+    	getCache().flush();
+	}
+    
+    public void closeCache() {
+    	getCache().clear();
 	}
 
 	public SimpleImageLoader setImageCacheParams(ImageCacheParams imageCacheParams) {
@@ -139,6 +147,7 @@ public class SimpleImageLoader extends ImageLoader {
         return setMaxImageSize(maxImageSize, maxImageSize);
     }
 
+    //Get 
     public ImageContainer get(String requestUrl, ImageView imageView) {
         return get(requestUrl, imageView, 0);
     }
@@ -190,6 +199,60 @@ public class SimpleImageLoader extends ImageLoader {
 
         return imageContainer;
     }
+    
+    //Set
+    public ImageContainer set(String requestUrl, ImageView imageView, Bitmap bitmap) {
+        return set(requestUrl, imageView, 0, bitmap);
+    }
+
+    public ImageContainer set(String requestUrl, ImageView imageView, int placeHolderIndex, Bitmap bitmap) {
+        return set(requestUrl, imageView, 
+        		mPlaceHolderDrawables != null ? mPlaceHolderDrawables.get(placeHolderIndex) : null,
+                mMaxImageWidth, mMaxImageHeight, bitmap);
+    }
+
+    public ImageContainer set(String requestUrl, ImageView imageView, Drawable placeHolder, Bitmap bitmap) {
+        return set(requestUrl, imageView, placeHolder, mMaxImageWidth, mMaxImageHeight, bitmap);
+    }
+
+    public ImageContainer set(String requestUrl, ImageView imageView, Drawable placeHolder,
+            int maxWidth, int maxHeight, Bitmap bitmap) {
+
+        // Find any old image load request pending on this ImageView (in case this view was
+        // recycled)
+        ImageContainer imageContainer = imageView.getTag() != null &&
+                imageView.getTag() instanceof ImageContainer ?
+                (ImageContainer) imageView.getTag() : null;
+
+        // Find image url from prior request
+        String recycledImageUrl = imageContainer != null ? imageContainer.getRequestUrl() : null;
+
+        // If the new requestUrl is null or the new requestUrl is different to the previous
+        // recycled requestUrl
+        if (requestUrl == null || !requestUrl.equals(recycledImageUrl)) {
+            if (imageContainer != null) {
+                // Cancel previous image request
+                imageContainer.cancelRequest();
+                imageView.setTag(null);
+            }
+            if (requestUrl != null) {
+                // Queue new request to fetch image
+                imageContainer = get(requestUrl,
+                        getImageListener(mResources, imageView, placeHolder, mFadeInImage),
+                        maxWidth, maxHeight);
+                // Store request in ImageView tag
+                imageView.setTag(imageContainer);
+            } else {
+            	if(!(imageView instanceof PhotoView)){
+            		imageView.setImageDrawable(placeHolder);
+            	}
+                imageView.setTag(null);
+            }
+        }
+
+        return imageContainer;
+    }
+    
 
     private static ImageListener getImageListener(final Resources resources,
             final ImageView imageView, final Drawable placeHolder, final boolean fadeInImage) {
