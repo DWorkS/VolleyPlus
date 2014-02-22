@@ -17,7 +17,7 @@
 package com.android.volley.demo.util;
 
 import com.android.volley.demo.ImageDetailActivity;
-import com.android.volley.demo.ImageGridActivity;
+import com.android.volley.demo.SimpleCacheActivity;
 
 import android.annotation.TargetApi;
 import android.os.Build;
@@ -44,7 +44,7 @@ public class Utils {
             if (Utils.hasHoneycomb()) {
                 threadPolicyBuilder.penaltyFlashScreen();
                 vmPolicyBuilder
-                        .setClassInstanceLimit(ImageGridActivity.class, 1)
+                        .setClassInstanceLimit(SimpleCacheActivity.class, 1)
                         .setClassInstanceLimit(ImageDetailActivity.class, 1);
             }
             StrictMode.setThreadPolicy(threadPolicyBuilder.build());

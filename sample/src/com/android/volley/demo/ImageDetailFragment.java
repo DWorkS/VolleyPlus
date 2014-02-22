@@ -17,7 +17,6 @@
 package com.android.volley.demo;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,10 +26,12 @@ import com.android.volley.cache.SimpleImageLoader;
 import com.android.volley.demo.util.Utils;
 import com.android.volley.ui.PhotoView;
 
+import dev.dworks.libs.actionbarplus.ActionBarFragment;
+
 /**
  * This fragment will populate the children of the ViewPager from {@link ImageDetailActivity}.
  */
-public class ImageDetailFragment extends Fragment {
+public class ImageDetailFragment extends ActionBarFragment {
     private static final String IMAGE_DATA_EXTRA = "extra_image_data";
     private String mImageUrl;
     private PhotoView mImageView;

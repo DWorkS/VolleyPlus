@@ -1,7 +1,12 @@
 VolleyPlus
 ==========
+![VolleyPlus](https://github.com/DWorkS/VolleyPlus/raw/master/header.png)
 
-Volley Plus library Project improvements to Volley along with full image caching.
+`VolleyPlus` library Project improvements to Volley along with full image caching.
+
+## Sample App
+
+[![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](http://play.google.com/store/apps/details?id=com.android.volley.demo)
 
 
 Developed By

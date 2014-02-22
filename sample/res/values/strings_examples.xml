@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="act__main__btn_simple_request">Simple request</string>
+    <string name="act__main__btn_json_request">JSON request</string>
+    <string name="act__main__btn_gson_request">Gson request</string>
+    <string name="act__main__btn_image_loading">Image loading</string>
+    <string name="act__simple_request__btn_request">Execute simple request</string>
+    <string name="act__json_request__btn_request">Execute JSON request</string>
+    <string name="act__gson_request__btn_request">Execute Gson request</string>
+    <string name="act__image_loading__btn_request">Image loading</string>
+    <string name="act__image_loading_error__btn_request">Image loading with intentional error</string>
+    <string name="act__ext_http_client">Newer external HttpClient (4.2.x)</string>
+    <string name="act__main__btn_cookies">Using cookies</string>
+    <string name="act__act__ss_ssl_http_client">Using self-signed SSL cert</string>
+    <string name="act__ss_ssl_http_client">HTTPS request</string>
+    <string name="act__btn_https_request">Execute HTTPS request</string>
+    <string name="act__main__btn_ss_ssl_http_client">HTTPS with self-signed cert</string>
+    
+    <string name="act_cookie__btn_execute_request">Execute request</string>
+    <string name="act_cookie__btn_set_cookie">Set cookie and execute</string>
+    <string name="act_cookie__tv_cookie">Cookie value: %s</string>
+    
+    <string name="act__params_get">Request with GET params</string>
+    <string name="act__params_post">Request with POST params</string>
+    <string name="act__params_get_post">Request with GET and POST params</string>
+    <string name="act__params__num1_hint">Decimal 1</string>
+    <string name="act__params__num2_hint">Decimal 2</string>
+    <string name="act__params__sum">Sum: %s</string>
+    <string name="act__main__btn_params">GET and POST parameters</string>
+    <string name="act__main__btn_network_list_view">Dynamic Image Caching</string>
+</resources>
