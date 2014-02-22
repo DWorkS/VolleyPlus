@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2014 Hari Krishna Dulipudi
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,47 +22,46 @@ import android.content.Context;
 import android.net.http.AndroidHttpClient;
 
 import com.android.volley.Network;
-import com.android.volley.RequestQueue;
+import com.android.volley.RequestTickle;
 import com.android.volley.cache.DiskBasedCache;
 import com.android.volley.misc.NetUtils;
 import com.android.volley.misc.Utils;
 
-public class Volley {
+public class VolleyTickle {
 
     /** Default on-disk cache directory. */
     private static final String DEFAULT_CACHE_DIR = "volley";
 
     /**
-     * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
+     * Creates a default instance of the worker pool and calls {@link RequestTickle#start()} on it.
      *
      * @param context A {@link Context} to use for creating the cache dir.
-     * @param stack An {@link HttpStack} to use for the network, or null for default.
-     * @return A started {@link RequestQueue} instance.
+     * @return A started {@link RequestTickle} instance.
      */
-    public static RequestQueue newRequestQueue(Context context, HttpStack stack) {
+    public static RequestTickle newRequestTickle(Context context) {
         File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
-        if (stack == null) {
-            stack = Utils.hasHoneycomb() ?
-                    new HurlStack() :
-                    new HttpClientStack(AndroidHttpClient.newInstance(
-                            NetUtils.getUserAgent(context)));
-        }
-
+		HttpStack stack = Utils.hasHoneycomb() ?
+                new HurlStack() :
+                new HttpClientStack(AndroidHttpClient.newInstance(
+                        NetUtils.getUserAgent(context)));
+                
         Network network = new BasicNetwork(stack);
+        
+        RequestTickle tickle = new RequestTickle(new DiskBasedCache(cacheDir), network);
 
-        RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir), network);
-        queue.start();
-
-        return queue;
+        return tickle;
     }
-
+    
     /**
-     * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
+     * Creates a default instance of the worker pool and calls {@link RequestTickle#start()} on it.
      *
      * @param context A {@link Context} to use for creating the cache dir.
-     * @return A started {@link RequestQueue} instance.
+     * @return A started {@link RequestTickle} instance.
      */
-    public static RequestQueue newRequestQueue(Context context) {
-        return newRequestQueue(context, null);
+    public static RequestTickle newRequestTickle(Context context, Network network) {
+    	File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
+        RequestTickle tickle = new RequestTickle(new DiskBasedCache(cacheDir), network);
+
+        return tickle;
     }
 }
