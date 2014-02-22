@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/btn_execute_request"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/act_cookie__btn_execute_request" />
+    <Button
+        android:id="@+id/btn_set_cookie"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/act_cookie__btn_set_cookie"
+        android:enabled="false"
+         />
+    <TextView
+        android:id="@+id/tv_cookie"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/act_cookie__tv_cookie" />
+
+</LinearLayout>

@@ -1,0 +1,73 @@
+<ScrollView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+         >
+
+        <Button
+            android:id="@+id/btn_simple_request"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__main__btn_simple_request" >
+        </Button>
+        
+        <Button
+            android:id="@+id/btn_params"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__main__btn_params" >
+        </Button>
+
+        <Button
+            android:id="@+id/btn_json_request"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__main__btn_json_request" >
+        </Button>
+
+        <Button
+            android:id="@+id/btn_gson_request"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__main__btn_gson_request" >
+        </Button>
+
+        <Button
+            android:id="@+id/btn_image_loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__main__btn_image_loading" >
+        </Button>
+        <Button
+            android:id="@+id/btn_cookies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__main__btn_cookies" >
+        </Button>
+        <Button
+            android:id="@+id/btn_ext_http_client"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__ext_http_client" >
+        </Button>
+
+        <Button
+            android:id="@+id/btn_ss_ssl_http_client"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__main__btn_ss_ssl_http_client" >
+        </Button>
+        <Button
+            android:id="@+id/btn_network_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__main__btn_network_list_view" >
+        </Button>        
+    </LinearLayout>
+
+</ScrollView>
