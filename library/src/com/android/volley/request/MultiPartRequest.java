@@ -1,4 +1,3 @@
-
 package com.android.volley.request;
 
 import java.util.HashMap;
@@ -14,132 +13,109 @@ import com.android.volley.Response.Listener;
 /**
  * A request for making a Multi Part request
  * 
- * @param <T>
- *            Response expected
+ * @param <T> Response expected
  */
 public abstract class MultiPartRequest<T> extends Request<T> {
 
-    private static final String PROTOCOL_CHARSET = "utf-8";
+	private static final String PROTOCOL_CHARSET = "utf-8";
+	private Listener<T> mListener;
+	private Map<String, MultiPartParam> mMultipartParams = null;
+	private Map<String, String> mFileUploads = null;
+	public static final int TIMEOUT_MS = 30000;
 
-    /**
-     * Listener object for delivering the response
-     */
-    private Listener<T> mListener;
+	public MultiPartRequest(int method, String url, Listener<T> listener, ErrorListener errorlistener) {
 
-    /**
-     * A map for Multipart parameters
-     */
-    private Map<String, MultiPartParam> mMultipartParams = null;
+		super(method, url, Priority.NORMAL, errorlistener, new DefaultRetryPolicy(TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+				DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+		mListener = listener;
+		mMultipartParams = new HashMap<String, MultiPartRequest.MultiPartParam>();
+		mFileUploads = new HashMap<String, String>();
 
-    /**
-     * A map for uploading files
-     */
-    private Map<String, String> mFileUploads     = null;
-    
-    /**
-     * Default connection timeout for Multipart requests
-     */
-    public static final int TIMEOUT_MS = 30000;
+	}
 
-    public MultiPartRequest(int method, String url, Listener<T> listener, ErrorListener errorlistener) {
+	/**
+	 * Add a parameter to be sent in the multipart request
+	 * 
+	 * @param name
+	 *            The name of the paramter
+	 * @param contentType
+	 *            The content type of the paramter
+	 * @param value
+	 *            the value of the paramter
+	 * @return The Multipart request for chaining calls
+	 */
+	public MultiPartRequest<T> addMultipartParam(String name, String contentType, String value) {
+		mMultipartParams.put(name, new MultiPartParam(contentType, value));
+		return this;
+	}
 
-        super(method, url, Priority.NORMAL, errorlistener, new DefaultRetryPolicy(TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        mListener = listener;
-        mMultipartParams = new HashMap<String, MultiPartRequest.MultiPartParam>();
-        mFileUploads = new HashMap<String, String>();
-        
-    }
+	/**
+	 * Add a file to be uploaded in the multipart request
+	 * 
+	 * @param name
+	 *            The name of the file key
+	 * @param filePath
+	 *            The path to the file. This file MUST exist.
+	 * @return The Multipart request for chaining method calls
+	 */
+	public MultiPartRequest<T> addFile(String name, String filePath) {
 
-    /**
-     * Add a parameter to be sent in the multipart request
-     * 
-     * @param name
-     *            The name of the paramter
-     * @param contentType
-     *            The content type of the paramter
-     * @param value
-     *            the value of the paramter
-     * @return The Multipart request for chaining calls
-     */
-    public MultiPartRequest<T> addMultipartParam(String name, String contentType, String value) {
+		mFileUploads.put(name, filePath);
+		return this;
+	}
 
-        mMultipartParams.put(name, new MultiPartParam(contentType, value));
-        return this;
-    }
+	@Override
+	abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
 
-    /**
-     * Add a file to be uploaded in the multipart request
-     * 
-     * @param name
-     *            The name of the file key
-     * @param filePath
-     *            The path to the file. This file MUST exist.
-     * @return The Multipart request for chaining method calls
-     */
-    public MultiPartRequest<T> addFile(String name, String filePath) {
+	@Override
+	protected void deliverResponse(T response) {
+		mListener.onResponse(response);
+	}
 
-        mFileUploads.put(name, filePath);
-        return this;
-    }
+	/**
+	 * A representation of a MultiPart parameter
+	 */
+	public static final class MultiPartParam {
 
-    @Override
-    abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
+		public String contentType;
+		public String value;
 
-    @Override
-    protected void deliverResponse(T response) {
+		/**
+		 * Initialize a multipart request param with the value and content type
+		 * 
+		 * @param contentType
+		 *            The content type of the param
+		 * @param value
+		 *            The value of the param
+		 */
+		public MultiPartParam(String contentType, String value) {
+			this.contentType = contentType;
+			this.value = value;
+		}
+	}
 
-        mListener.onResponse(response);
-    }
+	/**
+	 * Get all the multipart params for this request
+	 * 
+	 * @return A map of all the multipart params NOT including the file uploads
+	 */
+	public Map<String, MultiPartParam> getMultipartParams() {
+		return mMultipartParams;
+	}
 
-    /**
-     * A representation of a MultiPart parameter
-     */
-    public static final class MultiPartParam {
+	/**
+	 * Get all the files to be uploaded for this request
+	 * 
+	 * @return A map of all the files to be uploaded for this request
+	 */
+	public Map<String, String> getFilesToUpload() {
+		return mFileUploads;
+	}
 
-        public String contentType;
-        public String value;
-
-        /**
-         * Initialize a multipart request param with the value and content type
-         * 
-         * @param contentType
-         *            The content type of the param
-         * @param value
-         *            The value of the param
-         */
-        public MultiPartParam(String contentType, String value) {
-
-            this.contentType = contentType;
-            this.value = value;
-        }
-    }
-
-    /**
-     * Get all the multipart params for this request
-     * 
-     * @return A map of all the multipart params NOT including the file uploads
-     */
-    public Map<String, MultiPartParam> getMultipartParams() {
-
-        return mMultipartParams;
-    }
-
-    /**
-     * Get all the files to be uploaded for this request
-     * 
-     * @return A map of all the files to be uploaded for this request
-     */
-    public Map<String, String> getFilesToUpload() {
-
-        return mFileUploads;
-    }
-    
-    /**
-     * Get the protocol charset
-     */
-    public String getProtocolCharset() {
-        
-        return PROTOCOL_CHARSET;
-    }
-    
+	/**
+	 * Get the protocol charset
+	 */
+	public String getProtocolCharset() {
+		return PROTOCOL_CHARSET;
+	}
 }
