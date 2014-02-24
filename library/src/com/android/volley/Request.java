@@ -280,6 +280,21 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns the URL of this request.
      */
     public String getUrl() {
+		try {
+	    	if(mMethod == Method.GET && getParams().size() != 0){
+	            String encodedParams = getEncodedUrlParams();
+	            String extra = "";
+	            if (encodedParams != null && encodedParams.length() > 0) {
+	                if (!mUrl.endsWith("?")) {
+	                	extra += "?";
+	                }
+	                extra += encodedParams;
+	            }
+				return mUrl + extra;
+	    	}
+		}
+		catch (AuthFailureError e) { }
+
         return mUrl;
     }
 
@@ -466,6 +481,24 @@ public abstract class Request<T> implements Comparable<Request<T>> {
                 encodedParams.append('&');
             }
             return encodedParams.toString().getBytes(paramsEncoding);
+        } catch (UnsupportedEncodingException uee) {
+            throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
+        }
+    }
+    
+    public String getEncodedUrlParams() throws AuthFailureError {
+
+        StringBuilder encodedParams = new StringBuilder();
+        String paramsEncoding = getParamsEncoding();
+        Map<String, String> params = getParams();
+        try {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
+                encodedParams.append('=');
+                encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
+                encodedParams.append('&');
+            }
+            return encodedParams.toString();
         } catch (UnsupportedEncodingException uee) {
             throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
         }

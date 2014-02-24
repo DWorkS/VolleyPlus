@@ -64,7 +64,7 @@ public class GsonRequest<T> extends Request<T> {
     
     @Override
     protected Map<String, String> getParams() throws AuthFailureError {
-    	return params != null ? params : super.getHeaders();
+    	return params != null ? params : super.getParams();
     }
  
     @Override
