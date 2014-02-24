@@ -16,6 +16,7 @@
 
 package com.android.volley;
 
+import android.annotation.TargetApi;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Handler;
@@ -43,6 +44,8 @@ public class RequestTickle {
 
     /** Response delivery mechanism. */
     private final ResponseDelivery mDelivery;
+ 
+	private Response<?> response;
 
     /**
      * Creates the worker pool. Processing will not begin until {@link #start()} is called.
@@ -99,11 +102,11 @@ public class RequestTickle {
     /**
      * Starts the request and return {@link NetworkResponse} or null.
      */
-    public NetworkResponse get() {
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH) 
+    public NetworkResponse start() {
     	if(null == mRequest){
     		return null;
     	}
-        cancel();  // Make sure any currently running dispatchers are stopped.
         NetworkResponse networkResponse = null;
         try {
             mRequest.addMarker("network-queue-take");
@@ -132,7 +135,7 @@ public class RequestTickle {
             }
 
             // Parse the response here on the worker thread.
-            Response<?> response = mRequest.parseNetworkResponse(networkResponse);
+            response = mRequest.parseNetworkResponse(networkResponse);
             mRequest.addMarker("network-parse-complete");
 
             // Write to cache if applicable.
@@ -153,6 +156,10 @@ public class RequestTickle {
         }
 
 		return networkResponse;
+    }
+    
+    public Response<?> getResponse() {
+    	return response;
     }
     
     private void parseAndDeliverNetworkError(Request<?> request, VolleyError error) {

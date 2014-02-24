@@ -17,11 +17,13 @@
 package com.android.volley.toolbox;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 
 import android.content.Context;
 import android.net.http.AndroidHttpClient;
 
 import com.android.volley.Network;
+import com.android.volley.NetworkResponse;
 import com.android.volley.RequestTickle;
 import com.android.volley.cache.DiskBasedCache;
 import com.android.volley.misc.NetUtils;
@@ -63,5 +65,15 @@ public class VolleyTickle {
         RequestTickle tickle = new RequestTickle(new DiskBasedCache(cacheDir), network);
 
         return tickle;
+    }
+    
+    public static String parseResponse(NetworkResponse response){
+        String parsed;
+        try {
+            parsed = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+        } catch (UnsupportedEncodingException e) {
+            parsed = new String(response.data);
+        }
+		return parsed;
     }
 }
