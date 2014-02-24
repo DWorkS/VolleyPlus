@@ -100,6 +100,29 @@ public class SimpleImageLoader extends ImageLoader {
         mResources = activity.getResources();
         mPlaceHolderDrawables = placeHolderDrawables;
     }
+    
+    /**
+     * Creates an ImageLoader with Bitmap memory cache and a default placeholder image while the
+     * image is being fetched and loaded.
+     */
+    public SimpleImageLoader(Context context, int defaultPlaceHolderResId) {
+        super(newRequestQueue(context),
+                BitmapImageCache.getInstance(null));
+        mResources = context.getResources();
+        mPlaceHolderDrawables = new ArrayList<Drawable>(1);
+        mPlaceHolderDrawables.add(defaultPlaceHolderResId == -1 ?
+                null : mResources.getDrawable(defaultPlaceHolderResId));
+    }
+
+    /**
+     * Creates an ImageLoader with Bitmap memory cache and a list of default placeholder drawables.
+     */
+    public SimpleImageLoader(Context context, ArrayList<Drawable> placeHolderDrawables) {
+        super(newRequestQueue(context),
+                BitmapImageCache.getInstance(null));
+        mResources = context.getResources();
+        mPlaceHolderDrawables = placeHolderDrawables;
+    }
 
     /**
      * Starts processing requests on the {@link RequestQueue}.
@@ -283,12 +306,8 @@ public class SimpleImageLoader extends ImageLoader {
         };
     }
 
-    //TODO: improve
     private static RequestQueue newRequestQueue(Context context) {
 
-        // On HC+ use HurlStack which is based on HttpURLConnection. Otherwise fall back on
-        // AndroidHttpClient (based on Apache DefaultHttpClient) which should no longer be used
-        // on newer platform versions where HttpURLConnection is simply better.
         Network network = new BasicNetwork(
                 Utils.hasHoneycomb() ?
                         new HurlStack() :
