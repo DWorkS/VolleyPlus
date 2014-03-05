@@ -15,7 +15,6 @@
  */
 package com.android.volley.toolbox;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 import android.content.Context;
@@ -24,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.util.ArrayMap;
 import android.widget.ImageView;
 
 import com.android.volley.Cache;
@@ -59,12 +59,12 @@ public class ImageLoader {
      * HashMap of Cache keys -> BatchedImageRequest used to track in-flight requests so
      * that we can coalesce multiple requests to the same URL into a single network request.
      */
-    private final HashMap<String, BatchedImageRequest> mInFlightRequests =
-            new HashMap<String, BatchedImageRequest>();
+    private final ArrayMap<String, BatchedImageRequest> mInFlightRequests =
+            new ArrayMap<String, BatchedImageRequest>();
 
     /** HashMap of the currently pending responses (waiting to be delivered). */
-    private final HashMap<String, BatchedImageRequest> mBatchedResponses =
-            new HashMap<String, BatchedImageRequest>();
+    private final ArrayMap<String, BatchedImageRequest> mBatchedResponses =
+            new ArrayMap<String, BatchedImageRequest>();
 
     /** Handler to the main thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -74,7 +74,8 @@ public class ImageLoader {
     
     /** {@link Resources} instance for loading resource uris */
     private Resources mResources;
-
+    private ArrayMap<String, String> mHeaders;
+    
     /**
      * Constructs a new ImageLoader with a default LruCache
      * implementation
@@ -293,7 +294,7 @@ public class ImageLoader {
                     onGetImageError(cacheKey, error);
                 }
             });
-
+        newRequest.setHeaders(mHeaders);
         mRequestQueue.add(newRequest);
         mInFlightRequests.put(cacheKey,
                 new BatchedImageRequest(newRequest, imageContainer));
@@ -598,5 +599,9 @@ public class ImageLoader {
      */
     public void setResources(Resources resources) {
     	mResources = resources;
+    }
+    
+	public void setHeaders(ArrayMap<String, String> headers) {
+        mHeaders = headers;
     }
 }
