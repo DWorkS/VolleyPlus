@@ -174,6 +174,10 @@ public class SimpleImageLoader extends ImageLoader {
     public ImageContainer get(String requestUrl, ImageView imageView) {
         return get(requestUrl, imageView, 0);
     }
+    
+    public ImageContainer get(String requestUrl, ImageView imageView, int maxImageWidth, int maxImageHeight) {
+        return get(requestUrl, imageView, mPlaceHolderDrawables != null ? mPlaceHolderDrawables.get(0) : null, maxImageWidth, maxImageHeight);
+    }
 
     public ImageContainer get(String requestUrl, ImageView imageView, int placeHolderIndex) {
         return get(requestUrl, imageView, 

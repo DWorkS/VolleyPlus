@@ -619,7 +619,6 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
     public void resetTransformations() {
         // snap transformations; we don't animate
         mMatrix.set(mOriginalMatrix);
-
         // Invalidate the view because if you move off this PhotoView
         // to another one and come back, you want it to draw from scratch
         // in case you were zoomed in or translated (since those settings
@@ -640,6 +639,25 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
     public void rotateCounterClockwise() {
         rotate(-90, true);
     }
+    
+    /**
+     * Rotates the image 90 degrees, counter clockwise.
+     */
+    public void rotateInDegree(float degree) {
+        rotate(degree, true);
+    }
+    
+    /**
+     * Get Rotation of the image.
+     */
+    public float getRotation() {
+        return mRotation;
+    }
+    
+    public void setRotation(float degree) {
+        mRotation = degree;
+    }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -763,7 +781,7 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
             resetTransformations();
         }
     }
-
+    
     /**
      * Configures the bounds of the photo. The photo will always be scaled to fit center.
      */
