@@ -32,6 +32,7 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ScaleGestureDetectorCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.FloatMath;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.ViewGroup.LayoutParams;
@@ -881,8 +882,20 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
      * NOTE: This method overwrites any values stored in {@link #mValues}.
      */
     private float getScale() {
-        mMatrix.getValues(mValues);
-        return mValues[Matrix.MSCALE_X];
+        return FloatMath.sqrt((float) Math.pow(getValue(mMatrix, Matrix.MSCALE_X), 2) + (float) Math.pow(getValue(mMatrix, Matrix.MSKEW_Y), 2));
+    }
+    
+
+    /**
+     * Helper method that 'unpacks' a Matrix and returns the required value
+     *
+     * @param matrix     - Matrix to unpack
+     * @param whichValue - Which value from Matrix.M* to return
+     * @return float - returned value
+     */
+    private float getValue(Matrix matrix, int whichValue) {
+        matrix.getValues(mValues);
+        return mValues[whichValue];
     }
 
     /**
