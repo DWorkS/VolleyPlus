@@ -644,19 +644,26 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
     /**
      * Rotates the image 90 degrees, counter clockwise.
      */
-    public void rotateInDegree(float degree) {
-        rotate(degree, true);
+    public void rotateTo(float degree) {
+        rotate(degree % 360, true);
+    }
+    
+    /**
+     * Rotates the image 90 degrees, counter clockwise.
+     */
+    public void rotateTo(float degree, boolean animate) {
+        rotate(degree % 360, animate);
     }
     
     /**
      * Get Rotation of the image.
      */
     public float getRotation() {
-        return mRotation;
+        return mRotation % 360;
     }
     
     public void setRotation(float degree) {
-        mRotation = degree;
+        mRotation = degree % 360;
     }
 
 
