@@ -125,7 +125,7 @@ public class RequestTickle {
             
             // Perform the network request.
             networkResponse = mNetwork.performRequest(mRequest);
-            mRequest.addMarker("network-http-complete");
+            //mRequest.addMarker("network-http-complete");
 
             // If the server returned 304 AND we delivered a response already,
             // we're done -- don't deliver a second identical response.

@@ -209,11 +209,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Adds an event to this request's event log; for debugging.
      */
     public void addMarker(String tag) {
-        if (MarkerLog.ENABLED) {
-            mEventLog.add(tag, Thread.currentThread().getId());
-        } else if (mRequestBirthTime == 0) {
-            mRequestBirthTime = SystemClock.elapsedRealtime();
-        }
+    	try {
+            if (MarkerLog.ENABLED) {
+                mEventLog.add(tag, Thread.currentThread().getId());
+            } else if (mRequestBirthTime == 0) {
+                mRequestBirthTime = SystemClock.elapsedRealtime();
+            }
+		} catch (Exception e) {
+		}
     }
 
     /**
@@ -226,23 +229,27 @@ public abstract class Request<T> implements Comparable<Request<T>> {
             mRequestQueue.finish(this);
         }
         if (MarkerLog.ENABLED) {
-            final long threadId = Thread.currentThread().getId();
-            if (Looper.myLooper() != Looper.getMainLooper()) {
-                // If we finish marking off of the main thread, we need to
-                // actually do it on the main thread to ensure correct ordering.
-                Handler mainThread = new Handler(Looper.getMainLooper());
-                mainThread.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mEventLog.add(tag, threadId);
-                        mEventLog.finish(this.toString());
-                    }
-                });
-                return;
-            }
+        	try {
+                final long threadId = Thread.currentThread().getId();
+                if (Looper.myLooper() != Looper.getMainLooper()) {
+                    // If we finish marking off of the main thread, we need to
+                    // actually do it on the main thread to ensure correct ordering.
+                    Handler mainThread = new Handler(Looper.getMainLooper());
+                    mainThread.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mEventLog.add(tag, threadId);
+                            mEventLog.finish(this.toString());
+                        }
+                    });
+                    return;
+                }
 
-            mEventLog.add(tag, threadId);
-            mEventLog.finish(this.toString());
+                mEventLog.add(tag, threadId);
+                mEventLog.finish(this.toString());
+			} catch (Exception e) {
+			}
+
         } else {
             long requestTime = SystemClock.elapsedRealtime() - mRequestBirthTime;
             if (requestTime >= SLOW_REQUEST_THRESHOLD_MS) {
