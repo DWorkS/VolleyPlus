@@ -16,9 +16,24 @@
 
 package com.android.volley.toolbox;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.impl.cookie.DateUtils;
+
 import android.os.SystemClock;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
@@ -30,22 +45,6 @@ import com.android.volley.error.NoConnectionError;
 import com.android.volley.error.ServerError;
 import com.android.volley.error.TimeoutError;
 import com.android.volley.error.VolleyError;
-
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.impl.cookie.DateUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A network performing Volley requests over an {@link HttpStack}.
@@ -136,14 +135,21 @@ public class BasicNetwork implements Network {
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
                             responseHeaders, false);
-                    if (statusCode == HttpStatus.SC_UNAUTHORIZED ||
+                    
+                    if(statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR){
+                        throw new ServerError(networkResponse);
+                    }
+                    else{
+                    	throw new VolleyError(networkResponse);
+                    }
+                    /*if (statusCode == HttpStatus.SC_UNAUTHORIZED ||
                             statusCode == HttpStatus.SC_FORBIDDEN) {
                         attemptRetryOnException("auth",
                                 request, new AuthFailureError(networkResponse));
                     } else {
                         // TODO: Only throw ServerError for 5xx status codes.
                         throw new ServerError(networkResponse);
-                    }
+                    }*/
                 } else {
                     throw new NetworkError(networkResponse);
                 }

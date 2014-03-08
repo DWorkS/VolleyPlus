@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * resolving from either cache or network on a worker thread, and then delivering
  * a parsed response on the main thread.
  */
-@SuppressWarnings("rawtypes")
 public class RequestQueue {
 
     /** Used for generating monotonically-increasing sequence numbers for requests. */
@@ -60,7 +59,7 @@ public class RequestQueue {
      * will be in this set if it is waiting in any queue or currently being processed by
      * any dispatcher.
      */
-    private final Set<Request> mCurrentRequests = new HashSet<Request>();
+    private final Set<Request<?>> mCurrentRequests = new HashSet<Request<?>>();
 
     /** The cache triage queue. */
     private final PriorityBlockingQueue<Request<?>> mCacheQueue =
