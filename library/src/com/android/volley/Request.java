@@ -53,13 +53,18 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         int POST = 1;
         int PUT = 2;
         int DELETE = 3;
-        int PATCH = 4;
+        int HEAD = 4;
+        int OPTIONS = 5;
+        int TRACE = 6;
+        int PATCH = 7;
     }
 
     /** An event log tracing the lifetime of this request; for debugging. */
     private final MarkerLog mEventLog = MarkerLog.ENABLED ? new MarkerLog() : null;
 
-    /** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
+    /** Request method of this request.  Currently supports GET, POST, PUT, DELETE, HEAD, OPTIONS,
+     * TRACE, and PATCH. 
+     */
     private final int mMethod;
 
     /** URL of this request. */
@@ -154,19 +159,24 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         mErrorListener = listener;
         setRetryPolicy((retryPolicy == null) ? new DefaultRetryPolicy() : retryPolicy);
 
-        if(TextUtils.isEmpty(url)){
-        	mDefaultTrafficStatsTag = 0;
-        }
-        else{
-        	String host = Uri.parse(url).getHost();
-        	if(TextUtils.isEmpty(host)){
-        		mDefaultTrafficStatsTag = 0;
-        	}
-        	else{
-        		mDefaultTrafficStatsTag = host.hashCode();;
-        	}
-        }
+        mDefaultTrafficStatsTag = findDefaultTrafficStatsTag(url);
     }
+    
+	/**
+	 * @return The hashcode of the URL's host component, or 0 if there is none.
+	 */
+	private static int findDefaultTrafficStatsTag(String url) {
+		if (!TextUtils.isEmpty(url)) {
+			Uri uri = Uri.parse(url);
+			if (uri != null) {
+				String host = uri.getHost();
+				if (host != null) {
+					return host.hashCode();
+				}
+			}
+		}
+		return 0;
+	}
 
     /**
      * Return the method for this request.  Can be one of the values in {@link Method}.
@@ -178,9 +188,12 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /**
      * Set a tag on this request. Can be used to cancel all requests with this
      * tag by {@link RequestQueue#cancelAll(Object)}.
+     * 
+     * @return This Request object to allow for chaining.
      */
-    public void setTag(Object tag) {
+    public Request<?> setTag(Object tag) {
         mTag = tag;
+        return this;
     }
 
     /**
@@ -200,9 +213,12 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Sets the retry policy for this request.
+     * 
+     * @return This Request object to allow for chaining.
      */
-    public void setRetryPolicy(RetryPolicy retryPolicy) {
+    public Request<?> setRetryPolicy(RetryPolicy retryPolicy) {
         mRetryPolicy = retryPolicy;
+        return this;
     }
 
     /**

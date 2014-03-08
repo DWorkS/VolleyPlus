@@ -31,10 +31,9 @@ import com.android.volley.error.VolleyError;
  * Calling {@link #add(Request)} will add the request to request tickle and {@link #start()},
  * will give a {@link NetworkResponse}. The listeners in the request will also be notified.
  */
-@SuppressWarnings("rawtypes")
 public class RequestTickle {
 
-	private Request mRequest;
+	private Request<?> mRequest;
 	
     /** Cache interface for retrieving and storing response. */
     private final Cache mCache;

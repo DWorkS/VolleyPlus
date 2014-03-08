@@ -72,7 +72,6 @@ public class HurlStack implements HttpStack {
 	private static final String FILENAME = "filename=%s";
 	private static final String COLON_SPACE = ": ";
 	private static final String SEMICOLON_SPACE = "; ";
-	private static final String PATCH_HEADER = "X-HTTP-Method-Override";
 
     private UrlRewriter            mUrlRewriter;
     private final SSLSocketFactory mSslSocketFactory;
@@ -373,15 +372,25 @@ public class HurlStack implements HttpStack {
                 connection.setRequestMethod("POST");
                 addBodyIfExists(connection, request);
                 break;
-            case Method.PATCH:
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty(PATCH_HEADER, "PATCH");
-                addBodyIfExists(connection, request);
-                break;
             case Method.PUT:
                 connection.setRequestMethod("PUT");
                 addBodyIfExists(connection, request);
                 break;
+			case Method.HEAD:
+				connection.setRequestMethod("HEAD");
+				break;
+			case Method.OPTIONS:
+				connection.setRequestMethod("OPTIONS");
+				break;
+			case Method.TRACE:
+				connection.setRequestMethod("TRACE");
+				break;
+			case Method.PATCH:
+				addBodyIfExists(connection, request);
+				connection.setRequestMethod("PATCH");
+				//If server doesnt support patch uncomment this
+				//connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+				break;
             default:
                 throw new IllegalStateException("Unknown method type.");
         }

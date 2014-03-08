@@ -119,7 +119,7 @@ public class NetworkImageView extends AnimateImageView {
      * Loads the image for the view if it isn't already loaded.
      * @param isInLayoutPass True if this was invoked from a layout pass, false otherwise.
      */
-	public void loadImageIfNecessary(final boolean isInLayoutPass) {
+	void loadImageIfNecessary(final boolean isInLayoutPass) {
         int width = getWidth();
         int height = getHeight();
 
