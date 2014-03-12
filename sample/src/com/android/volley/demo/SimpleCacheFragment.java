@@ -77,7 +77,7 @@ public class SimpleCacheFragment extends ActionBarFragment implements AdapterVie
         mAdapter = new ImageAdapter(getActivity());
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        mImageLoader = new SimpleImageLoader(getActivity(), R.drawable.empty_photo);
+        mImageLoader = new SimpleImageLoader(getActivity(), R.drawable.empty_photo, null);
     }
 
     @Override

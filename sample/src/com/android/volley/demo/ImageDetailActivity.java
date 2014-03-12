@@ -76,9 +76,8 @@ public class ImageDetailActivity extends ActionBarActivity implements OnClickLis
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
         
-        mImageLoader = new SimpleImageLoader(this);//, R.drawable.empty_photo);
+        mImageLoader = new SimpleImageLoader(this, cacheParams);//, R.drawable.empty_photo);
         //mImageFetcher.setFadeInImage(false);
-        mImageLoader.setImageCacheParams(cacheParams);
         mImageLoader.setMaxImageSize(longest);
 
         // Set up ViewPager and backing adapter

@@ -66,14 +66,23 @@ public class SimpleImageLoader extends ImageLoader {
     private boolean mFadeInImage = true;
     private int mMaxImageHeight = 0;
     private int mMaxImageWidth = 0;
-    private static ImageCacheParams mImageCacheParams;
 
     /**
      * Creates an ImageLoader with Bitmap memory cache. No default placeholder image will be shown
      * while the image is being fetched and loaded.
      */
     public SimpleImageLoader(FragmentActivity activity) {
-        super(newRequestQueue(activity),
+        super(newRequestQueue(activity, null),
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
+        mResources = activity.getResources();
+    }
+    
+    /**
+     * Creates an ImageLoader with Bitmap memory cache. No default placeholder image will be shown
+     * while the image is being fetched and loaded.
+     */
+    public SimpleImageLoader(FragmentActivity activity, ImageCacheParams imageCacheParams) {
+        super(newRequestQueue(activity, imageCacheParams),
                 BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
     }
@@ -82,8 +91,8 @@ public class SimpleImageLoader extends ImageLoader {
      * Creates an ImageLoader with Bitmap memory cache and a default placeholder image while the
      * image is being fetched and loaded.
      */
-    public SimpleImageLoader(FragmentActivity activity, int defaultPlaceHolderResId) {
-        super(newRequestQueue(activity),
+    public SimpleImageLoader(FragmentActivity activity, int defaultPlaceHolderResId, ImageCacheParams imageCacheParams) {
+        super(newRequestQueue(activity,imageCacheParams),
                 BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
         mPlaceHolderDrawables = new ArrayList<Drawable>(1);
@@ -94,8 +103,8 @@ public class SimpleImageLoader extends ImageLoader {
     /**
      * Creates an ImageLoader with Bitmap memory cache and a list of default placeholder drawables.
      */
-    public SimpleImageLoader(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables) {
-        super(newRequestQueue(activity),
+    public SimpleImageLoader(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables, ImageCacheParams imageCacheParams) {
+        super(newRequestQueue(activity, imageCacheParams),
                 BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
         mResources = activity.getResources();
         mPlaceHolderDrawables = placeHolderDrawables;
@@ -105,8 +114,8 @@ public class SimpleImageLoader extends ImageLoader {
      * Creates an ImageLoader with Bitmap memory cache and a default placeholder image while the
      * image is being fetched and loaded.
      */
-    public SimpleImageLoader(Context context, int defaultPlaceHolderResId) {
-        super(newRequestQueue(context),
+    public SimpleImageLoader(Context context, int defaultPlaceHolderResId, ImageCacheParams imageCacheParams) {
+        super(newRequestQueue(context, imageCacheParams),
                 BitmapImageCache.getInstance(null));
         mResources = context.getResources();
         mPlaceHolderDrawables = new ArrayList<Drawable>(1);
@@ -117,8 +126,8 @@ public class SimpleImageLoader extends ImageLoader {
     /**
      * Creates an ImageLoader with Bitmap memory cache and a list of default placeholder drawables.
      */
-    public SimpleImageLoader(Context context, ArrayList<Drawable> placeHolderDrawables) {
-        super(newRequestQueue(context),
+    public SimpleImageLoader(Context context, ArrayList<Drawable> placeHolderDrawables, ImageCacheParams imageCacheParams) {
+        super(newRequestQueue(context, imageCacheParams),
                 BitmapImageCache.getInstance(null));
         mResources = context.getResources();
         mPlaceHolderDrawables = placeHolderDrawables;
@@ -150,11 +159,6 @@ public class SimpleImageLoader extends ImageLoader {
     	getCache().clear();
 	}
 
-	public SimpleImageLoader setImageCacheParams(ImageCacheParams imageCacheParams) {
-        mImageCacheParams = imageCacheParams;
-        return this;
-    }
-	
 	public SimpleImageLoader setFadeInImage(boolean fadeInImage) {
         mFadeInImage = fadeInImage;
         return this;
@@ -310,7 +314,7 @@ public class SimpleImageLoader extends ImageLoader {
         };
     }
 
-    private static RequestQueue newRequestQueue(Context context) {
+    private static RequestQueue newRequestQueue(Context context, ImageCacheParams imageCacheParams) {
 
         Network network = new BasicNetwork(
                 Utils.hasHoneycomb() ?
@@ -319,8 +323,8 @@ public class SimpleImageLoader extends ImageLoader {
                                 NetUtils.getUserAgent(context))));
 
         Cache cache; 
-        if(null != mImageCacheParams){
-            cache = new DiskLruBasedCache(mImageCacheParams);	
+        if(null != imageCacheParams){
+            cache = new DiskLruBasedCache(imageCacheParams);	
         }
         else{
         	cache = new DiskLruBasedCache(Utils.getDiskCacheDir(context, CACHE_DIR));

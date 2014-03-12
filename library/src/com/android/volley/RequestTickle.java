@@ -148,12 +148,16 @@ public class RequestTickle {
             mRequest.markDelivered();
             mDelivery.postResponse(mRequest, response);
         } catch (VolleyError volleyError) {
+        	networkResponse = volleyError.networkResponse;
             parseAndDeliverNetworkError(mRequest, volleyError);
         } catch (Exception e) {
             VolleyLog.e(e, "Unhandled exception %s", e.toString());
             mDelivery.postError(mRequest, new VolleyError(e));
         }
 
+        if(null == networkResponse){
+            networkResponse = new NetworkResponse(0, null, null, false);
+        }
 		return networkResponse;
     }
     
