@@ -86,6 +86,14 @@ public class NetworkImageView extends AnimateImageView {
         loadImageIfNecessary(false);
     }
 
+    public void setResetImageUrl(String url, ImageLoader imageLoader) {
+    	mImageContainer = null;
+        mUrl = url;
+        mImageLoader = imageLoader;
+        // The URL has potentially changed. See if we need to load it.
+        loadImageIfNecessary(false);
+    }
+    
     /**
      * Sets the default image resource ID to be used for this view until the attempt to load it
      * completes.

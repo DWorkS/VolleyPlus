@@ -158,6 +158,10 @@ public class SimpleImageLoader extends ImageLoader {
     public void closeCache() {
     	getCache().clear();
 	}
+    
+    public void invalidate(String key) {
+    	getCache().invalidate(key, true);
+	}
 
 	public SimpleImageLoader setFadeInImage(boolean fadeInImage) {
         mFadeInImage = fadeInImage;

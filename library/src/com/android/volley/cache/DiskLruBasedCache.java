@@ -425,9 +425,9 @@ public class DiskLruBasedCache implements Cache {
 	public void invalidate(String key, boolean fullExpire) {
         Entry entry = get(key);
         if (entry != null) {
-            entry.softTtl = 0;
+            entry.softTtl = -1;
             if (fullExpire) {
-                entry.ttl = 0;
+                entry.ttl = -1;
             }
             put(key, entry);
         }
