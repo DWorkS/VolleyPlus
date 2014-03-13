@@ -108,16 +108,24 @@ public class NetworkDispatcher extends Thread {
 
                 addTrafficStatsTag(request);
 
-                // Perform the network request.
-                NetworkResponse networkResponse = mNetwork.performRequest(request);
-                request.addMarker("network-http-complete");
+                //Not Local images
+                NetworkResponse networkResponse;
+				if (!request.getUrl().startsWith("file:") 
+						&& !request.getUrl().startsWith("android.resource:")){
+	                // Perform the network request.
+					networkResponse = mNetwork.performRequest(request);
+	                request.addMarker("network-http-complete");
 
-                // If the server returned 304 AND we delivered a response already,
-                // we're done -- don't deliver a second identical response.
-                if (networkResponse.notModified && request.hasHadResponseDelivered()) {
-                    request.finish("not-modified");
-                    continue;
-                }
+	                // If the server returned 304 AND we delivered a response already,
+	                // we're done -- don't deliver a second identical response.
+	                if (networkResponse.notModified && request.hasHadResponseDelivered()) {
+	                    request.finish("not-modified");
+	                    continue;
+	                }
+				}
+				else{
+					networkResponse = new NetworkResponse(0, null, null, false);
+				}
 
                 // Parse the response here on the worker thread.
                 Response<?> response = request.parseNetworkResponse(networkResponse);

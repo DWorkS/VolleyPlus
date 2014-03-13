@@ -110,7 +110,6 @@ public class HttpHeaderParser {
     * @return a cache entry for the given response, or null if the response is not cacheable.
     */
    public static Cache.Entry parseIgnoreCacheHeaders(NetworkResponse response) {
-       long now = System.currentTimeMillis();
 
        Map<String, String> headers = response.headers;
        long serverDate = 0;
@@ -124,10 +123,10 @@ public class HttpHeaderParser {
 
        serverEtag = headers.get("ETag");
 
-       final long cacheHitButRefreshed = Long.MAX_VALUE; //3 * 60 * 1000; // in 3 minutes cache will be hit, but also refreshed on background
-       final long cacheExpired = Long.MAX_VALUE; //24 * 60 * 60 * 1000; // in 24 hours this cache entry expires completely
-       final long softExpire = now + cacheHitButRefreshed;
-       final long ttl = now + cacheExpired;
+       final long cacheHitButRefreshed = 0; //3 * 60 * 1000; // in 3 minutes cache will be hit, but also refreshed on background
+       final long cacheExpired = 0; //24 * 60 * 60 * 1000; // in 24 hours this cache entry expires completely
+       final long softExpire = cacheHitButRefreshed;
+       final long ttl = cacheExpired;
 
        Cache.Entry entry = new Cache.Entry();
        entry.data = response.data;
