@@ -160,6 +160,8 @@ public class SimpleImageLoader extends ImageLoader {
 	}
     
     public void invalidate(String key) {
+        final String cacheKey = getCacheKey(key, mMaxImageWidth, mMaxImageHeight);
+    	getImageCache().invalidateBitmap(cacheKey);
     	getCache().invalidate(key, true);
 	}
 

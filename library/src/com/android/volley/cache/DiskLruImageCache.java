@@ -126,6 +126,11 @@ public class DiskLruImageCache implements ImageCache {
 		return bitmap;
 	}
 
+	@Override
+	public void invalidateBitmap(String url) {
+		
+	}
+
 	public boolean containsKey(String key) {
 
 		boolean contained = false;

@@ -16,10 +16,12 @@
 package com.android.volley.ui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 
+import com.android.volley.Response.Listener;
 import com.android.volley.error.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
@@ -54,7 +56,8 @@ public class NetworkImageView extends AnimateImageView {
 	private int mMaxImageHeight = 0;
     @SuppressWarnings("unused")
 	private int mMaxImageWidth = 0;
-
+    private Listener<Bitmap> mListener;
+    
     public NetworkImageView(Context context) {
         this(context, null);
     }
@@ -121,6 +124,10 @@ public class NetworkImageView extends AnimateImageView {
     
 	public void setFadeInImage(boolean fadeInImage) {
         mFadeInImage = fadeInImage;
+    }
+	
+    public void setImageListener(Listener<Bitmap> listener) {
+    	mListener = listener;
     }
 
     /**
@@ -199,6 +206,10 @@ public class NetworkImageView extends AnimateImageView {
 
                         if (response.getBitmap() != null) {
                             setImageBitmap(response.getBitmap());
+                        	if(null != mListener){
+                        		mListener.onResponse(response.getBitmap());
+                        	}
+
                         } else if (mDefaultImageId != 0) {
                             setImageResource(mDefaultImageId);
                         }
