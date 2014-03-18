@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo;
+package com.volley.demo;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -36,8 +36,8 @@ import android.widget.Toast;
 
 import com.android.volley.cache.DiskLruBasedCache.ImageCacheParams;
 import com.android.volley.cache.SimpleImageLoader;
-import com.android.volley.demo.util.Images;
-import com.android.volley.demo.util.Utils;
+import com.volley.demo.util.Images;
+import com.volley.demo.util.Utils;
 
 public class ImageDetailActivity extends ActionBarActivity implements OnClickListener {
     private static final String IMAGE_CACHE_DIR = "images";

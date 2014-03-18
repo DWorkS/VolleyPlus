@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo;
+package com.volley.demo;
 
 import java.util.List;
 

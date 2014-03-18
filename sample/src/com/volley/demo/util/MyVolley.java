@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.volley.demo.util;
+package com.volley.demo.util;
 
 import android.content.Context;
 

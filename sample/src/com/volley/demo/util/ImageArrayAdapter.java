@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo.util;
+package com.volley.demo.util;
 
 import java.util.List;
 
@@ -26,9 +26,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.android.volley.demo.R;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.ui.NetworkImageView;
+import com.volley.demo.R;
 
 public class ImageArrayAdapter extends ArrayAdapter<ImageEntry> {
 	private ImageLoader mImageLoader;

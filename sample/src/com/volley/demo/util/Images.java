@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo.util;
+package com.volley.demo.util;
 
 /**
  * Some simple test data to use for this sample app.

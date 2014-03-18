@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo;
+package com.volley.demo;
 
 import java.util.ArrayList;
 
@@ -32,11 +32,11 @@ import android.widget.ListView;
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.demo.util.ImageArrayAdapter;
-import com.android.volley.demo.util.ImageEntry;
-import com.android.volley.demo.util.MyVolley;
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.JsonObjectRequest;
+import com.volley.demo.util.ImageArrayAdapter;
+import com.volley.demo.util.ImageEntry;
+import com.volley.demo.util.MyVolley;
 
 
 /**

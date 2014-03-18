@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo.util;
-
-import com.android.volley.demo.ImageDetailActivity;
-import com.android.volley.demo.SimpleCacheActivity;
+package com.volley.demo.util;
 
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.StrictMode;
+
+import com.volley.demo.ImageDetailActivity;
+import com.volley.demo.SimpleCacheActivity;
 
 /**
  * Class containing some static utility methods.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo;
+package com.volley.demo;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -23,8 +23,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.android.volley.demo.util.MyVolley;
 import com.android.volley.toolbox.ImageLoader;
+import com.volley.demo.util.MyVolley;
 
 /**
  * Demonstrates how to execute request that loads an image and sets it to <code>ImageView</code>

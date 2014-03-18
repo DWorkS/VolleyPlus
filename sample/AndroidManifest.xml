@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.volley.demo"
+    package="com.volley.demo"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -12,14 +12,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="com.android.volley.demo.VolleyExamplesApplication"
+        android:name="com.volley.demo.VolleyExamplesApplication"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.android.volley.demo.MainActivity"
+            android:name="com.volley.demo.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,59 +28,59 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.android.volley.demo.AboutActivity"
+            android:name="com.volley.demo.AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="About"
-            android:parentActivityName="com.android.volley.demo.MainActivity"
+            android:parentActivityName="com.volley.demo.MainActivity"
             android:uiOptions="splitActionBarWhenNarrow" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="dev.dworks.lib.wizard.demo.MainActivity" />
         </activity>
         <activity
-            android:name="com.android.volley.demo.SimpleCacheActivity"
+            android:name="com.volley.demo.SimpleCacheActivity"
             android:label="@string/activity_simple_cache"
             android:theme="@style/AppTheme.Translucent" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleNetworkListView"
+            android:name="com.volley.demo.ExampleNetworkListView"
             android:label="@string/act__main__btn_network_list_view" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleSimpleRequest"
+            android:name="com.volley.demo.ExampleSimpleRequest"
             android:label="@string/act__main__btn_simple_request" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleJsonRequest"
+            android:name="com.volley.demo.ExampleJsonRequest"
             android:label="@string/act__main__btn_json_request" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleGsonRequest"
+            android:name="com.volley.demo.ExampleGsonRequest"
             android:label="@string/act__main__btn_gson_request" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleImageLoading"
+            android:name="com.volley.demo.ExampleImageLoading"
             android:label="@string/act__main__btn_image_loading" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleNewHttpClient"
+            android:name="com.volley.demo.ExampleNewHttpClient"
             android:label="@string/act__ext_http_client" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleSsSslHttpClient"
+            android:name="com.volley.demo.ExampleSsSslHttpClient"
             android:label="@string/act__main__btn_ss_ssl_http_client" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleCookies"
+            android:name="com.volley.demo.ExampleCookies"
             android:label="@string/act__main__btn_cookies" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ExampleParams"
+            android:name="com.volley.demo.ExampleParams"
             android:label="@string/act__main__btn_params" >
         </activity>
         <activity
-            android:name="com.android.volley.demo.ImageDetailActivity"
-            android:parentActivityName="com.android.volley.demo.SimpleCacheActivity"
+            android:name="com.volley.demo.ImageDetailActivity"
+            android:parentActivityName="com.volley.demo.SimpleCacheActivity"
             android:theme="@style/AppTheme.Translucent" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

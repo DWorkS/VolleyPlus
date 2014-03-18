@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo.misc;
+package com.volley.demo.misc;
 
 import java.io.InputStream;
 import java.security.GeneralSecurityException;

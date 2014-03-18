@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo;
+package com.volley.demo;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 
-import com.android.volley.demo.util.Utils;
+import com.volley.demo.util.Utils;
 
 /**
  * Simple FragmentActivity to hold the main {@link SimpleCacheFragment} and not much else.

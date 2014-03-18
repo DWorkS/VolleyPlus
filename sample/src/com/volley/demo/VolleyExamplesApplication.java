@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo.util;
+package com.volley.demo;
 
-import com.android.volley.demo.ExampleNetworkListView;
+import android.app.Application;
+
+import com.volley.demo.util.MyVolley;
 
 /**
- * Holds the data for Picasa photo that is used in the
- * {@link ExampleNetworkListView}
- * 
- * @author Ognyan Bankov (ognyan.bankov@bulpros.com)
- * 
+ * Application class for the demo. Used to ensure that MyVolley is initialized. {@see MyVolley}
+ * @author Ognyan Bankov
+ *
  */
-public class ImageEntry {
-	private String mTitle;
-	private String mThumbnailUrl;
+public class VolleyExamplesApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        
+        init();
+    }
 
-	public ImageEntry(String title, String thumbnailUrl) {
-		super();
-		mTitle = title;
-		mThumbnailUrl = thumbnailUrl;
-	}
 
-	public String getTitle() {
-		return mTitle;
-	}
-
-	public String getThumbnailUrl() {
-		return mThumbnailUrl;
-	}
+    private void init() {
+        MyVolley.init(this);
+    }
 }

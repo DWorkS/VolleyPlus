@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo;
+package com.volley.demo.util;
 
-import android.app.Application;
-
-import com.android.volley.demo.util.MyVolley;
-
-/**
- * Application class for the demo. Used to ensure that MyVolley is initialized. {@see MyVolley}
- * @author Ognyan Bankov
- *
- */
-public class VolleyExamplesApplication extends Application {
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        
-        init();
-    }
+import com.google.gson.annotations.SerializedName;
 
 
-    private void init() {
-        MyVolley.init(this);
-    }
+public class MyClass {
+    @SerializedName("object_or_array")
+    public String mType;
+    
+    @SerializedName("empty")
+    public boolean mIsEmpty;
+    
+    @SerializedName("parse_time_nanoseconds")
+    public long mNanoseconds;
+    
+    @SerializedName("validate")
+    public boolean mIsValid;
 }

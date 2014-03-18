@@ -1,4 +1,4 @@
-package com.android.volley.demo;
+package com.volley.demo;
 
 import java.util.ArrayList;
 

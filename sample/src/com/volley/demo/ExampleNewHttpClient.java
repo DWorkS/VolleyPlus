@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo;
+package com.volley.demo;
+
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -23,39 +25,46 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.demo.util.MyClass;
-import com.android.volley.demo.util.MyVolley;
 import com.android.volley.error.VolleyError;
-import com.android.volley.request.GsonRequest;
+import com.android.volley.request.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.volley.demo.misc.ExtHttpClientStack;
+
 
 /**
- * Demonstrates how to use Volley along with Gson
+ * Demonstrates how to use external HttpClient. You may want this approach if you need to use newer version of
+ * HttpClient. Basically this demo does exactly the same as {@see Act_SimpleRequest} but uses HttpClient 4.2.x.
+ * For this example to work you will need khandroid-httpclient-4.2.3.jar which resides in libs/
+ * 
  * @author Ognyan Bankov
- *
+ * 
  */
-public class ExampleGsonRequest extends ActionBarActivity {
+public class ExampleNewHttpClient extends ActionBarActivity {
     private TextView mTvResult;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gson_request);
+        setContentView(R.layout.activity_new_http_client);
 
         mTvResult = (TextView) findViewById(R.id.tv_result);
 
-        Button btnSimpleRequest = (Button) findViewById(R.id.btn_gson_request);
+        Button btnSimpleRequest = (Button) findViewById(R.id.btn_simple_request);
         btnSimpleRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                RequestQueue queue = MyVolley.getRequestQueue();
-                GsonRequest<MyClass> myReq = new GsonRequest<MyClass>(
-                                                        "http://validate.jsontest.com/?json={'key':'value'}",
-                                                        MyClass.class,
-                                                        null,
+                // Usually getting the request queue shall be in singleton like in {@see Act_SimpleRequest}
+                // Current approach is used just for brevity
+                RequestQueue queue = Volley
+                        .newRequestQueue(ExampleNewHttpClient.this,
+                                         new ExtHttpClientStack(new DefaultHttpClient()));
+
+                StringRequest myReq = new StringRequest(Method.GET,
+                                                        "http://www.google.com/",
                                                         createMyReqSuccessListener(),
                                                         createMyReqErrorListener());
 
@@ -63,18 +72,18 @@ public class ExampleGsonRequest extends ActionBarActivity {
             }
         });
     }
-    
-    
-    private Response.Listener<MyClass> createMyReqSuccessListener() {
-        return new Response.Listener<MyClass>() {
+
+
+    private Response.Listener<String> createMyReqSuccessListener() {
+        return new Response.Listener<String>() {
             @Override
-            public void onResponse(MyClass response) {
-                mTvResult.setText(Long.toString(response.mNanoseconds));
+            public void onResponse(String response) {
+                mTvResult.setText(response);
             }
         };
     }
-    
-    
+
+
     private Response.ErrorListener createMyReqErrorListener() {
         return new Response.ErrorListener() {
             @Override

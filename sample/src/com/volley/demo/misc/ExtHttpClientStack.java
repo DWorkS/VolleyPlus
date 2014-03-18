@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.demo.misc;
+package com.volley.demo.misc;
 
 import java.io.IOException;
 import java.util.ArrayList;
