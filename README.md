@@ -3,6 +3,13 @@ VolleyPlus
 ![VolleyPlus](https://github.com/DWorkS/VolleyPlus/raw/master/header.png)
 
 `VolleyPlus` library Project improvements to Volley along with full image caching.
+Improved features:
+
+ * `VolleyTickle` and `RequestTickle` for synchronous execution 
+ * `NetworkImageView` improved
+ * `DiskLruBasedCache` based on `DiskLruCache` for L2 cache
+ * Improved Image Loader : `SimpleImageLoder`
+ * `MultiPartRequest` for file uploads
 
 ## Sample App
 
