@@ -15,14 +15,22 @@
  */
 package com.android.volley.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 
 import com.android.volley.Response.Listener;
+import com.android.volley.cache.SimpleImageLoader;
 import com.android.volley.error.VolleyError;
+import com.android.volley.misc.Utils;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
@@ -32,6 +40,9 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
  * associated request.
  */
 public class NetworkImageView extends AnimateImageView {
+    private static final ColorDrawable transparentDrawable = new ColorDrawable(
+            android.R.color.transparent);
+	private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
     /** The URL of the network image to load */
     protected String mUrl;
 
@@ -50,11 +61,9 @@ public class NetworkImageView extends AnimateImageView {
 
     /** Current ImageContainer. (either in-flight or finished) */
     protected ImageContainer mImageContainer;
-    @SuppressWarnings("unused")
-	private boolean mFadeInImage = true;
-    @SuppressWarnings("unused")
+    
+	private boolean mFadeInImage = false;
 	private int mMaxImageHeight = 0;
-    @SuppressWarnings("unused")
 	private int mMaxImageWidth = 0;
     private Listener<Bitmap> mListener;
     
@@ -173,9 +182,18 @@ public class NetworkImageView extends AnimateImageView {
             }
         }
         
-        // Calculate the max image width / height to use while ignoring WRAP_CONTENT dimens.
-        int maxWidth = wrapWidth ? 0 : width;
-        int maxHeight = wrapHeight ? 0 : height;
+        int maxWidth = 0;
+        int maxHeight = 0;
+        if(mImageLoader instanceof SimpleImageLoader){
+        	final SimpleImageLoader loader = (SimpleImageLoader) mImageLoader;
+        	maxWidth = mMaxImageWidth == 0 ? loader.getMaxImageWidth() : mMaxImageWidth;
+        	maxHeight = mMaxImageHeight == 0 ? loader.getMaxImageHeight() : mMaxImageHeight;
+        }
+        else{
+            // Calculate the max image width / height to use while ignoring WRAP_CONTENT dimens.
+            maxWidth = wrapWidth ? 0 : width;
+            maxHeight = wrapHeight ? 0 : height;
+        }
         
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
@@ -205,7 +223,8 @@ public class NetworkImageView extends AnimateImageView {
                         }
 
                         if (response.getBitmap() != null) {
-                            setImageBitmap(response.getBitmap());
+                            //setImageBitmap(response.getBitmap(), mFadeInImage);
+                            setAnimateImageBitmap(response.getBitmap(), mFadeInImage);
                         	if(null != mListener){
                         		mListener.onResponse(response.getBitmap());
                         	}
@@ -218,6 +237,53 @@ public class NetworkImageView extends AnimateImageView {
 
         // update the ImageContainer to be the new bitmap container.
         mImageContainer = newContainer;
+    }
+	
+	private void setAnimateImageBitmap(final Bitmap bitmap, boolean fadeIn) {
+
+        // If we're fading in and on HC MR1+
+        if (fadeIn && Utils.hasHoneycombMR1()) {
+            // Use ViewPropertyAnimator to run a simple fade in + fade out animation to update the
+            // ImageView
+            animate()
+                    .scaleY(0.95f)
+                    .scaleX(0.95f)
+                    .alpha(0f)
+                    .setDuration(getDrawable() == null ? 0 : HALF_FADE_IN_TIME)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            setImageBitmap(bitmap);
+                            animate()
+                                    .alpha(1f)
+                                    .scaleY(1f)
+                                    .scaleX(1f)
+                                    .setDuration(HALF_FADE_IN_TIME)
+                                    .setListener(null);
+                        }
+                    });
+        } else if (fadeIn) {
+            // Otherwise use a TransitionDrawable to fade in
+            Drawable initialDrawable;
+            if (getDrawable() != null) {
+                initialDrawable = getDrawable();
+            } else {
+                initialDrawable = transparentDrawable;
+            }
+            
+            BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
+            // Use TransitionDrawable to fade in
+            final TransitionDrawable td =
+                    new TransitionDrawable(new Drawable[] {
+                            initialDrawable,
+                            bitmapDrawable
+                    });
+            setImageDrawable(td);
+            td.startTransition(Utils.ANIMATION_FADE_IN_TIME);
+        } else {
+            // No fade in, just set bitmap directly
+            setImageBitmap(bitmap);
+        }
     }
     
 	protected void setDefaultImageOrNull() {

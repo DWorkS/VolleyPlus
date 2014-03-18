@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.cache.BitmapImageCache;
@@ -326,7 +327,19 @@ public class ImageLoader {
 
         // Update the caller to let them know that they should use the default bitmap.
         imageListener.onResponse(imageContainer, true);
-        setImageSuccess(cacheKey, bitmap);
+        //setImageSuccess(cacheKey, bitmap);
+        
+        // cache the image that was fetched.
+        mCache.putBitmap(cacheKey, bitmap);
+
+        Response<?> response = Response.success(bitmap, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
+        getCache().put(requestUrl, response.cacheEntry);
+        
+/*        Response<?> response = Response.success(bitmap, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
+        Entry cache = getCache().get(requestUrl);
+        cache.data = response.cacheEntry.data;
+        getCache().put(requestUrl, cache);*/
+        
         return imageContainer;
     }
     
@@ -365,7 +378,8 @@ public class ImageLoader {
      * @param cacheKey The cache key that is associated with the image request.
      * @param response The bitmap that was returned from the network.
      */
-    private void setImageSuccess(String cacheKey, Bitmap response) {
+    @SuppressWarnings("unused")
+	private void setImageSuccess(String cacheKey, Bitmap response) {
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, response);
 

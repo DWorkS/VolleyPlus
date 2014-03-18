@@ -179,7 +179,15 @@ public class SimpleImageLoader extends ImageLoader {
     public SimpleImageLoader setMaxImageSize(int maxImageSize) {
         return setMaxImageSize(maxImageSize, maxImageSize);
     }
+    
+    public int getMaxImageWidth() {
+        return mMaxImageWidth;
+    }
 
+    public int getMaxImageHeight() {
+        return mMaxImageHeight;
+    }
+    
     //Get 
     public ImageContainer get(String requestUrl, ImageView imageView) {
         return get(requestUrl, imageView, 0);
@@ -262,29 +270,25 @@ public class SimpleImageLoader extends ImageLoader {
                 (ImageContainer) imageView.getTag() : null;
 
         // Find image url from prior request
-        String recycledImageUrl = imageContainer != null ? imageContainer.getRequestUrl() : null;
+        //String recycledImageUrl = imageContainer != null ? imageContainer.getRequestUrl() : null;
 
-        // If the new requestUrl is null or the new requestUrl is different to the previous
-        // recycled requestUrl
-        if (requestUrl == null || !requestUrl.equals(recycledImageUrl)) {
-            if (imageContainer != null) {
-                // Cancel previous image request
-                imageContainer.cancelRequest();
-                imageView.setTag(null);
-            }
-            if (requestUrl != null) {
-                // Queue new request to fetch image
-                imageContainer = get(requestUrl,
-                        getImageListener(mResources, imageView, placeHolder, mFadeInImage),
-                        maxWidth, maxHeight);
-                // Store request in ImageView tag
-                imageView.setTag(imageContainer);
-            } else {
-            	if(!(imageView instanceof PhotoView)){
-            		imageView.setImageDrawable(placeHolder);
-            	}
-                imageView.setTag(null);
-            }
+        if (imageContainer != null) {
+            // Cancel previous image request
+            imageContainer.cancelRequest();
+            imageView.setTag(null);
+        }
+        if (requestUrl != null) {
+            // Queue new request to fetch image
+            imageContainer = set(requestUrl,
+                    getImageListener(mResources, imageView, placeHolder, mFadeInImage),
+                    maxWidth, maxHeight, bitmap);
+            // Store request in ImageView tag
+            imageView.setTag(imageContainer);
+        } else {
+        	if(!(imageView instanceof PhotoView)){
+        		imageView.setImageDrawable(placeHolder);
+        	}
+            imageView.setTag(null);
         }
 
         return imageContainer;
