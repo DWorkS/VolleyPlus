@@ -92,14 +92,14 @@ public class SimpleCacheFragment extends ActionBarFragment implements AdapterVie
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
                 // Pause fetcher to ensure smoother scrolling when flinging
-                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
+/*                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_FLING) {
                     // Before Honeycomb pause image loading on scroll to help with performance
                     if (!Utils.hasHoneycomb()) {
                         mImageLoader.stopProcessingQueue();
                     }
                 } else {
                     mImageLoader.startProcessingQueue();
-                }
+                }*/
             }
 
             @Override

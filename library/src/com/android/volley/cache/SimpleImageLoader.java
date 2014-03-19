@@ -152,6 +152,7 @@ public class SimpleImageLoader extends ImageLoader {
 	}
     
     public void flushCache() {
+    	getImageCache().clear();
     	getCache().flush();
 	}
     

@@ -320,4 +320,9 @@ public class BitmapImageCache implements ImageCache {
             return mObject;
         }
     }
+
+	@Override
+	public void clear() {
+		clearCache();
+	}
 }

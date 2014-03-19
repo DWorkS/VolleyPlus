@@ -59,4 +59,9 @@ public class LruImageCache implements ImageCache {
 	public void invalidateBitmap(String url) {
 		mLruCache.remove(url);
 	}
+
+	@Override
+	public void clear() {
+		mLruCache.evictAll();
+	}
 }
