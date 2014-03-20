@@ -40,7 +40,7 @@ public class MyVolley {
 
     public static void init(Context context) {
         mRequestQueue = Volley.newRequestQueue(context);
-        mImageLoader = new ImageLoader(mRequestQueue, BitmapImageCache.getInstance(null));
+        mImageLoader = new ImageLoader(mRequestQueue, BitmapImageCache.getInstance(null, context.getResources()));
     }
 
     public static RequestQueue getRequestQueue() {

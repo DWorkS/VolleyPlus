@@ -61,7 +61,6 @@ public class SimpleImageLoader extends ImageLoader {
     private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
     private static final String CACHE_DIR = "images";
 
-    private Resources mResources;
     private ArrayList<Drawable> mPlaceHolderDrawables;
     private boolean mFadeInImage = true;
     private int mMaxImageHeight = 0;
@@ -73,8 +72,8 @@ public class SimpleImageLoader extends ImageLoader {
      */
     public SimpleImageLoader(FragmentActivity activity) {
         super(newRequestQueue(activity, null),
-                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
-        mResources = activity.getResources();
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager(), activity.getResources()),
+                activity.getResources());
     }
     
     /**
@@ -83,8 +82,8 @@ public class SimpleImageLoader extends ImageLoader {
      */
     public SimpleImageLoader(FragmentActivity activity, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(activity, imageCacheParams),
-                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
-        mResources = activity.getResources();
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager(), imageCacheParams, activity.getResources()),
+                activity.getResources());
     }
 
     /**
@@ -93,11 +92,11 @@ public class SimpleImageLoader extends ImageLoader {
      */
     public SimpleImageLoader(FragmentActivity activity, int defaultPlaceHolderResId, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(activity,imageCacheParams),
-                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
-        mResources = activity.getResources();
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager(), imageCacheParams, activity.getResources()),
+                activity.getResources());
         mPlaceHolderDrawables = new ArrayList<Drawable>(1);
         mPlaceHolderDrawables.add(defaultPlaceHolderResId == -1 ?
-                null : mResources.getDrawable(defaultPlaceHolderResId));
+                null : getResources().getDrawable(defaultPlaceHolderResId));
     }
 
     /**
@@ -105,8 +104,8 @@ public class SimpleImageLoader extends ImageLoader {
      */
     public SimpleImageLoader(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(activity, imageCacheParams),
-                BitmapImageCache.getInstance(activity.getSupportFragmentManager()));
-        mResources = activity.getResources();
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager(), imageCacheParams, activity.getResources()),
+                activity.getResources());
         mPlaceHolderDrawables = placeHolderDrawables;
     }
     
@@ -116,11 +115,11 @@ public class SimpleImageLoader extends ImageLoader {
      */
     public SimpleImageLoader(Context context, int defaultPlaceHolderResId, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(context, imageCacheParams),
-                BitmapImageCache.getInstance(null));
-        mResources = context.getResources();
+                BitmapImageCache.getInstance(null, imageCacheParams, context.getResources()),
+                context.getResources());
         mPlaceHolderDrawables = new ArrayList<Drawable>(1);
         mPlaceHolderDrawables.add(defaultPlaceHolderResId == -1 ?
-                null : mResources.getDrawable(defaultPlaceHolderResId));
+                null : getResources().getDrawable(defaultPlaceHolderResId));
     }
 
     /**
@@ -128,8 +127,8 @@ public class SimpleImageLoader extends ImageLoader {
      */
     public SimpleImageLoader(Context context, ArrayList<Drawable> placeHolderDrawables, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(context, imageCacheParams),
-                BitmapImageCache.getInstance(null));
-        mResources = context.getResources();
+                BitmapImageCache.getInstance(null, imageCacheParams, context.getResources()),
+                context.getResources());
         mPlaceHolderDrawables = placeHolderDrawables;
     }
 
@@ -240,7 +239,7 @@ public class SimpleImageLoader extends ImageLoader {
             if (requestUrl != null) {
                 // Queue new request to fetch image
                 imageContainer = get(requestUrl,
-                        getImageListener(mResources, imageView, placeHolder, mFadeInImage),
+                        getImageListener(getResources(), imageView, placeHolder, mFadeInImage),
                         maxWidth, maxHeight);
                 // Store request in ImageView tag
                 imageView.setTag(imageContainer);
@@ -290,7 +289,7 @@ public class SimpleImageLoader extends ImageLoader {
         if (requestUrl != null) {
             // Queue new request to fetch image
             imageContainer = set(requestUrl,
-                    getImageListener(mResources, imageView, placeHolder, mFadeInImage),
+                    getImageListener(getResources(), imageView, placeHolder, mFadeInImage),
                     maxWidth, maxHeight, bitmap);
             // Store request in ImageView tag
             imageView.setTag(imageContainer);

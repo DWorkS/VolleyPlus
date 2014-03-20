@@ -27,14 +27,13 @@ import android.util.AttributeSet;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 
 import com.android.volley.R;
 
 /**
  * Created by vinaysshenoy on 19/5/13.
  */
-public class AnimateImageView extends ImageView implements Animation.AnimationListener{
+public class AnimateImageView extends RecyclingImageView implements Animation.AnimationListener{
 
     /**
      * Whether changes to this imageview
@@ -266,7 +265,6 @@ public class AnimateImageView extends ImageView implements Animation.AnimationLi
         } else {
             super.setImageDrawable(drawable);
         }
-
     }
 
     public void setImageBitmap(Bitmap bm, boolean animate) {
