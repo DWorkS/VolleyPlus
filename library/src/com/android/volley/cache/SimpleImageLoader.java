@@ -147,17 +147,26 @@ public class SimpleImageLoader extends ImageLoader {
         getRequestQueue().stop();
     }
     
+    /**
+     * Clears {@link Cache}.
+     */
     public void clearCache() {
     	getCache().clear();
 	}
     
+    /**
+     * Flushed {@link Cache} and clears {@link ImageCache}.
+     */
     public void flushCache() {
     	getImageCache().clear();
     	getCache().flush();
 	}
     
+    /**
+     * Closes {@link Cache}.
+     */
     public void closeCache() {
-    	getCache().clear();
+    	getCache().close();
 	}
     
     public void invalidate(String key) {

@@ -63,6 +63,8 @@ public class ImageRequest extends Request<Bitmap> {
     /** Decoding lock so that we don't decode more than one image at a time (to avoid OOM's) */
     private static final Object sDecodeLock = new Object();
 
+    private final BitmapFactory.Options defaultOptions;
+    
     /**
      * Creates a new image request, decoding to a maximum specified width and
      * height. If both width and height are zero, the image will be decoded to
@@ -94,6 +96,8 @@ public class ImageRequest extends Request<Bitmap> {
         mDecodeConfig = decodeConfig;
         mMaxWidth = maxWidth;
         mMaxHeight = maxHeight;
+        
+        defaultOptions = getDefaultOptions();
     }
 
     @Override
@@ -287,9 +291,11 @@ public class ImageRequest extends Request<Bitmap> {
     private Response<Bitmap> doParse(NetworkResponse response) {
         byte[] data = response.data;
         BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+		decodeOptions.inInputShareable = true;
+		decodeOptions.inPurgeable = true;
+		decodeOptions.inPreferredConfig = mDecodeConfig;
         Bitmap bitmap = null;
         if (mMaxWidth == 0 && mMaxHeight == 0) {
-            decodeOptions.inPreferredConfig = mDecodeConfig;
             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
         } else {
 			// If we have to resize this image, first get the natural bounds.
@@ -333,5 +339,59 @@ public class ImageRequest extends Request<Bitmap> {
     @Override
     protected void deliverResponse(Bitmap response) {
         mListener.onResponse(response);
+    }
+    
+    @TargetApi(11)
+    public static BitmapFactory.Options getDefaultOptions() {
+       BitmapFactory.Options decodeBitmapOptions = new BitmapFactory.Options();
+       decodeBitmapOptions.inDither = false;
+       decodeBitmapOptions.inScaled = false;
+       decodeBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+       decodeBitmapOptions.inSampleSize = 1;
+       if (Utils.hasHoneycomb())  {
+           decodeBitmapOptions.inMutable = true;
+       }
+       return decodeBitmapOptions;
+    }
+    
+    @SuppressWarnings("unused")
+	private BitmapFactory.Options getOptions() {
+        BitmapFactory.Options result = new BitmapFactory.Options();
+        copyOptions(defaultOptions, result);
+        return result;
+    }
+
+    private static void copyOptions(BitmapFactory.Options from, BitmapFactory.Options to) {
+        if (Build.VERSION.SDK_INT >= 11) {
+            copyOptionsHoneycomb(from, to);
+        } else if (Build.VERSION.SDK_INT >= 10) {
+            copyOptionsGingerbreadMr1(from, to);
+        } else {
+            copyOptionsFroyo(from, to);
+        }
+    }
+
+    @TargetApi(11)
+    private static void copyOptionsHoneycomb(BitmapFactory.Options from, BitmapFactory.Options to) {
+        copyOptionsGingerbreadMr1(from, to);
+        to.inMutable = from.inMutable;
+    }
+
+    @TargetApi(10)
+    private static void copyOptionsGingerbreadMr1(BitmapFactory.Options from, BitmapFactory.Options to) {
+        copyOptionsFroyo(from, to);
+        to.inPreferQualityOverSpeed = from.inPreferQualityOverSpeed;
+    }
+
+    private static void copyOptionsFroyo(BitmapFactory.Options from, BitmapFactory.Options to) {
+        to.inDensity = from.inDensity;
+        to.inDither = from.inDither;
+        to.inInputShareable = from.inInputShareable;
+        to.inPreferredConfig = from.inPreferredConfig;
+        to.inPurgeable = from.inPurgeable;
+        to.inSampleSize = from.inSampleSize;
+        to.inScaled = from.inScaled;
+        to.inScreenDensity = from.inScreenDensity;
+        to.inTargetDensity = from.inTargetDensity;
     }
 }

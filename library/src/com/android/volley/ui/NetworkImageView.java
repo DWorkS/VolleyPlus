@@ -17,11 +17,13 @@ package com.android.volley.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -239,6 +241,7 @@ public class NetworkImageView extends AnimateImageView {
         mImageContainer = newContainer;
     }
 	
+	@SuppressLint("NewApi")
 	private void setAnimateImageBitmap(final Bitmap bitmap, boolean fadeIn) {
 
         // If we're fading in and on HC MR1+
@@ -254,6 +257,7 @@ public class NetworkImageView extends AnimateImageView {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             setImageBitmap(bitmap);
+                            setImageDrawable(null);
                             animate()
                                     .alpha(1f)
                                     .scaleY(1f)
@@ -319,5 +323,59 @@ public class NetworkImageView extends AnimateImageView {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
         invalidate();
+    }
+    
+    @Override
+    public void setImageBitmap(Bitmap bm) {
+    	super.setImageBitmap(bm);
+    	
+        BitmapDrawable drawable;
+		if (Utils.hasHoneycomb()) {
+            // Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+            drawable = new BitmapDrawable(getResources(), bm);
+        } else {
+            // Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+            // which will recycle automagically
+            drawable = new RecyclingBitmapDrawable(getResources(), bm);
+        }
+        
+        setImageDrawable(drawable);
+    }
+    
+    /**
+     * @see android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)
+     */
+    @Override
+    public void setImageDrawable(Drawable drawable) {
+        // Keep hold of previous Drawable
+        final Drawable previousDrawable = getDrawable();
+
+        // Call super to set new Drawable
+        super.setImageDrawable(drawable);
+
+        // Notify new Drawable that it is being displayed
+        notifyDrawable(drawable, true);
+
+        // Notify old Drawable so it is no longer being displayed
+        notifyDrawable(previousDrawable, false);
+    }
+
+    /**
+     * Notifies the drawable that it's displayed state has changed.
+     *
+     * @param drawable
+     * @param isDisplayed
+     */
+    private static void notifyDrawable(Drawable drawable, final boolean isDisplayed) {
+        if (drawable instanceof RecyclingBitmapDrawable) {
+            // The drawable is a CountingBitmapDrawable, so notify it
+            ((RecyclingBitmapDrawable) drawable).setIsDisplayed(isDisplayed);
+        } else if (drawable instanceof LayerDrawable) {
+            // The drawable is a LayerDrawable, so recurse on each layer
+            LayerDrawable layerDrawable = (LayerDrawable) drawable;
+            for (int i = 0, z = layerDrawable.getNumberOfLayers(); i < z; i++) {
+                notifyDrawable(layerDrawable.getDrawable(i), isDisplayed);
+            }
+        }
     }
 }

@@ -111,6 +111,17 @@ public class BitmapImageCache implements ImageCache {
                 final int bitmapSize = getBitmapSize(bitmap) / 1024;
                 return bitmapSize == 0 ? 1 : bitmapSize;
             }
+            
+            @Override
+            protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+            	super.entryRemoved(evicted, key, oldValue, newValue);
+            	
+/*                if (RecyclingBitmapDrawables.class.isInstance(oldValue)) {
+                    // The removed entry is a recycling drawable, so notify it 
+                    // that it has been removed from the memory cache
+                    ((RecyclingBitmapDrawables) oldValue).setIsCached(false);
+                }*/ 
+            }
         };
     }
 
