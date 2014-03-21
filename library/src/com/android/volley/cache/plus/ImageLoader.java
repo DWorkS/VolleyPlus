@@ -42,13 +42,13 @@ import com.android.volley.ui.RecyclingBitmapDrawable;
 /**
  * Helper that handles loading and caching images from remote URLs.
  *
- * The simple way to use this class is to call {@link ImageLoaderPlus#get(String, ImageListener)}
+ * The simple way to use this class is to call {@link ImageLoader#get(String, ImageListener)}
  * and to pass in the default image listener provided by
- * {@link ImageLoaderPlus#getImageListener(ImageView, int, int)}. Note that all function calls to
+ * {@link ImageLoader#getImageListener(ImageView, int, int)}. Note that all function calls to
  * this class must be made from the main thead, and all responses will be delivered to the main
  * thread as well.
  */
-public class ImageLoaderPlus {
+public class ImageLoader {
     /** RequestQueue for dispatching ImageRequests onto. */
     private final RequestQueue mRequestQueue;
 
@@ -56,7 +56,7 @@ public class ImageLoaderPlus {
     private int mBatchResponseDelayMs = 100;
 
     /** The cache implementation to be used as an L1 cache before calling into volley. */
-    private final ImageCachePlus mCache;
+    private final ImageCache mCache;
 
     /**
      * HashMap of Cache keys -> BatchedImageRequest used to track in-flight requests so
@@ -84,8 +84,8 @@ public class ImageLoaderPlus {
      * implementation
      * @param queue The RequestQueue to use for making image requests.
      */
-    public ImageLoaderPlus(RequestQueue queue) {
-        this(queue, BitmapImageCachePlus.getInstance(null, (Resources)null));
+    public ImageLoader(RequestQueue queue) {
+        this(queue, BitmapImageCache.getInstance(null));
     }
 
     /**
@@ -93,7 +93,7 @@ public class ImageLoaderPlus {
      * @param queue The RequestQueue to use for making image requests.
      * @param imageCache The cache to use as an L1 cache.
      */
-    public ImageLoaderPlus(RequestQueue queue, ImageCachePlus imageCache) {
+    public ImageLoader(RequestQueue queue, ImageCache imageCache) {
         this(queue, imageCache, null);
     }
     
@@ -103,7 +103,7 @@ public class ImageLoaderPlus {
      * @param imageCache The cache to use as an L1 cache.
      * @param resources The Resources to use for loading resource uris
      */
-    public ImageLoaderPlus(RequestQueue queue, ImageCachePlus imageCache, Resources resources) {
+    public ImageLoader(RequestQueue queue, ImageCache imageCache, Resources resources) {
         mRequestQueue = queue;
         mCache = imageCache;
         mResources = resources;
@@ -113,7 +113,7 @@ public class ImageLoaderPlus {
 		return mRequestQueue;
 	}
 
-    protected ImageCachePlus getImageCache() {
+    protected ImageCache getImageCache() {
 		return mCache;
 	}
     
@@ -229,7 +229,7 @@ public class ImageLoaderPlus {
      * Returns an ImageContainer for the requested URL.
      *
      * The ImageContainer will contain either the specified default bitmap or the loaded bitmap.
-     * If the default was returned, the {@link ImageLoaderPlus} will be invoked when the
+     * If the default was returned, the {@link ImageLoader} will be invoked when the
      * request is fulfilled.
      *
      * @param requestUrl The URL of the image to be loaded.
@@ -285,7 +285,7 @@ public class ImageLoaderPlus {
         // The request is not already in flight. Send the new request to the network and
         // track it.
         Request<?> newRequest =
-            new ImageRequestPlus(requestUrl, mResources, new Listener<BitmapDrawable>() {
+            new ImageRequest(requestUrl, mResources, new Listener<BitmapDrawable>() {
                 @Override
                 public void onResponse(BitmapDrawable response) {
                     onGetImageSuccess(cacheKey, response);

@@ -19,7 +19,6 @@ package com.android.volley.cache.plus;
 import java.io.File;
 
 import android.annotation.TargetApi;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -29,7 +28,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.util.LruCache;
 
 import com.android.volley.VolleyLog;
-import com.android.volley.cache.DiskLruBasedCache;
 import com.android.volley.cache.DiskLruBasedCache.ImageCacheParams;
 import com.android.volley.misc.Utils;
 import com.android.volley.ui.RecyclingBitmapDrawable;
@@ -37,22 +35,21 @@ import com.android.volley.ui.RecyclingBitmapDrawable;
 /**
  * This class holds our bitmap caches (memory and disk).
  */
-public class BitmapImageCachePlus implements ImageCachePlus {
+public class BitmapImageCache implements ImageCache {
     private static final String TAG = "BitmapImageCache";
 
     // Default memory cache size as a percent of device memory class
     private static final float DEFAULT_MEM_CACHE_PERCENT = 0.25f;
 
     private LruCache<String, BitmapDrawable> mMemoryCache;
-    private Resources mResources;
     
     /**
      * Don't instantiate this class directly, use
      * {@link #getInstance(android.support.v4.app.FragmentManager, float)}.
      * @param memCacheSize Memory cache size in KB.
      */
-    private BitmapImageCachePlus(int memCacheSize, Resources resources) {
-        init(memCacheSize, resources);
+    private BitmapImageCache(int memCacheSize) {
+        init(memCacheSize);
     }
 
     /**
@@ -64,9 +61,9 @@ public class BitmapImageCachePlus implements ImageCachePlus {
      *                    that needs to be retained).
      * @param memCacheSize Memory cache size in KB.
      */
-    public static BitmapImageCachePlus getInstance(FragmentManager fragmentManager, String fragmentTag,
-            int memCacheSize, Resources resources) {
-        BitmapImageCachePlus bitmapImageCache = null;
+    public static BitmapImageCache getInstance(FragmentManager fragmentManager, String fragmentTag,
+            int memCacheSize) {
+        BitmapImageCache bitmapImageCache = null;
         RetainFragment mRetainFragment = null;
 
         if (fragmentManager != null) {
@@ -74,12 +71,12 @@ public class BitmapImageCachePlus implements ImageCachePlus {
             mRetainFragment = getRetainFragment(fragmentManager, fragmentTag);
 
             // See if we already have a BitmapCache stored in RetainFragment
-            bitmapImageCache = (BitmapImageCachePlus) mRetainFragment.getObject();
+            bitmapImageCache = (BitmapImageCache) mRetainFragment.getObject();
         }
 
         // No existing BitmapCache, create one and store it in RetainFragment
         if (bitmapImageCache == null) {
-            bitmapImageCache = new BitmapImageCachePlus(memCacheSize, resources);
+            bitmapImageCache = new BitmapImageCache(memCacheSize);
             if (mRetainFragment != null) {
                 mRetainFragment.setObject(bitmapImageCache);
             }
@@ -87,28 +84,27 @@ public class BitmapImageCachePlus implements ImageCachePlus {
         return bitmapImageCache;
     }
 
-    public static BitmapImageCachePlus getInstance(FragmentManager fragmentManager, int memCacheSize, Resources resources) {
-        return getInstance(fragmentManager, TAG, memCacheSize, resources);
+    public static BitmapImageCache getInstance(FragmentManager fragmentManager, int memCacheSize) {
+        return getInstance(fragmentManager, TAG, memCacheSize);
     }
 
-    public static BitmapImageCachePlus getInstance(FragmentManager fragmentManager, float memCachePercent, Resources resources) {
-        return getInstance(fragmentManager, calculateMemCacheSize(memCachePercent), resources);
+    public static BitmapImageCache getInstance(FragmentManager fragmentManager, float memCachePercent) {
+        return getInstance(fragmentManager, calculateMemCacheSize(memCachePercent));
     }
 
-    public static BitmapImageCachePlus getInstance(FragmentManager fragmentManger, Resources resources) {
-        return getInstance(fragmentManger, DEFAULT_MEM_CACHE_PERCENT, resources);
+    public static BitmapImageCache getInstance(FragmentManager fragmentManger) {
+        return getInstance(fragmentManger, DEFAULT_MEM_CACHE_PERCENT);
     }
 
-    public static BitmapImageCachePlus getInstance(FragmentManager fragmentManger, ImageCacheParams imageCacheParams, Resources resources) {
-        return getInstance(fragmentManger, imageCacheParams != null ? imageCacheParams.memCacheSize : calculateMemCacheSize(DEFAULT_MEM_CACHE_PERCENT), resources);
+    public static BitmapImageCache getInstance(FragmentManager fragmentManger, ImageCacheParams imageCacheParams) {
+        return getInstance(fragmentManger, imageCacheParams != null ? imageCacheParams.memCacheSize : calculateMemCacheSize(DEFAULT_MEM_CACHE_PERCENT));
     }
     /**
      * Initialize the cache.
      */
-    private void init(int memCacheSize, Resources resources) {
+    private void init(int memCacheSize) {
         // Set up memory cache
     	VolleyLog.d(TAG, "Memory cache created (size = " + memCacheSize + "KB)");
-    	mResources = resources;
         mMemoryCache = new LruCache<String, BitmapDrawable>(memCacheSize) {
             /**
              * Measure item size in kilobytes rather than units which is more practical
@@ -151,7 +147,7 @@ public class BitmapImageCachePlus implements ImageCachePlus {
                 if (RecyclingBitmapDrawable.class.isInstance(bitmap)) {
                     // The removed entry is a recycling drawable, so notify it 
                     // that it has been removed from the memory cache
-                    ((RecyclingBitmapDrawable) bitmap).setIsCached(false);
+                    ((RecyclingBitmapDrawable) bitmap).setIsCached(true);
                 } 
                 mMemoryCache.put(data, bitmap);
             //}

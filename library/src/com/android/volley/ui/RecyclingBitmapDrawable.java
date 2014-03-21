@@ -99,5 +99,4 @@ public class RecyclingBitmapDrawable extends BitmapDrawable {
         Bitmap bitmap = getBitmap();
         return bitmap != null && !bitmap.isRecycled();
     }
-
 }

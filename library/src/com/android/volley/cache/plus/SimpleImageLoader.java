@@ -56,7 +56,7 @@ import com.android.volley.ui.PhotoView;
  * you must store the {@link com.android.volley.Request} in your ViewHolder type class and pass it
  * into loadImage to ensure the request is canceled as views are recycled.
  */
-public class SimpleImageLoaderPlus extends ImageLoaderPlus {
+public class SimpleImageLoader extends ImageLoader {
     private static final ColorDrawable transparentDrawable = new ColorDrawable(
             android.R.color.transparent);
     private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
@@ -71,9 +71,9 @@ public class SimpleImageLoaderPlus extends ImageLoaderPlus {
      * Creates an ImageLoader with Bitmap memory cache. No default placeholder image will be shown
      * while the image is being fetched and loaded.
      */
-    public SimpleImageLoaderPlus(FragmentActivity activity) {
+    public SimpleImageLoader(FragmentActivity activity) {
         super(newRequestQueue(activity, null),
-                BitmapImageCachePlus.getInstance(activity.getSupportFragmentManager(), activity.getResources()),
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager()),
                 activity.getResources());
     }
     
@@ -81,9 +81,9 @@ public class SimpleImageLoaderPlus extends ImageLoaderPlus {
      * Creates an ImageLoader with Bitmap memory cache. No default placeholder image will be shown
      * while the image is being fetched and loaded.
      */
-    public SimpleImageLoaderPlus(FragmentActivity activity, ImageCacheParams imageCacheParams) {
+    public SimpleImageLoader(FragmentActivity activity, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(activity, imageCacheParams),
-                BitmapImageCachePlus.getInstance(activity.getSupportFragmentManager(), imageCacheParams, activity.getResources()),
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager(), imageCacheParams),
                 activity.getResources());
     }
 
@@ -91,9 +91,9 @@ public class SimpleImageLoaderPlus extends ImageLoaderPlus {
      * Creates an ImageLoader with Bitmap memory cache and a default placeholder image while the
      * image is being fetched and loaded.
      */
-    public SimpleImageLoaderPlus(FragmentActivity activity, int defaultPlaceHolderResId, ImageCacheParams imageCacheParams) {
+    public SimpleImageLoader(FragmentActivity activity, int defaultPlaceHolderResId, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(activity,imageCacheParams),
-                BitmapImageCachePlus.getInstance(activity.getSupportFragmentManager(), imageCacheParams, activity.getResources()),
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager(), imageCacheParams),
                 activity.getResources());
         mPlaceHolderDrawables = new ArrayList<Drawable>(1);
         mPlaceHolderDrawables.add(defaultPlaceHolderResId == -1 ?
@@ -103,9 +103,9 @@ public class SimpleImageLoaderPlus extends ImageLoaderPlus {
     /**
      * Creates an ImageLoader with Bitmap memory cache and a list of default placeholder drawables.
      */
-    public SimpleImageLoaderPlus(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables, ImageCacheParams imageCacheParams) {
+    public SimpleImageLoader(FragmentActivity activity, ArrayList<Drawable> placeHolderDrawables, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(activity, imageCacheParams),
-                BitmapImageCachePlus.getInstance(activity.getSupportFragmentManager(), imageCacheParams, activity.getResources()),
+                BitmapImageCache.getInstance(activity.getSupportFragmentManager(), imageCacheParams),
                 activity.getResources());
         mPlaceHolderDrawables = placeHolderDrawables;
     }
@@ -114,9 +114,9 @@ public class SimpleImageLoaderPlus extends ImageLoaderPlus {
      * Creates an ImageLoader with Bitmap memory cache and a default placeholder image while the
      * image is being fetched and loaded.
      */
-    public SimpleImageLoaderPlus(Context context, int defaultPlaceHolderResId, ImageCacheParams imageCacheParams) {
+    public SimpleImageLoader(Context context, int defaultPlaceHolderResId, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(context, imageCacheParams),
-                BitmapImageCachePlus.getInstance(null, imageCacheParams, context.getResources()),
+                BitmapImageCache.getInstance(null, imageCacheParams),
                 context.getResources());
         mPlaceHolderDrawables = new ArrayList<Drawable>(1);
         mPlaceHolderDrawables.add(defaultPlaceHolderResId == -1 ?
@@ -126,9 +126,9 @@ public class SimpleImageLoaderPlus extends ImageLoaderPlus {
     /**
      * Creates an ImageLoader with Bitmap memory cache and a list of default placeholder drawables.
      */
-    public SimpleImageLoaderPlus(Context context, ArrayList<Drawable> placeHolderDrawables, ImageCacheParams imageCacheParams) {
+    public SimpleImageLoader(Context context, ArrayList<Drawable> placeHolderDrawables, ImageCacheParams imageCacheParams) {
         super(newRequestQueue(context, imageCacheParams),
-                BitmapImageCachePlus.getInstance(null, imageCacheParams, context.getResources()),
+                BitmapImageCache.getInstance(null, imageCacheParams),
                 context.getResources());
         mPlaceHolderDrawables = placeHolderDrawables;
     }
@@ -175,18 +175,18 @@ public class SimpleImageLoaderPlus extends ImageLoaderPlus {
     	getCache().invalidate(key, true);
 	}
 
-	public SimpleImageLoaderPlus setFadeInImage(boolean fadeInImage) {
+	public SimpleImageLoader setFadeInImage(boolean fadeInImage) {
         mFadeInImage = fadeInImage;
         return this;
     }
 
-    public SimpleImageLoaderPlus setMaxImageSize(int maxImageWidth, int maxImageHeight) {
+    public SimpleImageLoader setMaxImageSize(int maxImageWidth, int maxImageHeight) {
         mMaxImageWidth = maxImageWidth;
         mMaxImageHeight = maxImageHeight;
         return this;
     }
 
-    public SimpleImageLoaderPlus setMaxImageSize(int maxImageSize) {
+    public SimpleImageLoader setMaxImageSize(int maxImageSize) {
         return setMaxImageSize(maxImageSize, maxImageSize);
     }
     
@@ -463,6 +463,6 @@ public class SimpleImageLoaderPlus extends ImageLoaderPlus {
      * Interface an activity can implement to provide an ImageLoader to its children fragments.
      */
     public interface ImageLoaderProvider {
-        public SimpleImageLoaderPlus getImageLoaderInstance();
+        public SimpleImageLoader getImageLoaderInstance();
     }
 }

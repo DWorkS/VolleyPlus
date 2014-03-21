@@ -87,5 +87,4 @@ public class RecyclingImageView extends ImageView {
             }
         }
     }
-
 }

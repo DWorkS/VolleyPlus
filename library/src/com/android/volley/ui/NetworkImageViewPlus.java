@@ -28,10 +28,10 @@ import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 
 import com.android.volley.Response.Listener;
-import com.android.volley.cache.plus.ImageLoaderPlus;
-import com.android.volley.cache.plus.ImageLoaderPlus.ImageContainer;
-import com.android.volley.cache.plus.ImageLoaderPlus.ImageListener;
-import com.android.volley.cache.plus.SimpleImageLoaderPlus;
+import com.android.volley.cache.plus.ImageLoader;
+import com.android.volley.cache.plus.SimpleImageLoader;
+import com.android.volley.cache.plus.ImageLoader.ImageContainer;
+import com.android.volley.cache.plus.ImageLoader.ImageListener;
 import com.android.volley.error.VolleyError;
 import com.android.volley.misc.Utils;
 
@@ -57,7 +57,7 @@ public class NetworkImageViewPlus extends RecyclingImageView {
     int mErrorImageId;
 
     /** Local copy of the ImageLoader. */
-    protected ImageLoaderPlus mImageLoader;
+    protected ImageLoader mImageLoader;
 
     /** Current ImageContainer. (either in-flight or finished) */
     protected ImageContainer mImageContainer;
@@ -82,23 +82,23 @@ public class NetworkImageViewPlus extends RecyclingImageView {
     /**
      * Sets URL of the image that should be loaded into this view. Note that calling this will
      * immediately either set the cached image (if available) or the default image specified by
-     * {@link NetworkImageViewPlus#setDefaultImageResId(int)} on the view.
+     * {@link NetworkImageView#setDefaultImageResId(int)} on the view.
      *
-     * NOTE: If applicable, {@link NetworkImageViewPlus#setDefaultImageResId(int)} and
-     * {@link NetworkImageViewPlus#setErrorImageResId(int)} should be called prior to calling
+     * NOTE: If applicable, {@link NetworkImageView#setDefaultImageResId(int)} and
+     * {@link NetworkImageView#setErrorImageResId(int)} should be called prior to calling
      * this function.
      *
      * @param url The URL that should be loaded into this ImageView.
      * @param imageLoader ImageLoader that will be used to make the request.
      */
-    public void setImageUrl(String url, ImageLoaderPlus imageLoader) {
+    public void setImageUrl(String url, ImageLoader imageLoader) {
         mUrl = url;
         mImageLoader = imageLoader;
         // The URL has potentially changed. See if we need to load it.
         loadImageIfNecessary(false);
     }
 
-    public void setResetImageUrl(String url, ImageLoaderPlus imageLoader) {
+    public void setResetImageUrl(String url, ImageLoader imageLoader) {
     	mImageContainer = null;
         mUrl = url;
         mImageLoader = imageLoader;
@@ -184,8 +184,8 @@ public class NetworkImageViewPlus extends RecyclingImageView {
         
         int maxWidth = 0;
         int maxHeight = 0;
-        if(mImageLoader instanceof SimpleImageLoaderPlus){
-        	final SimpleImageLoaderPlus loader = (SimpleImageLoaderPlus) mImageLoader;
+        if(mImageLoader instanceof SimpleImageLoader){
+        	final SimpleImageLoader loader = (SimpleImageLoader) mImageLoader;
         	maxWidth = mMaxImageWidth == 0 ? loader.getMaxImageWidth() : mMaxImageWidth;
         	maxHeight = mMaxImageHeight == 0 ? loader.getMaxImageHeight() : mMaxImageHeight;
         }
@@ -223,7 +223,6 @@ public class NetworkImageViewPlus extends RecyclingImageView {
                         }
 
                         if (response.getBitmap() != null) {
-                            //setImageBitmap(response.getBitmap(), mFadeInImage);
                             setAnimateImageBitmap(response.getBitmap(), mFadeInImage);
                         	if(null != mListener){
                         		mListener.onResponse(response.getBitmap());
@@ -291,7 +290,7 @@ public class NetworkImageViewPlus extends RecyclingImageView {
 		if (mDefaultImageId != 0) {
 			setImageResource(mDefaultImageId);
 		} else {
-			setImageBitmap(null);
+			setImageDrawable(null);
 		}
 	}
 
@@ -309,7 +308,7 @@ public class NetworkImageViewPlus extends RecyclingImageView {
             // If the view was bound to an image request, cancel it and clear
             // out the image from the view.
             mImageContainer.cancelRequest();
-            setImageBitmap(null);
+            setImageDrawable(null);
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
         }
@@ -321,21 +320,4 @@ public class NetworkImageViewPlus extends RecyclingImageView {
         super.drawableStateChanged();
         invalidate();
     }
-    
-/*    @Override
-    public void setImageBitmap(Bitmap bm) {
-    	super.setImageBitmap(bm);
-    	
-        BitmapDrawable drawable;
-		if (Utils.hasHoneycomb()) {
-            // Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
-            drawable = new BitmapDrawable(getResources(), bm);
-        } else {
-            // Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
-            // which will recycle automagically
-            drawable = new RecyclingBitmapDrawable(getResources(), bm);
-        }
-        
-        setImageDrawable(drawable);
-    }*/
 }

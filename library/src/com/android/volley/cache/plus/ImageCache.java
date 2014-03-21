@@ -7,7 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
  * will be used as an L1 cache before dispatch to Volley. Implementations
  * must not block. Implementation with an LruCache is recommended.
  */
-public interface ImageCachePlus {
+public interface ImageCache {
     public BitmapDrawable getBitmap(String url);
     public void putBitmap(String url, BitmapDrawable bitmap);
     public void invalidateBitmap(String url);

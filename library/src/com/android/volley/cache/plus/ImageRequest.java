@@ -43,7 +43,7 @@ import com.android.volley.ui.RecyclingBitmapDrawable;
  * A canned request for getting an image at a given URL and calling
  * back with a decoded Bitmap.
  */
-public class ImageRequestPlus extends Request<BitmapDrawable> {
+public class ImageRequest extends Request<BitmapDrawable> {
     /** Socket timeout in milliseconds for image requests */
     private static final int IMAGE_TIMEOUT_MS = 1000;
 
@@ -86,7 +86,7 @@ public class ImageRequestPlus extends Request<BitmapDrawable> {
      * @param decodeConfig Format to decode the bitmap to
      * @param errorListener Error listener, or null to ignore errors
      */
-    public ImageRequestPlus(String url, Resources resources,
+    public ImageRequest(String url, Resources resources,
     		Response.Listener<BitmapDrawable> listener, int maxWidth, int maxHeight,
             Config decodeConfig, Response.ErrorListener errorListener) {
         super(Method.GET, url, errorListener);
