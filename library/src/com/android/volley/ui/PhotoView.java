@@ -1536,6 +1536,9 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
 
                         if (response.getBitmap() != null) {
                             bindPhoto(response.getBitmap());
+                        	if(null != getImageListener()){
+                        		getImageListener().onResponse(response.getBitmap());
+                        	}
                         } else if (mDefaultImageId != 0) {
                         	bindResource(mDefaultImageId);
                         }

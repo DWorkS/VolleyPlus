@@ -19,7 +19,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,18 +28,18 @@ import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 
 import com.android.volley.Response.Listener;
-import com.android.volley.cache.SimpleImageLoader;
+import com.android.volley.cache.plus.ImageLoaderPlus;
+import com.android.volley.cache.plus.ImageLoaderPlus.ImageContainer;
+import com.android.volley.cache.plus.ImageLoaderPlus.ImageListener;
+import com.android.volley.cache.plus.SimpleImageLoaderPlus;
 import com.android.volley.error.VolleyError;
 import com.android.volley.misc.Utils;
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLoader.ImageContainer;
-import com.android.volley.toolbox.ImageLoader.ImageListener;
 
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the
  * associated request.
  */
-public class NetworkImageView extends AnimateImageView {
+public class NetworkImageViewPlus extends RecyclingImageView {
     private static final ColorDrawable transparentDrawable = new ColorDrawable(
             android.R.color.transparent);
 	private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
@@ -58,7 +57,7 @@ public class NetworkImageView extends AnimateImageView {
     int mErrorImageId;
 
     /** Local copy of the ImageLoader. */
-    protected ImageLoader mImageLoader;
+    protected ImageLoaderPlus mImageLoader;
 
     /** Current ImageContainer. (either in-flight or finished) */
     protected ImageContainer mImageContainer;
@@ -66,40 +65,40 @@ public class NetworkImageView extends AnimateImageView {
 	private boolean mFadeInImage = false;
 	private int mMaxImageHeight = 0;
 	private int mMaxImageWidth = 0;
-    private Listener<Bitmap> mListener;
+    private Listener<BitmapDrawable> mListener;
     
-    public NetworkImageView(Context context) {
+    public NetworkImageViewPlus(Context context) {
         this(context, null);
     }
 
-    public NetworkImageView(Context context, AttributeSet attrs) {
+    public NetworkImageViewPlus(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public NetworkImageView(Context context, AttributeSet attrs, int defStyle) {
+    public NetworkImageViewPlus(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
     /**
      * Sets URL of the image that should be loaded into this view. Note that calling this will
      * immediately either set the cached image (if available) or the default image specified by
-     * {@link NetworkImageView#setDefaultImageResId(int)} on the view.
+     * {@link NetworkImageViewPlus#setDefaultImageResId(int)} on the view.
      *
-     * NOTE: If applicable, {@link NetworkImageView#setDefaultImageResId(int)} and
-     * {@link NetworkImageView#setErrorImageResId(int)} should be called prior to calling
+     * NOTE: If applicable, {@link NetworkImageViewPlus#setDefaultImageResId(int)} and
+     * {@link NetworkImageViewPlus#setErrorImageResId(int)} should be called prior to calling
      * this function.
      *
      * @param url The URL that should be loaded into this ImageView.
      * @param imageLoader ImageLoader that will be used to make the request.
      */
-    public void setImageUrl(String url, ImageLoader imageLoader) {
+    public void setImageUrl(String url, ImageLoaderPlus imageLoader) {
         mUrl = url;
         mImageLoader = imageLoader;
         // The URL has potentially changed. See if we need to load it.
         loadImageIfNecessary(false);
     }
 
-    public void setResetImageUrl(String url, ImageLoader imageLoader) {
+    public void setResetImageUrl(String url, ImageLoaderPlus imageLoader) {
     	mImageContainer = null;
         mUrl = url;
         mImageLoader = imageLoader;
@@ -136,12 +135,8 @@ public class NetworkImageView extends AnimateImageView {
         mFadeInImage = fadeInImage;
     }
 	
-    public void setImageListener(Listener<Bitmap> listener) {
+    public void setImageListener(Listener<BitmapDrawable> listener) {
     	mListener = listener;
-    }
-    
-    public Listener<Bitmap> getImageListener() {
-    	return mListener;
     }
 
     /**
@@ -189,8 +184,8 @@ public class NetworkImageView extends AnimateImageView {
         
         int maxWidth = 0;
         int maxHeight = 0;
-        if(mImageLoader instanceof SimpleImageLoader){
-        	final SimpleImageLoader loader = (SimpleImageLoader) mImageLoader;
+        if(mImageLoader instanceof SimpleImageLoaderPlus){
+        	final SimpleImageLoaderPlus loader = (SimpleImageLoaderPlus) mImageLoader;
         	maxWidth = mMaxImageWidth == 0 ? loader.getMaxImageWidth() : mMaxImageWidth;
         	maxHeight = mMaxImageHeight == 0 ? loader.getMaxImageHeight() : mMaxImageHeight;
         }
@@ -245,7 +240,7 @@ public class NetworkImageView extends AnimateImageView {
     }
 	
 	@SuppressLint("NewApi")
-	private void setAnimateImageBitmap(final Bitmap bitmap, boolean fadeIn) {
+	private void setAnimateImageBitmap(final BitmapDrawable bitmap, boolean fadeIn) {
 
         // If we're fading in and on HC MR1+
         if (fadeIn && Utils.hasHoneycombMR1()) {
@@ -259,7 +254,7 @@ public class NetworkImageView extends AnimateImageView {
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            setImageBitmap(bitmap);
+                            setImageDrawable(bitmap);
                             setImageDrawable(null);
                             animate()
                                     .alpha(1f)
@@ -278,18 +273,17 @@ public class NetworkImageView extends AnimateImageView {
                 initialDrawable = transparentDrawable;
             }
             
-            BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
             // Use TransitionDrawable to fade in
             final TransitionDrawable td =
                     new TransitionDrawable(new Drawable[] {
                             initialDrawable,
-                            bitmapDrawable
+                            bitmap
                     });
             setImageDrawable(td);
             td.startTransition(Utils.ANIMATION_FADE_IN_TIME);
         } else {
             // No fade in, just set bitmap directly
-            setImageBitmap(bitmap);
+            setImageDrawable(bitmap);
         }
     }
     
@@ -327,4 +321,21 @@ public class NetworkImageView extends AnimateImageView {
         super.drawableStateChanged();
         invalidate();
     }
+    
+/*    @Override
+    public void setImageBitmap(Bitmap bm) {
+    	super.setImageBitmap(bm);
+    	
+        BitmapDrawable drawable;
+		if (Utils.hasHoneycomb()) {
+            // Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+            drawable = new BitmapDrawable(getResources(), bm);
+        } else {
+            // Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+            // which will recycle automagically
+            drawable = new RecyclingBitmapDrawable(getResources(), bm);
+        }
+        
+        setImageDrawable(drawable);
+    }*/
 }
