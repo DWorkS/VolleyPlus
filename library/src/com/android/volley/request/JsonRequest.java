@@ -62,7 +62,9 @@ public abstract class JsonRequest<T> extends Request<T> {
 
     @Override
     protected void deliverResponse(T response) {
-        mListener.onResponse(response);
+    	if(null != mListener){
+    		mListener.onResponse(response);
+    	}
     }
 
     @Override
