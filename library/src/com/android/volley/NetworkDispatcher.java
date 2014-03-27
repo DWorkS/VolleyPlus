@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Process;
 
 import com.android.volley.error.VolleyError;
+import com.android.volley.misc.Utils;
 
 /**
  * Provides a thread for performing network dispatch from a queue of requests.
@@ -110,8 +111,7 @@ public class NetworkDispatcher extends Thread {
 
                 //Not Local images
                 NetworkResponse networkResponse;
-				if (!request.getUrl().startsWith("file:") 
-						&& !request.getUrl().startsWith("android.resource:")){
+				if (!Utils.isSpecialType(request.getUrl())){
 	                // Perform the network request.
 					networkResponse = mNetwork.performRequest(request);
 	                request.addMarker("network-http-complete");
