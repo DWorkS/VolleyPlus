@@ -498,6 +498,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         StringBuilder encodedParams = new StringBuilder();
         try {
             for (Map.Entry<String, String> entry : params.entrySet()) {
+            	if(null == entry.getValue()){
+                	continue;
+                }
                 encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
                 encodedParams.append('=');
                 encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
@@ -516,6 +519,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         Map<String, String> params = getParams();
         try {
             for (Map.Entry<String, String> entry : params.entrySet()) {
+            	if(null == entry.getValue()){
+                	continue;
+                }
                 encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
                 encodedParams.append('=');
                 encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
