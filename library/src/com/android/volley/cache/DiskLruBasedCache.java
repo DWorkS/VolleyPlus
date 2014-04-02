@@ -344,6 +344,7 @@ public class DiskLruBasedCache implements Cache {
             }
             if (mDiskLruCache != null) {
                 InputStream inputStream = null;
+            	File file = getFileForKey(key);
                 try {
                     final DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
                     if (snapshot != null) {
@@ -352,7 +353,6 @@ public class DiskLruBasedCache implements Cache {
                         }
                         inputStream = snapshot.getInputStream(DISK_CACHE_INDEX);
                         if (inputStream != null) {
-                        	File file = getFileForKey(key);
                             CountingInputStream cis = new CountingInputStream(inputStream);
                             CacheHeader entry = CacheHeader.readHeader(cis); // eat header
                             byte[] dataBytes = IOUtils.streamToBytes(cis, (int) (file.length() - cis.getBytesRead()));
@@ -362,6 +362,9 @@ public class DiskLruBasedCache implements Cache {
                 } catch (final IOException e) {
                     remove(key);
                     Log.e(TAG, "getDiskLruBasedCache - " + e);
+                    return null;
+                } catch (OutOfMemoryError e) {
+                    VolleyLog.e("Caught OOM for %d byte image, path=%s: %s", file.length(), file.getAbsolutePath(), e.toString());
                     return null;
                 } finally {
                     try {
