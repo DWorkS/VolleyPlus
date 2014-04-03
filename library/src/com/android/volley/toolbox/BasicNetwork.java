@@ -129,7 +129,7 @@ public class BasicNetwork implements Network {
                 if (httpResponse != null) {
                     statusCode = httpResponse.getStatusLine().getStatusCode();
                 } else {
-                    throw new NoConnectionError(e);
+                    throw new NoConnectionError(new NetworkResponse(0, null, null, false));
                 }
                 VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
                 if (responseContents != null) {

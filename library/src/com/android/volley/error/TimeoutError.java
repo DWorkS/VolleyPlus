@@ -16,8 +16,15 @@
 
 package com.android.volley.error;
 
+import com.android.volley.NetworkResponse;
+
 /**
  * Indicates that the connection or the socket timed out.
  */
 @SuppressWarnings("serial")
-public class TimeoutError extends VolleyError { }
+public class TimeoutError extends VolleyError {
+	
+	public TimeoutError() {
+		super(new NetworkResponse(-1, null, null, false));
+	}
+}

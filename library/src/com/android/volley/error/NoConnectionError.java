@@ -16,6 +16,8 @@
 
 package com.android.volley.error;
 
+import com.android.volley.NetworkResponse;
+
 /**
  * Error indicating that no connection could be established when performing a Volley request.
  */
@@ -25,6 +27,10 @@ public class NoConnectionError extends NetworkError {
         super();
     }
 
+    public NoConnectionError(NetworkResponse networkResponse) {
+        super(networkResponse);
+    }
+    
     public NoConnectionError(Throwable reason) {
         super(reason);
     }
