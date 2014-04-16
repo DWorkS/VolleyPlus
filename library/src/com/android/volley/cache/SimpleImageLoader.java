@@ -168,6 +168,10 @@ public class SimpleImageLoader extends ImageLoader {
     	getCache().close();
 	}
     
+    public boolean isCached(String key) {
+    	return getCache().get(key) != null;
+	}
+    
     public void invalidate(String key) {
         final String cacheKey = getCacheKey(key, mMaxImageWidth, mMaxImageHeight);
     	getImageCache().invalidateBitmap(cacheKey);

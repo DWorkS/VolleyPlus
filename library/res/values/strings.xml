@@ -15,11 +15,11 @@
   limitations under the License.
 -->
 
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="no_network_connection_toast">No network connection found</string>
-    <string name="generic_server_down">Server down</string>
-    <string name="generic_error">No internet</string>
-    <string name="no_internet">No internet</string>
+    <string name="no_network_connection_toast" translatable="false">No network connection found</string>
+    <string name="generic_server_down" translatable="false">Server down</string>
+    <string name="generic_error" translatable="false">No internet</string>
+    <string name="no_internet" translatable="false">No internet</string>
 
 </resources>
