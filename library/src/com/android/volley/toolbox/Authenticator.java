@@ -16,7 +16,7 @@
 
 package com.android.volley.toolbox;
 
-import com.android.volley.AuthFailureError;
+import com.android.volley.error.AuthFailureError;
 
 /**
  * An interface for interacting with auth tokens.

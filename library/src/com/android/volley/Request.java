@@ -24,6 +24,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.android.volley.VolleyLog.MarkerLog;
+import com.android.volley.error.AuthFailureError;
 import com.android.volley.error.TimeoutError;
 import com.android.volley.error.VolleyError;
 

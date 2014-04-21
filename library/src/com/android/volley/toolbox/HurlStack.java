@@ -48,9 +48,9 @@ import org.apache.http.message.BasicStatusLine;
 
 import android.text.TextUtils;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
+import com.android.volley.error.AuthFailureError;
 import com.android.volley.request.MultiPartRequest;
 import com.android.volley.request.MultiPartRequest.MultiPartParam;
 
@@ -123,7 +123,7 @@ public class HurlStack implements HttpStack {
 
     @Override
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
-            throws IOException, AuthFailureError {
+            throws AuthFailureError, IOException {
         String url = request.getUrl();
         HashMap<String, String> map = new HashMap<String, String>();
         map.putAll(request.getHeaders());

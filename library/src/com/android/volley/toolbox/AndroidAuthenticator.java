@@ -16,7 +16,7 @@
 
 package com.android.volley.toolbox;
 
-import com.android.volley.AuthFailureError;
+import com.android.volley.error.AuthFailureError;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;

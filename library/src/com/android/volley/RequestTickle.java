@@ -45,6 +45,7 @@ public class RequestTickle {
     private final ResponseDelivery mDelivery;
  
 	private Response<?> response;
+	private VolleyError error;
 
     /**
      * Creates the worker pool. Processing will not begin until {@link #start()} is called.
@@ -152,7 +153,8 @@ public class RequestTickle {
             parseAndDeliverNetworkError(mRequest, volleyError);
         } catch (Exception e) {
             VolleyLog.e(e, "Unhandled exception %s", e.toString());
-            mDelivery.postError(mRequest, new VolleyError(e));
+            error = new VolleyError(e);
+            mDelivery.postError(mRequest, error);
         }
 
         if(null == networkResponse){
@@ -165,8 +167,12 @@ public class RequestTickle {
     	return response;
     }
     
-    private void parseAndDeliverNetworkError(Request<?> request, VolleyError error) {
-        error = request.parseNetworkError(error);
+    public VolleyError getError() {
+    	return error;
+    }
+    
+    private void parseAndDeliverNetworkError(Request<?> request, VolleyError volleyError) {
+    	error = request.parseNetworkError(volleyError);
         mDelivery.postError(request, error);
     }
 }
