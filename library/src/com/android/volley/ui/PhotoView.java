@@ -658,14 +658,13 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
     /**
      * Get Rotation of the image.
      */
-    public float getRotation() {
+    public float getRotationDegree() {
         return mRotation % 360;
     }
     
-    public void setRotation(float degree) {
+    public void setRotationDegree(float degree) {
         mRotation = degree % 360;
     }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -790,6 +789,10 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
         }
     }
     
+    public boolean isImageTransformsEnabled() {
+        return mTransformsEnabled;
+    }
+    
     /**
      * Configures the bounds of the photo. The photo will always be scaled to fit center.
      */
@@ -815,6 +818,7 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
             generateScale();
         }
 
+        mMatrix.postRotate(getRotationDegree(), getWidth() / 2, getHeight() / 2);
         if (fits || mMatrix.isIdentity()) {
             // The bitmap fits exactly, no transform needed.
             mDrawMatrix = null;
@@ -858,6 +862,7 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
                 mMatrix.setRectToRect(mTempSrc, mTempDst, Matrix.ScaleToFit.CENTER);
             }
         }
+        
         mOriginalMatrix.set(mMatrix);
     }
 
