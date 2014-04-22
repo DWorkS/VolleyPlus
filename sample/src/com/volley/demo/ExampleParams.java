@@ -96,7 +96,7 @@ public class ExampleParams extends ActionBarActivity {
                                                             createMyReqSuccessListener(),
                                                             createMyReqErrorListener()) {
 
-                        protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                        protected Map<String, String> getParams() throws com.android.volley.error.AuthFailureError {
                             Map<String, String> params = new HashMap<String, String>();
                             params.put("param1", num1);
                             params.put("param2", num2);
