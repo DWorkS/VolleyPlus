@@ -1,0 +1,626 @@
+/**
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.volley.toolbox;
+
+import java.util.LinkedList;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.v4.util.ArrayMap;
+import android.widget.ImageView;
+import android.widget.VideoView;
+
+import com.android.volley.Cache;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.Response.ErrorListener;
+import com.android.volley.Response.Listener;
+import com.android.volley.cache.BitmapCache;
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.VideoRequest;
+import com.android.volley.ui.AnimateImageView;
+
+/**
+ * Helper that handles loading and caching Videos from remote URLs.
+ *
+ * The simple way to use this class is to call {@link VideoLoader#get(String, VideoListener)}
+ * and to pass in the default Video listener provided by
+ * {@link VideoLoader#getVideoListener(VideoView, int, int)}. Note that all function calls to
+ * this class must be made from the main thead, and all responses will be delivered to the main
+ * thread as well.
+ */
+public class VideoLoader {
+    /** RequestQueue for dispatching VideoRequests onto. */
+    private final RequestQueue mRequestQueue;
+
+    /** Amount of time to wait after first response arrives before delivering all responses. */
+    private int mBatchResponseDelayMs = 100;
+
+    /** The cache implementation to be used as an L1 cache before calling into volley. */
+    private final ImageCache mCache;
+
+    /**
+     * HashMap of Cache keys -> BatchedVideoRequest used to track in-flight requests so
+     * that we can coalesce multiple requests to the same URL into a single network request.
+     */
+    private final ArrayMap<String, BatchedVideoRequest> mInFlightRequests =
+            new ArrayMap<String, BatchedVideoRequest>();
+
+    /** HashMap of the currently pending responses (waiting to be delivered). */
+    private final ArrayMap<String, BatchedVideoRequest> mBatchedResponses =
+            new ArrayMap<String, BatchedVideoRequest>();
+
+    /** Handler to the main thread. */
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    /** Runnable for in-flight response delivery. */
+    private Runnable mRunnable;
+    
+    /** {@link Resources} instance for loading resource uris */
+    private Resources mResources;
+    private ArrayMap<String, String> mHeaders;
+    
+    /**
+     * Constructs a new VideoLoader with a default LruCache
+     * implementation
+     * @param queue The RequestQueue to use for making Video requests.
+     */
+    public VideoLoader(RequestQueue queue) {
+        this(queue, BitmapCache.getInstance(null));
+    }
+
+    /**
+     * Constructs a new VideoLoader.
+     * @param queue The RequestQueue to use for making Video requests.
+     * @param ImageCache The cache to use as an L1 cache.
+     */
+    public VideoLoader(RequestQueue queue, ImageCache ImageCache) {
+        this(queue, ImageCache, null);
+    }
+    
+    /**
+     * Constructs a new VideoLoader.
+     * @param queue The RequestQueue to use for making Video requests.
+     * @param ImageCache The cache to use as an L1 cache.
+     * @param resources The Resources to use for loading resource uris
+     */
+    public VideoLoader(RequestQueue queue, ImageCache ImageCache, Resources resources) {
+        mRequestQueue = queue;
+        mCache = ImageCache;
+        mResources = resources;
+    }
+    
+    protected RequestQueue getRequestQueue() {
+		return mRequestQueue;
+	}
+
+    protected ImageCache getImageCache() {
+		return mCache;
+	}
+    
+    protected Cache getCache() {
+		return mRequestQueue.getCache();
+	}
+    
+    /**
+     * The default implementation of VideoListener which handles basic functionality
+     * of showing a default Video until the network response is received, at which point
+     * it will switch to either the actual Video or the error Video.
+     * @param VideoView The VideoView that the listener is associated with.
+     * @param defaultVideoResId Default Video resource ID to use, or 0 if it doesn't exist.
+     * @param errorVideoResId Error Video resource ID to use, or 0 if it doesn't exist.
+     */
+    public static VideoListener getVideoListener(final ImageView view,
+            final int defaultVideoResId, final int errorVideoResId) {
+        return new VideoListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (errorVideoResId != 0) {
+                    view.setImageResource(errorVideoResId);
+                }
+            }
+
+            @Override
+            public void onResponse(VideoContainer response, boolean isImmediate) {
+                if (response.getBitmap() != null) {
+                    view.setImageBitmap(response.getBitmap());
+                } else if (defaultVideoResId != 0) {
+                    view.setImageResource(defaultVideoResId);
+                }
+            }
+        };
+    }
+
+    /**
+     * The default implementation of VideoListener which handles basic functionality
+     * of showing a default Video until the network response is received, at which point
+     * it will switch to either the actual Video or the error Video.
+     *
+     * This version returns one specifically for AnimateVideoView which allows it to animate
+     * the Video changing
+     * @param defaultVideoResId Default Video resource ID to use, or 0 if it doesn't exist.
+     * @param errorVideoResId Error Video resource ID to use, or 0 if it doesn't exist.
+     */
+    public static VideoListener getVideoListener(final AnimateImageView view,
+                                                 final int defaultVideoResId, final int errorVideoResId) {
+        return new VideoListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (errorVideoResId != 0) {
+                    view.setImageResource(errorVideoResId, false);
+                }
+            }
+
+            @Override
+            public void onResponse(VideoContainer response, boolean isImmediate) {
+                if (response.getBitmap() != null) {
+                    /**Animate the Video changing only if the Video was fetched from network */
+                    view.setImageBitmap(response.getBitmap(), !isImmediate);
+                } else if (defaultVideoResId != 0) {
+                    view.setImageResource(defaultVideoResId, false);
+                }
+            }
+        };
+    }
+
+
+
+    /**
+     * Interface for the response handlers on Video requests.
+     *
+     * The call flow is this:
+     * 1. Upon being  attached to a request, onResponse(response, true) will
+     * be invoked to reflect any cached data that was already available. If the
+     * data was available, response.getBitmap() will be non-null.
+     *
+     * 2. After a network response returns, only one of the following cases will happen:
+     *   - onResponse(response, false) will be called if the Video was loaded.
+     *   or
+     *   - onErrorResponse will be called if there was an error loading the Video.
+     */
+    public interface VideoListener extends ErrorListener {
+        /**
+         * Listens for non-error changes to the loading of the Video request.
+         *
+         * @param response Holds all information pertaining to the request, as well
+         * as the bitmap (if it is loaded).
+         * @param isImmediate True if this was called during VideoLoader.get() variants.
+         * This can be used to differentiate between a cached Video loading and a network
+         * Video loading in order to, for example, run an animation to fade in network loaded
+         * Videos.
+         */
+        public void onResponse(VideoContainer response, boolean isImmediate);
+    }
+
+    /**
+     * Checks if the item is available in the cache.
+     * @param requestUrl The url of the remote Video
+     * @param maxWidth The maximum width of the returned Video.
+     * @param maxHeight The maximum height of the returned Video.
+     * @return True if the item exists in cache, false otherwise.
+     */
+    public boolean isCached(String requestUrl, int maxWidth, int maxHeight) {
+        throwIfNotOnMainThread();
+
+        String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight);
+        return mCache.getBitmap(cacheKey) != null;
+    }
+
+    /**
+     * Returns an VideoContainer for the requested URL.
+     *
+     * The VideoContainer will contain either the specified default bitmap or the loaded bitmap.
+     * If the default was returned, the {@link VideoLoader} will be invoked when the
+     * request is fulfilled.
+     *
+     * @param requestUrl The URL of the Video to be loaded.
+     * @param defaultVideo Optional default Video to return until the actual Video is loaded.
+     */
+    public VideoContainer get(String requestUrl, final VideoListener listener) {
+        return get(requestUrl, listener, 0, 0);
+    }
+
+    /**
+     * Issues a bitmap request with the given URL if that Video is not available
+     * in the cache, and returns a bitmap container that contains all of the data
+     * relating to the request (as well as the default Video if the requested
+     * Video is not available).
+     * @param requestUrl The url of the remote Video
+     * @param VideoListener The listener to call when the remote Video is loaded
+     * @param maxWidth The maximum width of the returned Video.
+     * @param maxHeight The maximum height of the returned Video.
+     * @return A container object that contains all of the properties of the request, as well as
+     *     the currently available Video (default if remote is not loaded).
+     */
+    public VideoContainer get(String requestUrl, VideoListener VideoListener,
+            int maxWidth, int maxHeight) {
+        // only fulfill requests that were initiated from the main thread.
+        throwIfNotOnMainThread();
+
+        final String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight);
+
+        // Try to look up the request in the cache of remote Videos.
+        Bitmap cachedBitmap = mCache.getBitmap(cacheKey);
+        if (cachedBitmap != null) {
+            // Return the cached bitmap.
+            VideoContainer container = new VideoContainer(cachedBitmap, requestUrl, null, null);
+            VideoListener.onResponse(container, true);
+            return container;
+        }
+
+        // The bitmap did not exist in the cache, fetch it!
+        VideoContainer VideoContainer =
+                new VideoContainer(null, requestUrl, cacheKey, VideoListener);
+
+        // Update the caller to let them know that they should use the default bitmap.
+        VideoListener.onResponse(VideoContainer, true);
+
+        // Check to see if a request is already in-flight.
+        BatchedVideoRequest request = mInFlightRequests.get(cacheKey);
+        if (request != null) {
+            // If it is, add this request to the list of listeners.
+            request.addContainer(VideoContainer);
+            return VideoContainer;
+        }
+
+        // The request is not already in flight. Send the new request to the network and
+        // track it.
+        Request<?> newRequest =
+            new VideoRequest(requestUrl, mResources, new Listener<Bitmap>() {
+                @Override
+                public void onResponse(Bitmap response) {
+                    onGetVideoSuccess(cacheKey, response);
+                }
+            }, maxWidth, maxHeight,
+            Config.RGB_565, new ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    onGetVideoError(cacheKey, error);
+                }
+            });
+        newRequest.setHeaders(mHeaders);
+        mRequestQueue.add(newRequest);
+        mInFlightRequests.put(cacheKey,
+                new BatchedVideoRequest(newRequest, VideoContainer));
+        return VideoContainer;
+    }
+
+    /**
+     * Issues a bitmap request with the given URL if that Video is not available
+     * in the cache, and returns a bitmap container that contains all of the data
+     * relating to the request (as well as the default Video if the requested
+     * Video is not available).
+     * @param requestUrl The url of the remote Video
+     * @param VideoListener The listener to call when the remote Video is loaded
+     * @param maxWidth The maximum width of the returned Video.
+     * @param maxHeight The maximum height of the returned Video.
+     * @return A container object that contains all of the properties of the request, as well as
+     *     the currently available Video (default if remote is not loaded).
+     */
+    public VideoContainer set(String requestUrl, VideoListener VideoListener,
+            int maxWidth, int maxHeight, Bitmap bitmap) {
+        // only fulfill requests that were initiated from the main thread.
+        throwIfNotOnMainThread();
+
+        final String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight);
+
+        // The bitmap did not exist in the cache, fetch it!
+        VideoContainer VideoContainer =
+                new VideoContainer(bitmap, requestUrl, cacheKey, VideoListener);
+
+        // Update the caller to let them know that they should use the default bitmap.
+        VideoListener.onResponse(VideoContainer, true);
+        //setVideoSuccess(cacheKey, bitmap);
+        
+        // cache the Video that was fetched.
+        mCache.putBitmap(cacheKey, bitmap);
+
+        Response<?> response = Response.success(bitmap, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
+        getCache().put(requestUrl, response.cacheEntry);
+        
+/*        Response<?> response = Response.success(bitmap, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
+        Entry cache = getCache().get(requestUrl);
+        cache.data = response.cacheEntry.data;
+        getCache().put(requestUrl, cache);*/
+        
+        return VideoContainer;
+    }
+    
+    /**
+     * Sets the amount of time to wait after the first response arrives before delivering all
+     * responses. Batching can be disabled entirely by passing in 0.
+     * @param newBatchedResponseDelayMs The time in milliseconds to wait.
+     */
+    public void setBatchedResponseDelay(int newBatchedResponseDelayMs) {
+        mBatchResponseDelayMs = newBatchedResponseDelayMs;
+    }
+
+    /**
+     * Handler for when an Video was successfully loaded.
+     * @param cacheKey The cache key that is associated with the Video request.
+     * @param response The bitmap that was returned from the network.
+     */
+    private void onGetVideoSuccess(String cacheKey, Bitmap response) {
+        // cache the Video that was fetched.
+        mCache.putBitmap(cacheKey, response);
+
+        // remove the request from the list of in-flight requests.
+        BatchedVideoRequest request = mInFlightRequests.remove(cacheKey);
+
+        if (request != null) {
+            // Update the response bitmap.
+            request.mResponseBitmap = response;
+
+            // Send the batched response
+            batchResponse(cacheKey, request);
+        }
+    }
+    
+    /**
+     * Handler for when an Video was successfully loaded.
+     * @param cacheKey The cache key that is associated with the Video request.
+     * @param response The bitmap that was returned from the network.
+     */
+    @SuppressWarnings("unused")
+	private void setVideoSuccess(String cacheKey, Bitmap response) {
+        // cache the Video that was fetched.
+        mCache.putBitmap(cacheKey, response);
+
+        // remove the request from the list of in-flight requests.
+        BatchedVideoRequest request = mInFlightRequests.remove(cacheKey);
+
+        if (request != null) {
+            // Update the response bitmap.
+            request.mResponseBitmap = response;
+
+            // Send the batched response
+            batchResponse(cacheKey, request);
+        }
+    }
+
+    /**
+     * Handler for when an Video failed to load.
+     * @param cacheKey The cache key that is associated with the Video request.
+     */
+    private void onGetVideoError(String cacheKey, VolleyError error) {
+        // Notify the requesters that something failed via a null result.
+        // Remove this request from the list of in-flight requests.
+        BatchedVideoRequest request = mInFlightRequests.remove(cacheKey);
+
+        if (request != null) {
+            // Set the error for this request
+            request.setError(error);
+            
+            // Send the batched response
+            batchResponse(cacheKey, request);
+        }
+    }
+
+    /**
+     * Container object for all of the data surrounding an Video request.
+     */
+    public class VideoContainer {
+        /**
+         * The most relevant bitmap for the container. If the Video was in cache, the
+         * Holder to use for the final bitmap (the one that pairs to the requested URL).
+         */
+        private Bitmap mBitmap;
+
+        private final VideoListener mListener;
+
+        /** The cache key that was associated with the request */
+        private final String mCacheKey;
+
+        /** The request URL that was specified */
+        private final String mRequestUrl;
+
+        /**
+         * Constructs a BitmapContainer object.
+         * @param bitmap The final bitmap (if it exists).
+         * @param requestUrl The requested URL for this container.
+         * @param cacheKey The cache key that identifies the requested URL for this container.
+         */
+        public VideoContainer(Bitmap bitmap, String requestUrl,
+                String cacheKey, VideoListener listener) {
+            mBitmap = bitmap;
+            mRequestUrl = requestUrl;
+            mCacheKey = cacheKey;
+            mListener = listener;
+        }
+
+        /**
+         * Releases interest in the in-flight request (and cancels it if no one else is listening).
+         */
+        public void cancelRequest() {
+            if (mListener == null) {
+                return;
+            }
+
+            BatchedVideoRequest request = mInFlightRequests.get(mCacheKey);
+            if (request != null) {
+                boolean canceled = request.removeContainerAndCancelIfNecessary(this);
+                if (canceled) {
+                    mInFlightRequests.remove(mCacheKey);
+                }
+            } else {
+                // check to see if it is already batched for delivery.
+                request = mBatchedResponses.get(mCacheKey);
+                if (request != null) {
+                    request.removeContainerAndCancelIfNecessary(this);
+                    if (request.mContainers.size() == 0) {
+                        mBatchedResponses.remove(mCacheKey);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Returns the bitmap associated with the request URL if it has been loaded, null otherwise.
+         */
+        public Bitmap getBitmap() {
+            return mBitmap;
+        }
+
+        /**
+         * Returns the requested URL for this container.
+         */
+        public String getRequestUrl() {
+            return mRequestUrl;
+        }
+    }
+
+    /**
+     * Wrapper class used to map a Request to the set of active VideoContainer objects that are
+     * interested in its results.
+     */
+    private class BatchedVideoRequest {
+        /** The request being tracked */
+        private final Request<?> mRequest;
+
+        /** The result of the request being tracked by this item */
+        private Bitmap mResponseBitmap;
+
+        /** Error if one occurred for this response */
+        private VolleyError mError;
+
+        /** List of all of the active VideoContainers that are interested in the request */
+        private final LinkedList<VideoContainer> mContainers = new LinkedList<VideoContainer>();
+
+        /**
+         * Constructs a new BatchedVideoRequest object
+         * @param request The request being tracked
+         * @param container The VideoContainer of the person who initiated the request.
+         */
+        public BatchedVideoRequest(Request<?> request, VideoContainer container) {
+            mRequest = request;
+            mContainers.add(container);
+        }
+
+        /**
+         * Set the error for this response
+         */
+        public void setError(VolleyError error) {
+            mError = error;
+        }
+
+        /**
+         * Get the error for this response
+         */
+        public VolleyError getError() {
+            return mError;
+        }
+
+        /**
+         * Adds another VideoContainer to the list of those interested in the results of
+         * the request.
+         */
+        public void addContainer(VideoContainer container) {
+            mContainers.add(container);
+        }
+
+        /**
+         * Detatches the bitmap container from the request and cancels the request if no one is
+         * left listening.
+         * @param container The container to remove from the list
+         * @return True if the request was canceled, false otherwise.
+         */
+        public boolean removeContainerAndCancelIfNecessary(VideoContainer container) {
+            mContainers.remove(container);
+            if (mContainers.size() == 0) {
+                mRequest.cancel();
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Starts the runnable for batched delivery of responses if it is not already started.
+     * @param cacheKey The cacheKey of the response being delivered.
+     * @param request The BatchedVideoRequest to be delivered.
+     * @param error The volley error associated with the request (if applicable).
+     */
+    private void batchResponse(String cacheKey, BatchedVideoRequest request) {
+        mBatchedResponses.put(cacheKey, request);
+        // If we don't already have a batch delivery runnable in flight, make a new one.
+        // Note that this will be used to deliver responses to all callers in mBatchedResponses.
+        if (mRunnable == null) {
+            mRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    for (BatchedVideoRequest bir : mBatchedResponses.values()) {
+                        for (VideoContainer container : bir.mContainers) {
+                            // If one of the callers in the batched request canceled the request
+                            // after the response was received but before it was delivered,
+                            // skip them.
+                            if (container.mListener == null) {
+                                continue;
+                            }
+                            if (bir.getError() == null) {
+                                container.mBitmap = bir.mResponseBitmap;
+                                container.mListener.onResponse(container, false);
+                            } else {
+                                container.mListener.onErrorResponse(bir.getError());
+                            }
+                        }
+                    }
+                    mBatchedResponses.clear();
+                    mRunnable = null;
+                }
+
+            };
+            // Post the runnable.
+            mHandler.postDelayed(mRunnable, mBatchResponseDelayMs);
+        }
+    }
+
+    private void throwIfNotOnMainThread() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalStateException("VideoLoader must be invoked from the main thread.");
+        }
+    }
+    /**
+     * Creates a cache key for use with the L1 cache.
+     * @param url The URL of the request.
+     * @param maxWidth The max-width of the output.
+     * @param maxHeight The max-height of the output.
+     */
+    protected static String getCacheKey(String url, int maxWidth, int maxHeight) {
+        return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)
+                .append("#H").append(maxHeight).append(url).toString();
+    }
+    
+    /**
+     * Set a {@link Resources} instance if you need to support resource uris for loading Videos
+     * @param resources {@link Resources} instance for loading Videos. Get from {@link Context#getResources()}
+     */
+    public void setResources(Resources resources) {
+    	mResources = resources;
+    }
+
+    public Resources getResources() {
+    	return mResources;
+    }
+    
+	public void setHeaders(ArrayMap<String, String> headers) {
+        mHeaders = headers;
+    }
+}
