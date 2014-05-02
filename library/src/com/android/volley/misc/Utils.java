@@ -248,6 +248,7 @@ public class Utils {
 	
 	public static boolean isSpecialType(String url){
 		boolean isSpecial = url.startsWith("file:")
+		|| url.startsWith("video:")
 		|| url.startsWith("android.resource:");
 		return isSpecial;
 	}

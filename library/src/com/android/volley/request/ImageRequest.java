@@ -173,7 +173,7 @@ public class ImageRequest extends Request<Bitmap> {
 
 		final String requestUrl = getUrl();
 		// Remove the 'video://' prefix
-		File bitmapFile = new File(requestUrl.substring(7, requestUrl.length()));
+		File bitmapFile = new File(requestUrl.substring(8, requestUrl.length()));
 
 		if (!bitmapFile.exists() || !bitmapFile.isFile()) {
 			return Response.error(new ParseError(new FileNotFoundException(
