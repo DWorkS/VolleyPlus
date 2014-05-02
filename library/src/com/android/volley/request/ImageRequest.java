@@ -24,8 +24,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore.Images;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
@@ -146,7 +148,9 @@ public class ImageRequest extends Request<Bitmap> {
         // Serialize all decode on a global lock to reduce concurrent heap usage.
         synchronized (sDecodeLock) {
             try {
-				if (getUrl().startsWith("file:")) {
+				if (getUrl().startsWith("video:")) {
+					return doVideoFileParse();
+				} else if (getUrl().startsWith("file:")) {
 					return doFileParse();
 				} else if (getUrl().startsWith("android.resource:")) {
 					return doResourceParse();
@@ -159,6 +163,90 @@ public class ImageRequest extends Request<Bitmap> {
             }
         }
     }
+    
+	/**
+	 * The real guts of parseNetworkResponse. Broken out for readability.
+	 * 
+	 * This version is for reading a Bitmap from file
+	 */
+	private Response<Bitmap> doVideoFileParse() {
+
+		final String requestUrl = getUrl();
+		// Remove the 'video://' prefix
+		File bitmapFile = new File(requestUrl.substring(7, requestUrl.length()));
+
+		if (!bitmapFile.exists() || !bitmapFile.isFile()) {
+			return Response.error(new ParseError(new FileNotFoundException(
+					String.format("File not found: %s",
+							bitmapFile.getAbsolutePath()))));
+		}
+
+		BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+		decodeOptions.inInputShareable = true;
+		decodeOptions.inPurgeable = true;
+		decodeOptions.inPreferredConfig = mDecodeConfig;
+		Bitmap bitmap = null;
+		if (mMaxWidth == 0 && mMaxHeight == 0) {
+
+			bitmap = getVideoFrame(bitmapFile.getAbsolutePath());//BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
+			addMarker("read-full-size-image-from-file");
+		} else {
+			// If we have to resize this image, first get the natural bounds.
+			decodeOptions.inJustDecodeBounds = true;
+			//BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
+			int actualWidth = decodeOptions.outWidth;
+			int actualHeight = decodeOptions.outHeight;
+
+			// Then compute the dimensions we would ideally like to decode to.
+			int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
+					actualWidth, actualHeight);
+			int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,
+					actualHeight, actualWidth);
+
+			// Decode to the nearest power of two scaling factor.
+			decodeOptions.inJustDecodeBounds = false;
+			decodeOptions.inSampleSize = ImageUtils.findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			Bitmap tempBitmap = getVideoFrame(bitmapFile.getAbsolutePath());//BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
+			addMarker(String.format("read-from-file-scaled-times-%d",
+					decodeOptions.inSampleSize));
+			// If necessary, scale down to the maximal acceptable size.
+			if (tempBitmap != null
+					&& (tempBitmap.getWidth() > desiredWidth || tempBitmap.getHeight() > desiredHeight)) {
+				bitmap = Bitmap.createScaledBitmap(tempBitmap, desiredWidth,
+						desiredHeight, true);
+				tempBitmap.recycle();
+				addMarker("scaling-read-from-file-bitmap");
+			} else {
+				bitmap = tempBitmap;
+			}
+
+		}
+
+		if (bitmap == null) {
+			return Response.error(new ParseError());
+		} else {
+			return Response.success(bitmap, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
+		}
+	}
+	
+	private Bitmap getVideoFrame(String path) {
+		return ThumbnailUtils.createVideoThumbnail(path, Images.Thumbnails.MINI_KIND);
+/*		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+		try {
+			retriever.setDataSource(path);
+			return retriever.getFrameAtTime();
+		} catch (IllegalArgumentException ex) {
+			ex.printStackTrace();
+		} catch (RuntimeException ex) {
+			ex.printStackTrace();
+		} finally {
+			try {
+				retriever.release();
+			} catch (RuntimeException ex) {
+			}
+		}
+		return null;*/
+	}
 
 	/**
 	 * The real guts of parseNetworkResponse. Broken out for readability.
