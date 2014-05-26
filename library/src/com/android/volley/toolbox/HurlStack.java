@@ -247,8 +247,7 @@ public class HurlStack implements HttpStack {
                                + BINARY)
                        .append(CRLF)
                        .append(CRLF)
-                       .flush();
-
+                       .flush();               
                BufferedInputStream input = null;
                try {
                    FileInputStream fis = new FileInputStream(file);

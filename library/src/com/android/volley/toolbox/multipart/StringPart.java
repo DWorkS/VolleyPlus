@@ -45,13 +45,14 @@ public final class StringPart extends BasePart {
         
         headersProvider = new IHeadersProvider() {
             public String getContentDisposition() {
-                return "Content-Disposition: form-data; name=\"" + partName + '"';                  //$NON-NLS-1$
+                return String.format(HEADER_CONTENT_DISPOSITION + COLON_SPACE + FORM_DATA, partName);
             }
             public String getContentType() {
-                return "Content-Type: " + HTTP.PLAIN_TEXT_TYPE + HTTP.CHARSET_PARAM + partCharset;  //$NON-NLS-1$
+                return HEADER_CONTENT_TYPE + COLON_SPACE + HTTP.PLAIN_TEXT_TYPE;
+                		//"Content-Type: " + HTTP.PLAIN_TEXT_TYPE + HTTP.CHARSET_PARAM + partCharset;  //$NON-NLS-1$
             }
             public String getContentTransferEncoding() {
-                return "Content-Transfer-Encoding: 8bit";                                           //$NON-NLS-1$
+                return HEADER_CONTENT_TRANSFER_ENCODING + COLON_SPACE + EIGHT_BIT;
             }
         };
     }
