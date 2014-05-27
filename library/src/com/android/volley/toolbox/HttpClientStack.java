@@ -56,24 +56,22 @@ import com.android.volley.toolbox.multipart.StringPart;
 public class HttpClientStack implements HttpStack {
 	protected final HttpClient mClient;
 
+	private static final String CONTENT_TYPE_MULTIPART = "multipart/form-data; charset=%s; boundary=%s";
 	private final static String HEADER_CONTENT_TYPE = "Content-Type";
 
 	public HttpClientStack(HttpClient client) {
 		mClient = client;
 	}
 
-	private static void addHeaders(HttpUriRequest httpRequest,
-			Map<String, String> headers) {
+	private static void addHeaders(HttpUriRequest httpRequest, Map<String, String> headers) {
 		for (String key : headers.keySet()) {
 			httpRequest.setHeader(key, headers.get(key));
 		}
 	}
 
 	@SuppressWarnings("unused")
-	private static List<NameValuePair> getPostParameterPairs(
-			Map<String, String> postParams) {
-		List<NameValuePair> result = new ArrayList<NameValuePair>(
-				postParams.size());
+	private static List<NameValuePair> getPostParameterPairs(Map<String, String> postParams) {
+		List<NameValuePair> result = new ArrayList<NameValuePair>(postParams.size());
 		for (String key : postParams.keySet()) {
 			result.add(new BasicNameValuePair(key, postParams.get(key)));
 		}
@@ -81,11 +79,8 @@ public class HttpClientStack implements HttpStack {
 	}
 
 	@Override
-	public HttpResponse performRequest(Request<?> request,
-			Map<String, String> additionalHeaders) throws IOException,
-			AuthFailureError {
-		HttpUriRequest httpRequest = createHttpRequest(request,
-				additionalHeaders);
+	public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders) throws IOException, AuthFailureError {
+		HttpUriRequest httpRequest = createHttpRequest(request, additionalHeaders);
 		addHeaders(httpRequest, additionalHeaders);
 		addHeaders(httpRequest, request.getHeaders());
 		onPrepareRequest(httpRequest);
@@ -102,8 +97,7 @@ public class HttpClientStack implements HttpStack {
 	 * Creates the appropriate subclass of HttpUriRequest for passed in request.
 	 */
 	@SuppressWarnings("deprecation")
-	/* protected */static HttpUriRequest createHttpRequest(Request<?> request,
-			Map<String, String> additionalHeaders) throws AuthFailureError,
+	/* protected */static HttpUriRequest createHttpRequest(Request<?> request, Map<String, String> additionalHeaders) throws AuthFailureError,
 			IOException {
 		switch (request.getMethod()) {
 		case Method.DEPRECATED_GET_OR_POST: {
@@ -115,8 +109,7 @@ public class HttpClientStack implements HttpStack {
 			byte[] postBody = request.getPostBody();
 			if (postBody != null) {
 				HttpPost postRequest = new HttpPost(request.getUrl());
-				postRequest.addHeader(HEADER_CONTENT_TYPE,
-						request.getPostBodyContentType());
+				postRequest.addHeader(HEADER_CONTENT_TYPE, request.getPostBodyContentType());
 				HttpEntity entity;
 				entity = new ByteArrayEntity(postBody);
 				postRequest.setEntity(entity);
@@ -131,15 +124,12 @@ public class HttpClientStack implements HttpStack {
 			return new HttpDelete(request.getUrl());
 		case Method.POST: {
 			HttpPost postRequest = new HttpPost(request.getUrl());
-			postRequest.addHeader(HEADER_CONTENT_TYPE,
-					request.getBodyContentType());
 			setEntityIfNonEmptyBody(postRequest, request);
 			return postRequest;
 		}
 		case Method.PUT: {
 			HttpPut putRequest = new HttpPut(request.getUrl());
-			putRequest.addHeader(HEADER_CONTENT_TYPE,
-					request.getBodyContentType());
+			putRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
 			setEntityIfNonEmptyBody(putRequest, request);
 			return putRequest;
 		}
@@ -151,8 +141,6 @@ public class HttpClientStack implements HttpStack {
 			return new HttpTrace(request.getUrl());
 		case Method.PATCH: {
 			HttpPatch patchRequest = new HttpPatch(request.getUrl());
-			patchRequest.addHeader(HEADER_CONTENT_TYPE,
-					request.getBodyContentType());
 			setEntityIfNonEmptyBody(patchRequest, request);
 			return patchRequest;
 		}
@@ -161,35 +149,29 @@ public class HttpClientStack implements HttpStack {
 		}
 	}
 
-	private static void setEntityIfNonEmptyBody(
-			HttpEntityEnclosingRequestBase httpRequest, Request<?> request)
-			throws IOException, AuthFailureError {
+	private static void setEntityIfNonEmptyBody(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) throws IOException, AuthFailureError {
 
 		if (request instanceof MultiPartRequest) {
-
-			final Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request)
-					.getMultipartParams();
-			final Map<String, String> filesToUpload = ((MultiPartRequest<?>) request)
-					.getFilesToUpload();
-
 			MultipartEntity multipartEntity = new MultipartEntity();
+			final String charset = ((MultiPartRequest<?>) request).getProtocolCharset();
+			httpRequest.addHeader(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, multipartEntity.getBoundary()));
+
+			final Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
+			final Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
 
 			for (String key : multipartParams.keySet()) {
-				multipartEntity.addPart(new StringPart(key, multipartParams
-						.get(key).value));
+				multipartEntity.addPart(new StringPart(key, multipartParams.get(key).value));
 			}
 
 			for (String key : filesToUpload.keySet()) {
 				File file = new File(filesToUpload.get(key));
 
 				if (!file.exists()) {
-					throw new IOException(String.format("File not found: %s",
-							file.getAbsolutePath()));
+					throw new IOException(String.format("File not found: %s", file.getAbsolutePath()));
 				}
 
 				if (file.isDirectory()) {
-					throw new IOException(String.format(
-							"File is a directory: %s", file.getAbsolutePath()));
+					throw new IOException(String.format("File is a directory: %s", file.getAbsolutePath()));
 				}
 
 				multipartEntity.addPart(new FilePart(key, file, null, null));
@@ -197,6 +179,7 @@ public class HttpClientStack implements HttpStack {
 			httpRequest.setEntity(multipartEntity);
 
 		} else {
+			httpRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
 			byte[] body = request.getBody();
 			if (body != null) {
 				HttpEntity entity = new ByteArrayEntity(body);

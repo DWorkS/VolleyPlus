@@ -36,6 +36,10 @@ public class MultipartEntity extends AbstractHttpEntity implements Cloneable {
     public boolean isRepeatable() {
         return true;
     }
+    
+    public String getBoundary() {
+        return boundary.getBoundary();
+    }
 
     public long getContentLength() {
         long result = 0;
