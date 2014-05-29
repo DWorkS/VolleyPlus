@@ -308,7 +308,7 @@ public class SimpleImageLoader extends ImageLoader {
     }
     
 
-    private static ImageListener getImageListener(final Resources resources,
+    public static ImageListener getImageListener(final Resources resources,
             final ImageView imageView, final Drawable placeHolder, final boolean fadeInImage) {
         return new ImageListener() {
             @Override
