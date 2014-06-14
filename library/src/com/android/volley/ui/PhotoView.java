@@ -620,6 +620,7 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
     public void resetTransformations() {
         // snap transformations; we don't animate
         mMatrix.set(mOriginalMatrix);
+
         // Invalidate the view because if you move off this PhotoView
         // to another one and come back, you want it to draw from scratch
         // in case you were zoomed in or translated (since those settings
@@ -862,7 +863,6 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
                 mMatrix.setRectToRect(mTempSrc, mTempDst, Matrix.ScaleToFit.CENTER);
             }
         }
-        
         mOriginalMatrix.set(mMatrix);
     }
 
