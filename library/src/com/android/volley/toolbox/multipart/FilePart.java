@@ -8,6 +8,8 @@ import java.io.OutputStream;
 
 import org.apache.http.protocol.HTTP;
 
+import com.android.volley.Response.ProgressListener;
+
 
 /**
  * @author <a href="mailto:vit at cleverua.com">Vitaliy Khudenko</a>
@@ -15,6 +17,7 @@ import org.apache.http.protocol.HTTP;
 public final class FilePart extends BasePart {
 
     private final File file;
+    private ProgressListener mProgressListener;
     
     /**
      * @param name String - name of parameter (may not be <code>null</code>).
@@ -55,23 +58,46 @@ public final class FilePart extends BasePart {
             }            
         };
     }
+    
+    public void setProgressListener(ProgressListener listner){
+    	mProgressListener = listner;
+    }
 
     public long getContentLength(Boundary boundary) {
         return getHeader(boundary).length + file.length() + CRLF.length;
     }
 
+    @Override
     public void writeTo(OutputStream out, Boundary boundary) throws IOException {
         out.write(getHeader(boundary));
-        InputStream in = new FileInputStream(file);
-        try {
-            byte[] tmp = new byte[4096];
-            int l;
-            while ((l = in.read(tmp)) != -1) {
-                out.write(tmp, 0, l);
-            }
-        } finally {
-            in.close();
-        }
+		if (mProgressListener != null) {
+	        InputStream in = new FileInputStream(file);
+	        try {
+				int transferredBytes = 0;
+				int totalSize = (int) file.length();
+	            byte[] tmp = new byte[4096];
+	            int l;
+	            while ((l = in.read(tmp)) != -1) {
+	                out.write(tmp, 0, l);
+	                transferredBytes += l;
+	                mProgressListener.onProgress(transferredBytes, totalSize);
+	            }
+	        } finally {
+	            in.close();
+	        }
+		}
+		else{
+	        InputStream in = new FileInputStream(file);
+	        try {
+	            byte[] tmp = new byte[4096];
+	            int l;
+	            while ((l = in.read(tmp)) != -1) {
+	                out.write(tmp, 0, l);
+	            }
+	        } finally {
+	            in.close();
+	        }
+		}
         out.write(CRLF);
     }
 }

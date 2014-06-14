@@ -43,6 +43,7 @@ import org.apache.http.params.HttpParams;
 
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
+import com.android.volley.Response.ProgressListener;
 import com.android.volley.error.AuthFailureError;
 import com.android.volley.request.MultiPartRequest;
 import com.android.volley.request.MultiPartRequest.MultiPartParam;
@@ -152,6 +153,10 @@ public class HttpClientStack implements HttpStack {
 	private static void setEntityIfNonEmptyBody(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) throws IOException, AuthFailureError {
 
 		if (request instanceof MultiPartRequest) {
+			ProgressListener progressListener = null;
+			if (request instanceof ProgressListener) {
+				progressListener = (ProgressListener) request;
+			}
 			MultipartEntity multipartEntity = new MultipartEntity();
 			final String charset = ((MultiPartRequest<?>) request).getProtocolCharset();
 			httpRequest.addHeader(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, multipartEntity.getBoundary()));
@@ -174,7 +179,10 @@ public class HttpClientStack implements HttpStack {
 					throw new IOException(String.format("File is a directory: %s", file.getAbsolutePath()));
 				}
 
-				multipartEntity.addPart(new FilePart(key, file, null, null));
+				FilePart filePart = new FilePart(key, file, null, null);
+				filePart.setProgressListener(progressListener);
+				
+				multipartEntity.addPart(filePart);
 			}
 			httpRequest.setEntity(multipartEntity);
 

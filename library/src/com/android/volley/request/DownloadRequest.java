@@ -28,14 +28,16 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
+import com.android.volley.Response.ProgressListener;
 import com.android.volley.toolbox.HttpHeaderParser;
 
 /**
  * A canned request for retrieving the response body at a given URL as a String.
  */
-public class DownloadRequest extends Request<String> {
+public class DownloadRequest extends Request<String> implements ProgressListener {
     private final Listener<String> mListener;
     private final String mDownloadPath;
+    private ProgressListener mProgressListener;
 
     /**
      * Creates a new request with the given method.
@@ -50,6 +52,10 @@ public class DownloadRequest extends Request<String> {
         super(Method.GET, url, errorListener);
         mDownloadPath =download_path;
         mListener = listener;
+    }
+    
+    public void setOnProgressListener(ProgressListener listener){
+    	mProgressListener = listener;
     }
 
     @Override
@@ -83,4 +89,11 @@ public class DownloadRequest extends Request<String> {
         
         return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
     }
+
+	@Override
+	public void onProgress(int transferredBytes, int totalSize) {
+		if(null != mProgressListener){
+			mProgressListener.onProgress(transferredBytes, totalSize);
+		}
+	}
 }
