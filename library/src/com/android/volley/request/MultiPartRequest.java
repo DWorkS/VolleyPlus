@@ -9,16 +9,18 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
+import com.android.volley.Response.ProgressListener;
 
 /**
  * A request for making a Multi Part request
  * 
  * @param <T> Response expected
  */
-public abstract class MultiPartRequest<T> extends Request<T> {
+public abstract class MultiPartRequest<T> extends Request<T> implements ProgressListener{
 
 	private static final String PROTOCOL_CHARSET = "utf-8";
 	private Listener<T> mListener;
+	private ProgressListener mProgressListener;
 	private Map<String, MultiPartParam> mMultipartParams = null;
 	private Map<String, String> mFileUploads = null;
 	public static final int TIMEOUT_MS = 30000;
@@ -72,6 +74,13 @@ public abstract class MultiPartRequest<T> extends Request<T> {
 		if(null != mListener){
     		mListener.onResponse(response);
     	}
+	}
+	
+	@Override
+	public void onProgress(long transferredBytes, long totalSize) {
+		if(null != mProgressListener){
+			mProgressListener.onProgress(transferredBytes, totalSize);
+		}
 	}
 
 	/**

@@ -53,10 +53,12 @@ public class MultipartEntity extends AbstractHttpEntity implements Cloneable {
     /**
      * Returns <code>null</code> since it's not designed to be used for server responses.
      */
+    @Override
     public InputStream getContent() throws IOException {
         return null;
     }
     
+    @Override
     public void writeTo(final OutputStream out) throws IOException {
         if (out == null) {
             throw new IllegalArgumentException("Output stream may not be null");    //$NON-NLS-1$

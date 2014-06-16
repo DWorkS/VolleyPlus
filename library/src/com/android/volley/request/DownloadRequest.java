@@ -44,6 +44,7 @@ public class DownloadRequest extends Request<String> implements ProgressListener
      *
      * @param method the request {@link Method} to use
      * @param url URL to fetch the string at
+     * @param download_apth path to save the file to
      * @param listener Listener to receive the String response
      * @param errorListener Error listener, or null to ignore errors
      */
@@ -91,7 +92,7 @@ public class DownloadRequest extends Request<String> implements ProgressListener
     }
 
 	@Override
-	public void onProgress(int transferredBytes, int totalSize) {
+	public void onProgress(long transferredBytes, long totalSize) {
 		if(null != mProgressListener){
 			mProgressListener.onProgress(transferredBytes, totalSize);
 		}

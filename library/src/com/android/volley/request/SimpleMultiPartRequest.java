@@ -13,7 +13,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
  * 
  * @param <T> Response expected
  */
-public abstract class SimpleMultiPartRequest extends MultiPartRequest<String> {
+public class SimpleMultiPartRequest extends MultiPartRequest<String> {
 
 	private Listener<String> mListener;
 
