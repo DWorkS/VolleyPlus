@@ -179,7 +179,12 @@ public class DiskBasedCache implements Cache {
         try {
             FileOutputStream fos = new FileOutputStream(file);
             CacheHeader e = new CacheHeader(key, entry);
-            e.writeHeader(fos);
+            boolean success = e.writeHeader(fos);
+            if (!success) {
+                fos.close();
+                VolleyLog.d("Failed to write header for %s", file.getAbsolutePath());
+                throw new IOException();
+            }
             fos.write(entry.data);
             fos.close();
             putEntry(key, e);
