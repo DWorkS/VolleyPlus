@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
@@ -38,6 +39,10 @@ import android.util.Log;
 public class Utils {
 
 	public static final int ANIMATION_FADE_IN_TIME = 200;
+	public static final String SCHEME_VIDEO = "video";
+	public static final String SCHEME_FILE = ContentResolver.SCHEME_FILE;
+	public static final String SCHEME_CONTENT = ContentResolver.SCHEME_CONTENT;
+	public static final String SCHEME_ANDROID_RESOURCE = ContentResolver.SCHEME_ANDROID_RESOURCE;
 
 	private Utils() {
 	};
@@ -244,11 +249,11 @@ public class Utils {
 		}
 	}
 	
-	
 	public static boolean isSpecialType(String url){
-		boolean isSpecial = url.startsWith("file:")
-		|| url.startsWith("video:")
-		|| url.startsWith("android.resource:");
+		boolean isSpecial = url.startsWith(SCHEME_FILE)
+		|| url.startsWith(SCHEME_VIDEO)
+		|| url.startsWith(SCHEME_CONTENT)
+		|| url.startsWith(SCHEME_ANDROID_RESOURCE);
 		return isSpecial;
 	}
 }

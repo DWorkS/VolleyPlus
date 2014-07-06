@@ -17,6 +17,7 @@ package com.android.volley.cache.plus;
 
 import java.util.LinkedList;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -77,6 +78,10 @@ public class ImageLoader {
     
     /** {@link Resources} instance for loading resource uris */
     private Resources mResources;
+    
+    /** {@link ContentResolver} instance for loading content uris */
+    private ContentResolver mContentResolver;
+    
     private ArrayMap<String, String> mHeaders;
     
     /**
@@ -285,7 +290,7 @@ public class ImageLoader {
         // The request is not already in flight. Send the new request to the network and
         // track it.
         Request<?> newRequest =
-            new ImageRequest(requestUrl, mResources, new Listener<BitmapDrawable>() {
+            new ImageRequest(requestUrl, mResources, mContentResolver, new Listener<BitmapDrawable>() {
                 @Override
                 public void onResponse(BitmapDrawable response) {
                     onGetImageSuccess(cacheKey, response);
@@ -630,6 +635,18 @@ public class ImageLoader {
 
     public Resources getResources() {
     	return mResources;
+    }
+    
+    /**
+     * Set a {@link ContentResolver} instance if you need to support content uris for loading images
+     * @param resources {@link ContentResolver} instance for loading images. Get from {@link Context#getContentResolver()}
+     */
+    public void setResources(ContentResolver contentResolver) {
+    	mContentResolver = contentResolver;
+    }
+    
+    public ContentResolver getContentResolver() {
+    	return mContentResolver;
     }
     
 	public void setHeaders(ArrayMap<String, String> headers) {

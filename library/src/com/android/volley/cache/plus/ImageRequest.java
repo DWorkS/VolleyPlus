@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import android.annotation.TargetApi;
+import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -61,6 +62,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
     private final int mMaxHeight;
     
 	private Resources mResources;
+	private ContentResolver mContentResolver;
 	
     /** Decoding lock so that we don't decode more than one image at a time (to avoid OOM's) */
     private static final Object sDecodeLock = new Object();
@@ -79,6 +81,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
      * @param url URL of the image
      * @param resources {@link Resources} reference for parsing resource URIs. Can be
      * 			<code>null</code> if you don't need to load resource uris
+     * @param contentResolver 
      * @param listener Listener to receive the decoded bitmap
      * @param maxWidth Maximum width to decode this bitmap to, or zero for none
      * @param maxHeight Maximum height to decode this bitmap to, or zero for
@@ -86,7 +89,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
      * @param decodeConfig Format to decode the bitmap to
      * @param errorListener Error listener, or null to ignore errors
      */
-    public ImageRequest(String url, Resources resources,
+    public ImageRequest(String url, Resources resources, ContentResolver contentResolver,
     		Response.Listener<BitmapDrawable> listener, int maxWidth, int maxHeight,
             Config decodeConfig, Response.ErrorListener errorListener) {
         super(Method.GET, url, errorListener);
@@ -94,6 +97,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
                 new DefaultRetryPolicy(IMAGE_TIMEOUT_MS, IMAGE_MAX_RETRIES, IMAGE_BACKOFF_MULT));
         
         mResources = resources;
+        mContentResolver = contentResolver;
         mListener = listener;
         mDecodeConfig = decodeConfig;
         mMaxWidth = maxWidth;

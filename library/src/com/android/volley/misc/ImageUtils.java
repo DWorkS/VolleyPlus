@@ -60,7 +60,6 @@ public class ImageUtils {
      * @param fileDescriptor The file descriptor to read from
      * @param reqWidth The requested width of the resulting bitmap
      * @param reqHeight The requested height of the resulting bitmap
-     * @param cache The ImageCache used to find candidate bitmaps for use with inBitmap
      * @return A bitmap sampled down from the original with the same aspect ratio and dimensions
      *         that are equal to or greater than the requested width and height
      */
@@ -74,6 +73,26 @@ public class ImageUtils {
 
         // Calculate inSampleSize
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+
+        return BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+    }
+    
+    /**
+     * Decode and sample down a bitmap from a file input stream to the requested width and height.
+     *
+     * @param fileDescriptor The file descriptor to read from
+     * @return A bitmap sampled down from the original with the same aspect ratio and dimensions
+     *         that are equal to or greater than the requested width and height
+     */
+    public static Bitmap decodeSampledBitmapFromDescriptor(FileDescriptor fileDescriptor) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
@@ -129,6 +148,98 @@ public class ImageUtils {
             }
         }
         return inSampleSize;
+    }
+    
+
+    /**
+     * @return true if the MimeType type is image
+     */
+    public static boolean isImageMimeType(String mimeType) {
+        return mimeType != null && mimeType.startsWith("image/");
+    }
+
+    /**
+     * Create a bitmap from a local URI
+     *
+     * @param resolver The ContentResolver
+     * @param uri      The local URI
+     * @param maxSize  The maximum size (either width or height)
+     * @return The new bitmap or null
+     */
+    public static Bitmap decodeStream(final ContentResolver resolver, final Uri uri,
+            final int maxSize) {
+        Bitmap result = null;
+        final InputStreamFactory factory = createInputStreamFactory(resolver, uri);
+        try {
+            final Point bounds = getImageBounds(factory);
+            if (bounds == null) {
+                return result;
+            }
+
+            final BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inSampleSize = Math.max(bounds.x / maxSize, bounds.y / maxSize);
+            result = decodeStream(factory, null, opts);
+            return result;
+
+        } catch (FileNotFoundException exception) {
+            // Do nothing - the photo will appear to be missing
+        } catch (IOException exception) {
+        } catch (IllegalArgumentException exception) {
+            // Do nothing - the photo will appear to be missing
+        } catch (SecurityException exception) {
+        }
+        return result;
+    }
+    
+    /**
+     * Create a bitmap from a local URI
+     *
+     * @param resolver The ContentResolver
+     * @param uri      The local URI
+     * @param maxSize  The maximum size (either width or height)
+     * @return The new bitmap or null
+     */
+    public static Bitmap decodeStream(final ContentResolver resolver, final Uri uri,
+    		BitmapFactory.Options opts) {
+        Bitmap result = null;
+        final InputStreamFactory factory = createInputStreamFactory(resolver, uri);
+        try {
+            result = decodeStream(factory, null, opts);
+            return result;
+
+        } catch (FileNotFoundException exception) {
+            // Do nothing - the photo will appear to be missing
+        } catch (IllegalArgumentException exception) {
+            // Do nothing - the photo will appear to be missing
+        } catch (SecurityException exception) {
+        }
+        return result;
+    }
+    
+    /**
+     * Wrapper around {@link BitmapFactory#decodeStream(InputStream, Rect,
+     * BitmapFactory.Options)} that returns {@code null} on {@link
+     * OutOfMemoryError}.
+     *
+     * @param is The input stream that holds the raw data to be decoded into a
+     *           bitmap.
+     * @param outPadding If not null, return the padding rect for the bitmap if
+     *                   it exists, otherwise set padding to [-1,-1,-1,-1]. If
+     *                   no bitmap is returned (null) then padding is
+     *                   unchanged.
+     * @param opts null-ok; Options that control downsampling and whether the
+     *             image should be completely decoded, or just is size returned.
+     * @return The decoded bitmap, or null if the image data could not be
+     *         decoded, or, if opts is non-null, if opts requested only the
+     *         size be returned (in opts.outWidth and opts.outHeight)
+     */
+    public static Bitmap decodeStream(InputStream is, Rect outPadding, BitmapFactory.Options opts) {
+        try {
+            return BitmapFactory.decodeStream(is, outPadding, opts);
+        } catch (OutOfMemoryError oome) {
+            Log.e(TAG, "ImageUtils#decodeStream(InputStream, Rect, Options) threw an OOME", oome);
+            return null;
+        }
     }
     
     /**
