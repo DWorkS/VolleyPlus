@@ -16,12 +16,14 @@
 
 package com.android.volley.misc;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
 
 public class ViewCompat {
 	
+	@SuppressLint("NewApi")
 	@SuppressWarnings("deprecation")
 	public static void setBackground(View view, Drawable drawable){
 		if(Utils.hasJellyBean()){

@@ -16,12 +16,13 @@
 
 package com.android.volley.misc;
 
-import android.os.Trace;
-import android.util.Log;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+
+import android.annotation.TargetApi;
+import android.os.Build;
+import android.util.Log;
 
 /**
  * Wrapper for {@link InputStream} that allows you to read bytes from it like a byte[]. An
@@ -259,7 +260,7 @@ public class InputStreamBuffer {
      * @return True if the byte at the requested index has been filled. False if the wrapped
      * input stream ends before we reach the index.
      */
-    private boolean fill(final int index) {
+	private boolean fill(final int index) {
         Trace.beginSection("fill");
         if (index < mOffset) {
             Trace.endSection();
@@ -286,7 +287,7 @@ public class InputStreamBuffer {
                         "Increasing buffer length from %d to %d. Bad buffer size chosen, "
                                 + "or advanceTo() not called.",
                         mBuffer.length, length));
-                mBuffer = Arrays.copyOf(mBuffer, length);
+                mBuffer = copyOf(mBuffer, length);
             }
         }
 
@@ -312,6 +313,34 @@ public class InputStreamBuffer {
         return i < mFilled;
     }
 
+    /**
+     * Arrays.copyOf(byte[] original, int newLength) not found in API <= 8.
+     * 
+     * Copies the specified array, truncating or padding with zeros (if necessary)
+     * so the copy has the specified length. For all indices that are valid in both
+     * the original array and the copy, the two arrays will contain identical values.
+     * For any indices that are valid in the copy but not the original, the copy will
+     * contain (byte)0. Such indices will exist if and only if the specified length is
+     * greater than that of the original array.
+     * 
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returne
+     * @return a copy of the original array, truncated or padded with zeros to obtain the 
+     * specified length
+     */
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public static byte[] copyOf(byte[] original, int newLength) {
+		byte[] copy;
+		if(Utils.hasGingerbread()){
+			copy = Arrays.copyOf(original, newLength);
+		}
+		else{
+			copy = new byte[newLength];
+			System.arraycopy(original, 0, copy, 0, Math.min(original.length, newLength));	
+		}
+		return copy;
+	}
+	
     /**
      * Modify the internal buffer so that all the bytes are shifted towards the head by
      * <code>i</code>. In other words, the byte at index <code>i</code> will now be at index
