@@ -2,14 +2,49 @@ VolleyPlus
 ==========
 ![VolleyPlus](https://github.com/DWorkS/VolleyPlus/raw/master/header.png)
 
-`VolleyPlus` library Project improvements to Volley along with full image caching.
-Improved features:
+**VolleyPlus** library Project improvements to Volley along with full image caching.
 
- * `VolleyTickle` and `RequestTickle` for synchronous execution 
- * `NetworkImageView` improved
- * `DiskLruBasedCache` based on `DiskLruCache` for L2 cache
- * Improved Image Loader : `SimpleImageLoder`
- * `MultiPartRequest` for file uploads
+VolleyPlus involves using **RequestQueue**, **RequestTickle** and **Request**.
+* `RequestQueue` - Dispatch Queue which takes a Request and executes in a worker thread or if cache found its takes from cache and responds back to the UI main thread.
+* `RequestTickle` - A single class which takes a Request and executes in same thread or if cache found its takes from cache and responds back to the same thread. Mainly useful in sync operations where you want to perform operations sequentially.
+* `Request` - All network(HTTP) requests are created from this class. It takes main parameters required for a HTTP request like
+	* METHOD Type - GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE, PATCH
+	* URL 
+	* Headers
+	* Parameters
+	* Retry Policy
+	* Request Priority (RequestQueue)
+	* Request data (HTTP Body)
+	* Request Cancellation
+	* Response Caching
+	* Successful Response Listener
+	* Error Listener  
+	* Progress Listener (for few Request types)
+
+**VolleyPlus** Provides variety of implementations of **Request**.    
+* StringRequest
+* JsonRequest
+* JsonObjectRequest
+* JsonArrayRequest
+* GZipRequest
+* MultiPartRequest
+* SimpleMultiPartRequest
+* DownloadRequest
+* ImageRequest
+
+VolleyPlus has also very powerful image caching **SimpleImageLoder**.
+* **DiskLruBasedCache** based on **DiskLruCache** for Level2 (L2) cache
+* Supports `NewtworkImageView` usage with `SimpleImageLoader`
+* Can also update the cache
+* Provides option to flush, close and clear the cache in both L1 and L2 cache
+* Supported types of Image Caching
+    *   Network Caching
+    *   Resource Caching
+    *   File Caching
+    *   Video Caching
+    *   Content URI Caching
+
+
 
 ## Sample App
 
