@@ -68,18 +68,7 @@ mRequestQueue.add(stringRequest);
 ```
 RequestTickle mRequestTickle = VolleyTickle.newRequestTickle(getApplicationContext());
 
-StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-    @Override
-    public void onResponse(String response) {
-    	....
-    }
-}, new Response.ErrorListener() {
-    @Override
-    public void onErrorResponse(VolleyError error) {
-    	....
-    }
-});
-
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url, null, null);
 mRequestTickle.add(stringRequest);
 NetworkResponse response = mRequestTickle.start();
 
