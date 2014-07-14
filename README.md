@@ -2,14 +2,103 @@ VolleyPlus
 ==========
 ![VolleyPlus](https://github.com/DWorkS/VolleyPlus/raw/master/header.png)
 
-`VolleyPlus` library Project improvements to Volley along with full image caching.
-Improved features:
+**VolleyPlus** library Project improvements to Volley along with full image caching.It involves using **RequestQueue**, **RequestTickle** and **Request**.
+* `RequestQueue` - Dispatch Queue which takes a Request and executes in a worker thread or if cache found its takes from cache and responds back to the UI main thread.
+* `RequestTickle` - A single class which takes a Request and executes in same thread or if cache found its takes from cache and responds back to the same thread. Mainly useful in sync operations where you want to perform operations sequentially.
+* `Request` - All network(HTTP) requests are created from this class. It takes main parameters required for a HTTP request like
+	* METHOD Type - GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE, PATCH
+	* URL 
+	* Headers
+	* Parameters
+	* Retry Policy
+	* Request Priority (RequestQueue)
+	* Request data (HTTP Body)
+	* Request Cancellation
+	* Response Caching
+	* Successful Response Listener
+	* Error Listener  
+	* Progress Listener (for few Request types)
 
- * `VolleyTickle` and `RequestTickle` for synchronous execution 
- * `NetworkImageView` improved
- * `DiskLruBasedCache` based on `DiskLruCache` for L2 cache
- * Improved Image Loader : `SimpleImageLoder`
- * `MultiPartRequest` for file uploads
+**VolleyPlus** Provides variety of implementations of **Request**.    
+* StringRequest
+* JsonRequest
+* JsonObjectRequest
+* JsonArrayRequest
+* GsonRequest
+* GZipRequest
+* MultiPartRequest
+* SimpleMultiPartRequest
+* DownloadRequest
+* ImageRequest
+
+**VolleyPlus** has also very powerful image caching **SimpleImageLoder**.
+* **DiskLruBasedCache** based on **DiskLruCache** for Level2 (L2) cache
+* Supports `NewtworkImageView` usage with `SimpleImageLoader`
+* Can also update the cache
+* Provides option to flush, close and clear the cache in both L1 and L2 cache
+* Supported types of Image Caching
+    *   Network Caching
+    *   Resource Caching
+    *   File Caching
+    *   Video Caching
+    *   Content URI Caching
+
+
+## Usage
+**RequestQueue**
+```
+RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+    @Override
+    public void onResponse(String response) {
+    	....
+    }
+}, new Response.ErrorListener() {
+    @Override
+    public void onErrorResponse(VolleyError error) {
+    	....
+    }
+});
+
+mRequestQueue.add(stringRequest);
+```
+
+**RequestTickle**
+```
+RequestTickle mRequestTickle = VolleyTickle.newRequestTickle(getApplicationContext());
+
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url, null, null);
+mRequestTickle.add(stringRequest);
+NetworkResponse response = mRequestTickle.start();
+
+if (response.statusCode == 200) {
+	String data = VolleyTickle.parseResponse(response);
+	....
+}
+else{
+	....
+}
+
+```
+
+**SimpleImageLoader**
+```
+ImageCacheParams cacheParams = new ImageCacheParams(getApplicationContext(), "CacheDirectory");
+cacheParams.setMemCacheSizePercent(0.5f);
+
+SimpleImageLoader mImageFetcher = new SimpleImageLoader(getApplicationContext(), R.drawable.holder_image, cacheParams);
+mImageFetcher.setMaxImageSize(300);
+....
+
+mImageFetcher.get(url, image_view);
+
+OR
+
+network_image_view.setImageUrl(url, mImageFetcher);
+network_image_view.setDefaultImageResId(R.drawable.holder_image);
+
+```
 
 ## Sample App
 
