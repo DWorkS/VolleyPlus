@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Copyright (C) 2012 The Android Open Source Project
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+    <GridView
+        android:id="@+id/gridView"
+        style="@style/PhotoGridLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:columnWidth="@dimen/image_thumbnail_size"
+        android:horizontalSpacing="@dimen/image_thumbnail_spacing"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="@dimen/image_thumbnail_spacing" >
+    </GridView>
 
-       http://www.apache.org/licenses/LICENSE-2.0
+    <com.google.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="ca-app-pub-6407484780907805/5449003679"
+        ads:loadAdOnCreate="true" />
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
-<GridView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/gridView"
-    style="@style/PhotoGridLayout"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:columnWidth="@dimen/image_thumbnail_size"
-    android:horizontalSpacing="@dimen/image_thumbnail_spacing"
-    android:numColumns="auto_fit"
-    android:stretchMode="columnWidth"
-    android:verticalSpacing="@dimen/image_thumbnail_spacing" >
-
-</GridView>
+</LinearLayout>

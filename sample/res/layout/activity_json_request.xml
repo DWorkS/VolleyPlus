@@ -1,20 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/btn_json_request"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/act__json_request__btn_request" >
-    </Button>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/tv_result"
-        android:layout_width="match_parent"
+        <Button
+            android:id="@+id/btn_json_request"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/act__json_request__btn_request" >
+        </Button>
+
+        <TextView
+            android:id="@+id/tv_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true" />
+    </LinearLayout>
+
+    <com.google.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textIsSelectable="true" />
+        ads:adSize="SMART_BANNER"
+        ads:adUnitId="ca-app-pub-6407484780907805/5449003679"
+        ads:loadAdOnCreate="true" />
 
 </LinearLayout>
