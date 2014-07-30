@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -46,8 +47,6 @@ import com.android.volley.ui.NetworkImageView;
 import com.volley.demo.util.Images;
 import com.volley.demo.util.Utils;
 
-import dev.dworks.libs.actionbarplus.ActionBarFragment;
-
 /**
  * The main fragment that powers the ImageGridActivity screen. Fairly straight
  * forward GridView implementation with the key addition being the ImageWorker
@@ -56,7 +55,7 @@ import dev.dworks.libs.actionbarplus.ActionBarFragment;
  * configuration changes like orientation change so the images are populated
  * quickly if, for example, the user rotates the device.
  */
-public class SimpleCacheFragment extends ActionBarFragment implements AdapterView.OnItemClickListener {
+public class SimpleCacheFragment extends Fragment implements AdapterView.OnItemClickListener {
 	private static final String TAG = "ImageGridFragment";
 	private static final String IMAGE_CACHE_DIR = "thumbs";
 
