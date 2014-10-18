@@ -16,6 +16,14 @@
 
 package com.android.volley.cache;
 
+import android.os.SystemClock;
+
+import com.android.volley.Cache;
+import com.android.volley.VolleyLog;
+import com.android.volley.misc.IOUtils;
+import com.android.volley.misc.IOUtils.CountingInputStream;
+
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -35,13 +43,6 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
-import android.os.SystemClock;
-
-import com.android.volley.Cache;
-import com.android.volley.VolleyLog;
-import com.android.volley.misc.IOUtils;
-import com.android.volley.misc.IOUtils.CountingInputStream;
 
 /**
  * Cache implementation that caches files directly onto the hard disk in the specified
@@ -375,9 +376,9 @@ public class DiskBasedCache implements Cache {
 
             @Override
             public CacheHeader call() throws Exception {
-                FileInputStream fis = null;
+                BufferedInputStream fis = null;
                 try {
-                    fis = new FileInputStream(file);
+                    fis = new BufferedInputStream(new FileInputStream(file));
                     CacheHeader entry = CacheHeader.readHeader(fis);
                     entry.size = file.length();
                     CacheContainer.super.put(entry.key, entry);

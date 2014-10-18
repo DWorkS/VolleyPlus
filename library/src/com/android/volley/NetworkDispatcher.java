@@ -16,8 +16,6 @@
 
 package com.android.volley;
 
-import java.util.concurrent.BlockingQueue;
-
 import android.annotation.TargetApi;
 import android.net.TrafficStats;
 import android.os.Build;
@@ -25,6 +23,8 @@ import android.os.Process;
 
 import com.android.volley.error.VolleyError;
 import com.android.volley.misc.Utils;
+
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Provides a thread for performing network dispatch from a queue of requests.
@@ -84,8 +84,8 @@ public class NetworkDispatcher extends Thread {
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        Request<?> request;
         while (true) {
+            Request<?> request;
             try {
                 // Take a request from the queue.
                 request = mQueue.take();

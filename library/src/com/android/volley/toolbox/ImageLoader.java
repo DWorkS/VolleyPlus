@@ -287,19 +287,8 @@ public class ImageLoader {
 
         // The request is not already in flight. Send the new request to the network and
         // track it.
-        Request<?> newRequest =
-            new ImageRequest(requestUrl, mResources, mContentResolver, new Listener<Bitmap>() {
-                @Override
-                public void onResponse(Bitmap response) {
-                    onGetImageSuccess(cacheKey, response);
-                }
-            }, maxWidth, maxHeight,
-            Config.RGB_565, new ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    onGetImageError(cacheKey, error);
-                }
-            });
+        Request<Bitmap> newRequest = makeImageRequest(requestUrl, maxWidth, maxHeight, cacheKey);
+
         newRequest.setHeaders(mHeaders);
         mRequestQueue.add(newRequest);
         mInFlightRequests.put(cacheKey,
@@ -347,7 +336,22 @@ public class ImageLoader {
         
         return imageContainer;
     }
-    
+
+    protected Request<Bitmap> makeImageRequest(String requestUrl, int maxWidth, int maxHeight, final String cacheKey) {
+        return new ImageRequest(requestUrl, mResources, mContentResolver, new Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                onGetImageSuccess(cacheKey, response);
+            }
+        }, maxWidth, maxHeight,
+                Config.RGB_565, new ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                onGetImageError(cacheKey, error);
+            }
+        });
+    }
+
     /**
      * Sets the amount of time to wait after the first response arrives before delivering all
      * responses. Batching can be disabled entirely by passing in 0.

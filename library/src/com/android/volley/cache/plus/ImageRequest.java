@@ -26,8 +26,10 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore.Images;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
@@ -152,10 +154,14 @@ public class ImageRequest extends Request<BitmapDrawable> {
         // Serialize all decode on a global lock to reduce concurrent heap usage.
         synchronized (sDecodeLock) {
             try {
-				if (getUrl().startsWith("file:")) {
+				if (getUrl().startsWith(Utils.SCHEME_VIDEO)) {
+					return doVideoFileParse();
+				} else if (getUrl().startsWith(Utils.SCHEME_FILE)) {
 					return doFileParse();
-				} else if (getUrl().startsWith("android.resource:")) {
+				} else if (getUrl().startsWith(Utils.SCHEME_ANDROID_RESOURCE)) {
 					return doResourceParse();
+				} else if (getUrl().startsWith(Utils.SCHEME_CONTENT)) {
+					return doContentParse();
 				} else {
 					return doParse(response);
 				}
@@ -166,6 +172,84 @@ public class ImageRequest extends Request<BitmapDrawable> {
         }
     }
 
+	/**
+	 * The real guts of parseNetworkResponse. Broken out for readability.
+	 * 
+	 * This version is for reading a Bitmap from Video
+	 */
+	private Response<BitmapDrawable> doVideoFileParse() {
+
+		final String requestUrl = getUrl();
+		// Remove the 'video://' prefix
+		File bitmapFile = new File(requestUrl.substring(8, requestUrl.length()));
+
+		if (!bitmapFile.exists() || !bitmapFile.isFile()) {
+			return Response.error(new ParseError(new FileNotFoundException(
+					String.format("File not found: %s",
+							bitmapFile.getAbsolutePath()))));
+		}
+
+		BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+		decodeOptions.inInputShareable = true;
+		decodeOptions.inPurgeable = true;
+		decodeOptions.inPreferredConfig = mDecodeConfig;
+		Bitmap bitmap = null;
+		if (mMaxWidth == 0 && mMaxHeight == 0) {
+
+			bitmap = getVideoFrame(bitmapFile.getAbsolutePath());
+			addMarker("read-full-size-image-from-file");
+		} else {
+			// If we have to resize this image, first get the natural bounds.
+			decodeOptions.inJustDecodeBounds = true;
+			//BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
+			int actualWidth = decodeOptions.outWidth;
+			int actualHeight = decodeOptions.outHeight;
+
+			// Then compute the dimensions we would ideally like to decode to.
+			int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
+					actualWidth, actualHeight);
+			int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,
+					actualHeight, actualWidth);
+
+			// Decode to the nearest power of two scaling factor.
+			decodeOptions.inJustDecodeBounds = false;
+			decodeOptions.inSampleSize = ImageUtils.findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			Bitmap tempBitmap = getVideoFrame(bitmapFile.getAbsolutePath());
+			addMarker(String.format("read-from-file-scaled-times-%d",
+					decodeOptions.inSampleSize));
+			// If necessary, scale down to the maximal acceptable size.
+			if (tempBitmap != null
+					&& (tempBitmap.getWidth() > desiredWidth || tempBitmap.getHeight() > desiredHeight)) {
+				bitmap = Bitmap.createScaledBitmap(tempBitmap, desiredWidth,
+						desiredHeight, true);
+				tempBitmap.recycle();
+				addMarker("scaling-read-from-file-bitmap");
+			} else {
+				bitmap = tempBitmap;
+			}
+
+		}
+
+		if (bitmap == null) {
+			return Response.error(new ParseError());
+		} else {
+	        BitmapDrawable drawable;
+			if (Utils.hasHoneycomb()) {
+	            // Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+	            drawable = new BitmapDrawable(mResources, bitmap);
+	        } else {
+	            // Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+	            // which will recycle automagically
+	            drawable = new RecyclingBitmapDrawable(mResources, bitmap);
+	        }
+			return Response.success(drawable, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
+		}
+	}
+	
+	private Bitmap getVideoFrame(String path) {
+		return ThumbnailUtils.createVideoThumbnail(path, Images.Thumbnails.MINI_KIND);
+	}
+	
 	/**
 	 * The real guts of parseNetworkResponse. Broken out for readability.
 	 * 
@@ -222,6 +306,73 @@ public class ImageRequest extends Request<BitmapDrawable> {
 				bitmap = tempBitmap;
 			}
 
+		}
+
+		if (bitmap == null) {
+			return Response.error(new ParseError());
+		} else {
+	        BitmapDrawable drawable;
+			if (Utils.hasHoneycomb()) {
+	            // Running on Honeycomb or newer, so wrap in a standard BitmapDrawable
+	            drawable = new BitmapDrawable(mResources, bitmap);
+	        } else {
+	            // Running on Gingerbread or older, so wrap in a RecyclingBitmapDrawable
+	            // which will recycle automagically
+	            drawable = new RecyclingBitmapDrawable(mResources, bitmap);
+	        }
+			return Response.success(drawable, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
+		}
+	}
+	
+	/**
+	 * The real guts of parseNetworkResponse. Broken out for readability.
+	 * 
+	 * This version is for reading a Bitmap from resource
+	 */
+	private Response<BitmapDrawable> doContentParse() {
+
+		if (mContentResolver == null) {
+			return Response.error(new ParseError("Content Resolver instance is null"));
+		}
+		final String requestUrl = getUrl();
+		// Remove the 'content://' prefix
+		//final String imageData = requestUrl.substring(10, requestUrl.length());
+		final Uri imageUri = Uri.parse(requestUrl);
+		
+		BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+		decodeOptions.inInputShareable = true;
+		decodeOptions.inPurgeable = true;
+		decodeOptions.inPreferredConfig = mDecodeConfig;
+		Bitmap bitmap = null;
+		
+		if (mMaxWidth == 0 && mMaxHeight == 0) {
+			bitmap = ImageUtils.decodeStream(mContentResolver, imageUri, decodeOptions);
+			addMarker("read-full-size-image-from-resource");
+		} else {
+			// If we have to resize this image, first get the natural bounds.
+			decodeOptions.inJustDecodeBounds = true;
+			ImageUtils.decodeStream(mContentResolver, imageUri, decodeOptions);
+			int actualWidth = decodeOptions.outWidth;
+			int actualHeight = decodeOptions.outHeight;
+
+			// Then compute the dimensions we would ideally like to decode to.
+			int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight, actualWidth, actualHeight);
+			int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth, actualHeight, actualWidth);
+
+			// Decode to the nearest power of two scaling factor.
+			decodeOptions.inJustDecodeBounds = false;
+
+			decodeOptions.inSampleSize = ImageUtils.findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+			Bitmap tempBitmap = ImageUtils.decodeStream(mContentResolver, imageUri, decodeOptions);
+			addMarker(String.format("read-from-resource-scaled-times-%d", decodeOptions.inSampleSize));
+			// If necessary, scale down to the maximal acceptable size.
+			if (tempBitmap != null && (tempBitmap.getWidth() > desiredWidth || tempBitmap.getHeight() > desiredHeight)) {
+				bitmap = Bitmap.createScaledBitmap(tempBitmap, desiredWidth, desiredHeight, true);
+				tempBitmap.recycle();
+				addMarker("scaling-read-from-resource-bitmap");
+			} else {
+				bitmap = tempBitmap;
+			}
 		}
 
 		if (bitmap == null) {

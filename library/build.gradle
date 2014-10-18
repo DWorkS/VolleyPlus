@@ -13,7 +13,7 @@
 // limitations under the License.
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.12.+'
