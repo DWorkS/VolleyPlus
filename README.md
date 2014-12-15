@@ -100,6 +100,23 @@ network_image_view.setDefaultImageResId(R.drawable.holder_image);
 
 ```
 
+## Quick Start
+
+Volley is available as an AAR, so you just need to add the following dependency to your `build.gradle`.
+```
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+...
+
+dependencies {
+     compile 'dev.dworks.libs:volleyplus:+'
+}
+...
+```
+
 ## Sample App
 
 [![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](http://play.google.com/store/apps/details?id=com.volley.demo)

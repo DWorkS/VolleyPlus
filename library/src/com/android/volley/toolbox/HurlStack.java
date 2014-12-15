@@ -184,6 +184,8 @@ public class HurlStack implements HttpStack {
 	 * @param connection
 	 *            The Connection to perform the multi part request
 	 * @param request
+	 *            The params to add to the Multi Part request
+	 *            The files to upload
 	 * @throws ProtocolException
 	 */
 	private static void setConnectionParametersForMultipartRequest(HttpURLConnection connection, Request<?> request) throws IOException,
@@ -196,6 +198,9 @@ public class HurlStack implements HttpStack {
 		connection.setDoOutput(true);
 		connection.setRequestProperty(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, curTime));
 		connection.setChunkedStreamingMode(0);
+
+        ProgressListener progressListener;
+        progressListener = (ProgressListener) request;
 
 		Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
 		Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
@@ -229,15 +234,20 @@ public class HurlStack implements HttpStack {
 						.append(String.format(HEADER_CONTENT_DISPOSITION + COLON_SPACE + FORM_DATA + SEMICOLON_SPACE + FILENAME, key, file.getName()))
 						.append(CRLF).append(HEADER_CONTENT_TYPE + COLON_SPACE + CONTENT_TYPE_OCTET_STREAM).append(CRLF)
 						.append(HEADER_CONTENT_TRANSFER_ENCODING + COLON_SPACE + BINARY).append(CRLF).append(CRLF).flush();
+
 				BufferedInputStream input = null;
 				try {
 					FileInputStream fis = new FileInputStream(file);
+                    int transferredBytes = 0;
+                    int totalSize = (int) file.length();
 					input = new BufferedInputStream(fis);
 					int bufferLength = 0;
 
 					byte[] buffer = new byte[1024];
 					while ((bufferLength = input.read(buffer)) > 0) {
 						out.write(buffer, 0, bufferLength);
+                        transferredBytes += bufferLength;
+                        progressListener.onProgress(transferredBytes, totalSize);
 					}
 					out.flush(); // Important! Output cannot be closed. Close of
 									// writer will close
