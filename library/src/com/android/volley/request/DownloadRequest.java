@@ -16,11 +16,6 @@
 
 package com.android.volley.request;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
 import android.text.TextUtils;
 
 import com.android.volley.NetworkResponse;
@@ -30,6 +25,11 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.Response.ProgressListener;
 import com.android.volley.toolbox.HttpHeaderParser;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 /**
  * A canned request for retrieving the response body at a given URL as a String.
@@ -42,19 +42,23 @@ public class DownloadRequest extends Request<String> implements ProgressListener
     /**
      * Creates a new request with the given method.
      *
-     * @param method the request {@link Method} to use
      * @param url URL to fetch the string at
-     * @param download_apth path to save the file to
+     * @param download_path path to save the file to
      * @param listener Listener to receive the String response
      * @param errorListener Error listener, or null to ignore errors
      */
     public DownloadRequest(String url, String download_path, Listener<String> listener,
             ErrorListener errorListener) {
         super(Method.GET, url, errorListener);
-        mDownloadPath =download_path;
+        mDownloadPath = download_path;
         mListener = listener;
     }
-    
+
+    /**
+     * Set listener for tracking download progress
+     *
+     * @param listener
+     */
     public void setOnProgressListener(ProgressListener listener){
     	mProgressListener = listener;
     }
