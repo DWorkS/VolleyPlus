@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.volley.demo"
-    android:versionCode="2"
+    android:versionCode="3"
     android:versionName="1.1" >
 
     <uses-sdk
-        android:minSdkVersion="7"
+        android:minSdkVersion="8"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -35,7 +35,7 @@
             android:uiOptions="splitActionBarWhenNarrow" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="dev.dworks.lib.wizard.demo.MainActivity" />
+                android:value="com.volley.demo.MainActivity" />
         </activity>
         <activity
             android:name="com.volley.demo.SimpleCacheActivity"
