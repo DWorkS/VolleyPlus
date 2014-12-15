@@ -102,7 +102,8 @@ public class BasicNetwork implements Network {
                     Cache.Entry entry = request.getCacheEntry();
                     if (entry == null) {
                         return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, null,
-                                responseHeaders, true);
+                                responseHeaders, true,
+                                SystemClock.elapsedRealtime() - requestStart);
                     }
                     // A HTTP 304 response does not have all header fields. We
                     // have to use the header fields from the cache entry plus
@@ -110,7 +111,8 @@ public class BasicNetwork implements Network {
                     // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.5
                     entry.responseHeaders.putAll(responseHeaders);
                     return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, entry.data,
-                            entry.responseHeaders, true);
+                            entry.responseHeaders, true,
+                            SystemClock.elapsedRealtime() - requestStart);
                 }
 
 	            // Some responses such as 204s do not have content.  We must check.
@@ -128,7 +130,8 @@ public class BasicNetwork implements Network {
                 if (statusCode < 200 || statusCode > 299) {
                     throw new IOException();
                 }
-                return new NetworkResponse(statusCode, responseContents, responseHeaders, false);
+                return new NetworkResponse(statusCode, responseContents, responseHeaders, false,
+                        SystemClock.elapsedRealtime() - requestStart);
             } catch (SocketTimeoutException e) {
                 attemptRetryOnException("socket", request, new TimeoutError());
             } catch (ConnectTimeoutException e) {
@@ -146,7 +149,7 @@ public class BasicNetwork implements Network {
                 VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
-                            responseHeaders, false);
+                            responseHeaders, false, SystemClock.elapsedRealtime() - requestStart);
                     
                     if(statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR){
                         throw new ServerError(networkResponse);

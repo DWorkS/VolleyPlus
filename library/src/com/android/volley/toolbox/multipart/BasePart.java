@@ -21,7 +21,7 @@ import org.apache.http.util.EncodingUtils;
     protected static final String FORM_DATA = "form-data; name=\"%s\"";
     protected static final String BOUNDARY_PREFIX = "--";
     protected static final String CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
-    protected static final String FILENAME = "filename=%s";
+    protected static final String FILENAME = "filename=\"%s\"";
     protected static final String COLON_SPACE = ": ";
     protected static final String SEMICOLON_SPACE = "; ";
 	

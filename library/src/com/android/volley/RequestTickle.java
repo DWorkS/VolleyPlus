@@ -21,6 +21,7 @@ import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 
 import com.android.volley.error.VolleyError;
 
@@ -66,7 +67,6 @@ public class RequestTickle {
      *
      * @param cache A Cache to use for persisting responses to disk
      * @param network A Network interface for performing HTTP requests
-     * @param threadPoolSize Number of network dispatcher threads to create
      */
     public RequestTickle(Cache cache, Network network) {
         this(cache, network,new ExecutorDelivery(new Handler(Looper.getMainLooper())));
@@ -108,6 +108,7 @@ public class RequestTickle {
     		return null;
     	}
         NetworkResponse networkResponse = null;
+        long startTimeMs = SystemClock.elapsedRealtime();
         try {
             mRequest.addMarker("network-queue-take");
 
@@ -150,11 +151,13 @@ public class RequestTickle {
             mDelivery.postResponse(mRequest, response);
         } catch (VolleyError volleyError) {
         	networkResponse = volleyError.networkResponse;
+            volleyError.setNetworkTimeMs(SystemClock.elapsedRealtime() - startTimeMs);
             parseAndDeliverNetworkError(mRequest, volleyError);
         } catch (Exception e) {
             VolleyLog.e(e, "Unhandled exception %s", e.toString());
-            error = new VolleyError(e);
-            mDelivery.postError(mRequest, error);
+            VolleyError volleyError = new VolleyError(e);
+            volleyError.setNetworkTimeMs(SystemClock.elapsedRealtime() - startTimeMs);
+            mDelivery.postError(mRequest, volleyError);
         }
 
         if(null == networkResponse){
