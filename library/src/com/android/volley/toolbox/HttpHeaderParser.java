@@ -70,7 +70,8 @@ public class HttpHeaderParser {
 	                if (token.equals("no-cache") || token.equals("no-store")) {
 	    	            hasCacheControl = false;
 	                } else if (token.startsWith("max-age=")) {
-	                    try {	            hasCacheControl = true;	            hasCacheControl = true;	            hasCacheControl = true;
+                        hasCacheControl = true;
+	                    try {
 	                        maxAge = Long.parseLong(token.substring(8));
 	                    } catch (Exception e) {
 	                    }
@@ -111,7 +112,7 @@ public class HttpHeaderParser {
     /**
      * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.
      * Cache-control headers are ignored. SoftTtl == 3 mins, ttl == 24 hours.
-     * @param response The network response to parse headers from
+     * @param bitmap The network response to parse headers from
      * @return a cache entry for the given response, or null if the response is not cacheable.
      */
     public static Cache.Entry parseBitmapCacheHeaders(Bitmap bitmap) {
@@ -133,43 +134,8 @@ public class HttpHeaderParser {
     */
    public static Cache.Entry parseIgnoreCacheHeaders(NetworkResponse response) {
 
-       Map<String, String> headers = response.headers;
-       long serverDate = 0;
-       String serverEtag = null;
-       String headerValue;
-
-       headerValue = headers.get("Date");
-       if (headerValue != null) {
-           serverDate = parseDateAsEpoch(headerValue);
-       }
-
-       serverEtag = headers.get("ETag");
-
-       final long cacheHitButRefreshed = 0; //3 * 60 * 1000; // in 3 minutes cache will be hit, but also refreshed on background
-       final long cacheExpired = 0; //24 * 60 * 60 * 1000; // in 24 hours this cache entry expires completely
-       final long softExpire = cacheHitButRefreshed;
-       final long ttl = cacheExpired;
-
-       Cache.Entry entry = new Cache.Entry();
-       entry.data = response.data;
-       entry.etag = serverEtag;
-       entry.softTtl = softExpire;
-       entry.ttl = ttl;
-       entry.serverDate = serverDate;
-       entry.responseHeaders = headers;
-
-       return entry;
-   }
-   
-   /**
-    * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.
-    * Cache-control headers are ignored. SoftTtl == 3 mins, ttl == 24 hours.
-    * @return a cache entry for the given response, or null if the response is not cacheable.
-    */
-   public static Cache.Entry parseIgnoreCacheHeaders() {
        long now = System.currentTimeMillis();
-
-       Map<String, String> headers = new ArrayMap<String, String>();
+       Map<String, String> headers = response.headers;
        long serverDate = 0;
        String serverEtag = null;
        String headerValue;
@@ -183,10 +149,11 @@ public class HttpHeaderParser {
 
        final long cacheHitButRefreshed = 3 * 60 * 1000; // in 3 minutes cache will be hit, but also refreshed on background
        final long cacheExpired = 24 * 60 * 60 * 1000; // in 24 hours this cache entry expires completely
-       final long softExpire = now + cacheHitButRefreshed;
+       final long softExpire = now  + cacheHitButRefreshed;
        final long ttl = now + cacheExpired;
 
        Cache.Entry entry = new Cache.Entry();
+       entry.data = response.data;
        entry.etag = serverEtag;
        entry.softTtl = softExpire;
        entry.ttl = ttl;
@@ -195,6 +162,46 @@ public class HttpHeaderParser {
 
        return entry;
    }
+
+    /**
+     * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.
+     * Cache-control headers are ignored. SoftTtl == 3 mins, ttl == 24 hours.
+     * @param response The network response to parse headers from
+     * @param soft_expire The soft expire duration in milli seconds
+     * @param expire The full expire duration in milli seconds
+     * @return a cache entry for the given response, or null if the response is not cacheable.
+     */
+    public static Cache.Entry parseIgnoreCacheHeaders(NetworkResponse response, long soft_expire, long expire) {
+
+        long now = System.currentTimeMillis();
+        Map<String, String> headers = response.headers;
+        long serverDate = 0;
+        String serverEtag = null;
+        String headerValue;
+
+        headerValue = headers.get("Date");
+        if (headerValue != null) {
+            serverDate = parseDateAsEpoch(headerValue);
+        }
+
+        serverEtag = headers.get("ETag");
+
+        final long cacheHitButRefreshed = soft_expire; // in this duration cache will be hit, but also refreshed on background
+        final long cacheExpired = expire; // in this duration this cache entry expires completely
+        final long softExpire = now  + cacheHitButRefreshed;
+        final long ttl = now + cacheExpired;
+
+        Cache.Entry entry = new Cache.Entry();
+        entry.data = response.data;
+        entry.etag = serverEtag;
+        entry.softTtl = softExpire;
+        entry.ttl = ttl;
+        entry.serverDate = serverDate;
+        entry.responseHeaders = headers;
+
+        return entry;
+    }
+
     /**
      * Parse date in RFC1123 format, and return its value as epoch
      */
