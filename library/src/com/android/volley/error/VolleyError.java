@@ -21,6 +21,9 @@ import com.android.volley.NetworkResponse;
 /**
  * Exception style class encapsulating Volley errors
  */
+/**
+ * Exception style class encapsulating Volley errors
+ */
 @SuppressWarnings("serial")
 public class VolleyError extends Exception {
     public final NetworkResponse networkResponse;
@@ -42,6 +45,10 @@ public class VolleyError extends Exception {
     public VolleyError(Throwable cause) {
         super(cause);
         networkResponse = null;
+    }
+    public VolleyError(NetworkResponse response, Throwable cause) {
+        super(cause);
+        networkResponse = response;
     }
     public void setNetworkTimeMs(long networkTimeMs) {
         this.networkTimeMs = networkTimeMs;

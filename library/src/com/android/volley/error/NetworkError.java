@@ -35,4 +35,8 @@ public class NetworkError extends VolleyError {
     public NetworkError(NetworkResponse networkResponse) {
         super(networkResponse);
     }
+
+    public NetworkError(NetworkResponse networkResponse, Throwable reason) {
+        super(networkResponse, reason);
+    }
 }

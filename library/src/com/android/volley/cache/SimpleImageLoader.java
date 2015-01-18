@@ -154,7 +154,7 @@ public class SimpleImageLoader extends ImageLoader {
 	}
     
     /**
-     * Flushed {@link Cache} and clears {@link ImageCache}.
+     * Flushed {@link Cache} and clears {@link com.android.volley.toolbox.ImageCache}.
      */
     public void flushCache() {
     	getImageCache().clear();

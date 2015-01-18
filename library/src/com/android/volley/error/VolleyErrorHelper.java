@@ -12,12 +12,11 @@ import com.google.gson.reflect.TypeToken;
 
 public class VolleyErrorHelper {
 	/**
-	 * Returns appropriate message which is to be displayed to the user against
-	 * the specified error object.
 	 * 
 	 * @param error
 	 * @param context
-	 * @return
+	 * @return Returns appropriate message which is to be displayed to the user against
+     * the specified error object.
 	 */
 	public static String getMessage(Object error, Context context) {
 		if (error instanceof TimeoutError) {
@@ -29,6 +28,29 @@ public class VolleyErrorHelper {
 		}
 		return context.getResources().getString(R.string.generic_error);
 	}
+
+    /**
+     *
+     * @param error
+     * @param context
+     * @return Return generic message for errors
+     */
+    public static String getErrorType(Object error, Context context) {
+        if (error instanceof TimeoutError) {
+            return context.getResources().getString(R.string.generic_server_timeout);
+        } else if (error instanceof ServerError) {
+            return context.getResources().getString(R.string.generic_server_down);
+        } else if (error instanceof AuthFailureError) {
+            return context.getResources().getString(R.string.auth_failed);
+        } else if (error instanceof NetworkError) {
+            return context.getResources().getString(R.string.no_internet);
+        } else if (error instanceof NoConnectionError) {
+            return context.getResources().getString(R.string.no_network_connection);
+        } else if (error instanceof ParseError) {
+            return context.getResources().getString(R.string.parsing_failed);
+        }
+        return context.getResources().getString(R.string.generic_error);
+    }
 
 	/**
 	 * Determines whether the error is related to network

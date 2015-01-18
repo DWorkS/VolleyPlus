@@ -17,9 +17,12 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="no_network_connection_toast" translatable="false">No network connection found</string>
+    <string name="no_network_connection" translatable="false">No network connection found</string>
     <string name="generic_server_down" translatable="false">Server down</string>
+    <string name="generic_server_timeout" translatable="false">Server Timeout</string>
     <string name="generic_error" translatable="false">No internet</string>
     <string name="no_internet" translatable="false">No internet</string>
+    <string name="parsing_failed" translatable="false">Parsing Failure</string>
+    <string name="auth_failed" translatable="false">Authentication Failure</string>
 
 </resources>

@@ -30,7 +30,11 @@ public class NoConnectionError extends NetworkError {
     public NoConnectionError(NetworkResponse networkResponse) {
         super(networkResponse);
     }
-    
+
+    public NoConnectionError(NetworkResponse networkResponse, Throwable reason) {
+        super(networkResponse, reason);
+    }
+
     public NoConnectionError(Throwable reason) {
         super(reason);
     }
