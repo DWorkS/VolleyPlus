@@ -48,7 +48,7 @@ import com.android.volley.error.AuthFailureError;
 import com.android.volley.request.MultiPartRequest;
 import com.android.volley.request.MultiPartRequest.MultiPartParam;
 import com.android.volley.toolbox.multipart.FilePart;
-import com.android.volley.toolbox.multipart.MultipartEntity;
+import com.android.volley.toolbox.multipart.MultipartProgressEntity;
 import com.android.volley.toolbox.multipart.StringPart;
 
 /**
@@ -157,7 +157,8 @@ public class HttpClientStack implements HttpStack {
 			if (request instanceof ProgressListener) {
 				progressListener = (ProgressListener) request;
 			}
-			MultipartEntity multipartEntity = new MultipartEntity();
+            MultipartProgressEntity multipartEntity = new MultipartProgressEntity();
+            multipartEntity.setListener(progressListener);
 			final String charset = ((MultiPartRequest<?>) request).getProtocolCharset();
 			httpRequest.addHeader(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, multipartEntity.getBoundary()));
 
@@ -180,8 +181,6 @@ public class HttpClientStack implements HttpStack {
 				}
 
 				FilePart filePart = new FilePart(key, file, null, null);
-				filePart.setProgressListener(progressListener);
-				
 				multipartEntity.addPart(filePart);
 			}
 			httpRequest.setEntity(multipartEntity);
