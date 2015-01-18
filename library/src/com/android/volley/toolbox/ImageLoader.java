@@ -128,7 +128,7 @@ public class ImageLoader {
      * The default implementation of ImageListener which handles basic functionality
      * of showing a default image until the network response is received, at which point
      * it will switch to either the actual image or the error image.
-     * @param imageView The imageView that the listener is associated with.
+     * @param view The imageView that the listener is associated with.
      * @param defaultImageResId Default image resource ID to use, or 0 if it doesn't exist.
      * @param errorImageResId Error image resource ID to use, or 0 if it doesn't exist.
      */
@@ -236,7 +236,7 @@ public class ImageLoader {
      * request is fulfilled.
      *
      * @param requestUrl The URL of the image to be loaded.
-     * @param defaultImage Optional default image to return until the actual image is loaded.
+     * @param listener The listener to call when the remote image is loaded
      */
     public ImageContainer get(String requestUrl, final ImageListener listener) {
         return get(requestUrl, listener, 0, 0);
@@ -366,7 +366,7 @@ public class ImageLoader {
      * @param cacheKey The cache key that is associated with the image request.
      * @param response The bitmap that was returned from the network.
      */
-    private void onGetImageSuccess(String cacheKey, Bitmap response) {
+    protected void onGetImageSuccess(String cacheKey, Bitmap response) {
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, response);
 
@@ -388,7 +388,7 @@ public class ImageLoader {
      * @param response The bitmap that was returned from the network.
      */
     @SuppressWarnings("unused")
-	private void setImageSuccess(String cacheKey, Bitmap response) {
+	protected void setImageSuccess(String cacheKey, Bitmap response) {
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, response);
 
@@ -408,7 +408,7 @@ public class ImageLoader {
      * Handler for when an image failed to load.
      * @param cacheKey The cache key that is associated with the image request.
      */
-    private void onGetImageError(String cacheKey, VolleyError error) {
+    protected void onGetImageError(String cacheKey, VolleyError error) {
         // Notify the requesters that something failed via a null result.
         // Remove this request from the list of in-flight requests.
         BatchedImageRequest request = mInFlightRequests.remove(cacheKey);
@@ -564,7 +564,6 @@ public class ImageLoader {
      * Starts the runnable for batched delivery of responses if it is not already started.
      * @param cacheKey The cacheKey of the response being delivered.
      * @param request The BatchedImageRequest to be delivered.
-     * @param error The volley error associated with the request (if applicable).
      */
     private void batchResponse(String cacheKey, BatchedImageRequest request) {
         mBatchedResponses.put(cacheKey, request);
@@ -630,7 +629,7 @@ public class ImageLoader {
     
     /**
      * Set a {@link ContentResolver} instance if you need to support content uris for loading images
-     * @param resources {@link ContentResolver} instance for loading images. Get from {@link Context#getContentResolver()}
+     * @param contentResolver {@link ContentResolver} instance for loading images. Get from {@link Context#getContentResolver()}
      */
     public void setContetResolver(ContentResolver contentResolver) {
     	mContentResolver = contentResolver;

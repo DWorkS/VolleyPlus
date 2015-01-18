@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.util.ArrayMap;
@@ -130,7 +131,7 @@ public class ImageLoader {
      * The default implementation of ImageListener which handles basic functionality
      * of showing a default image until the network response is received, at which point
      * it will switch to either the actual image or the error image.
-     * @param imageView The imageView that the listener is associated with.
+     * @param view The imageView that the listener is associated with.
      * @param defaultImageResId Default image resource ID to use, or 0 if it doesn't exist.
      * @param errorImageResId Error image resource ID to use, or 0 if it doesn't exist.
      */
@@ -238,7 +239,7 @@ public class ImageLoader {
      * request is fulfilled.
      *
      * @param requestUrl The URL of the image to be loaded.
-     * @param defaultImage Optional default image to return until the actual image is loaded.
+     * @param listener The listener to call when the remote image is loaded.
      */
     public ImageContainer get(String requestUrl, final ImageListener listener) {
         return get(requestUrl, listener, 0, 0);
@@ -289,19 +290,7 @@ public class ImageLoader {
 
         // The request is not already in flight. Send the new request to the network and
         // track it.
-        Request<?> newRequest =
-            new ImageRequest(requestUrl, mResources, mContentResolver, new Listener<BitmapDrawable>() {
-                @Override
-                public void onResponse(BitmapDrawable response) {
-                    onGetImageSuccess(cacheKey, response);
-                }
-            }, maxWidth, maxHeight,
-            Config.RGB_565, new ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    onGetImageError(cacheKey, error);
-                }
-            });
+        Request<?> newRequest = makeImageRequest(requestUrl, maxWidth, maxHeight, cacheKey);
 
         newRequest.setHeaders(mHeaders);
         mRequestQueue.add(newRequest);
@@ -360,7 +349,22 @@ public class ImageLoader {
         
         return imageContainer;
     }
-    
+
+    protected Request<?> makeImageRequest(String requestUrl, int maxWidth, int maxHeight, final String cacheKey) {
+        return new ImageRequest(requestUrl, mResources, mContentResolver, new Listener<BitmapDrawable>() {
+            @Override
+            public void onResponse(BitmapDrawable response) {
+                onGetImageSuccess(cacheKey, response);
+            }
+        }, maxWidth, maxHeight,
+                Config.RGB_565, new ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                onGetImageError(cacheKey, error);
+            }
+        });
+    }
+
     /**
      * Sets the amount of time to wait after the first response arrives before delivering all
      * responses. Batching can be disabled entirely by passing in 0.
@@ -375,7 +379,7 @@ public class ImageLoader {
      * @param cacheKey The cache key that is associated with the image request.
      * @param response The bitmap that was returned from the network.
      */
-    private void onGetImageSuccess(String cacheKey, BitmapDrawable response) {
+    protected void onGetImageSuccess(String cacheKey, BitmapDrawable response) {
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, response);
 
@@ -397,7 +401,7 @@ public class ImageLoader {
      * @param response The bitmap that was returned from the network.
      */
     @SuppressWarnings("unused")
-	private void setImageSuccess(String cacheKey, BitmapDrawable response) {
+	protected void setImageSuccess(String cacheKey, BitmapDrawable response) {
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, response);
 
@@ -417,7 +421,7 @@ public class ImageLoader {
      * Handler for when an image failed to load.
      * @param cacheKey The cache key that is associated with the image request.
      */
-    private void onGetImageError(String cacheKey, VolleyError error) {
+    protected void onGetImageError(String cacheKey, VolleyError error) {
         // Notify the requesters that something failed via a null result.
         // Remove this request from the list of in-flight requests.
         BatchedImageRequest request = mInFlightRequests.remove(cacheKey);
@@ -573,7 +577,6 @@ public class ImageLoader {
      * Starts the runnable for batched delivery of responses if it is not already started.
      * @param cacheKey The cacheKey of the response being delivered.
      * @param request The BatchedImageRequest to be delivered.
-     * @param error The volley error associated with the request (if applicable).
      */
     private void batchResponse(String cacheKey, BatchedImageRequest request) {
         mBatchedResponses.put(cacheKey, request);
@@ -639,7 +642,7 @@ public class ImageLoader {
     
     /**
      * Set a {@link ContentResolver} instance if you need to support content uris for loading images
-     * @param resources {@link ContentResolver} instance for loading images. Get from {@link Context#getContentResolver()}
+     * @param contentResolver {@link ContentResolver} instance for loading images. Get from {@link Context#getContentResolver()}
      */
     public void setResources(ContentResolver contentResolver) {
     	mContentResolver = contentResolver;
