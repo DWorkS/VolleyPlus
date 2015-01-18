@@ -31,7 +31,11 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.StrictMode;
+import android.text.TextUtils;
 import android.util.Log;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 
 /**
  * Class containing some static utility methods.
@@ -39,12 +43,13 @@ import android.util.Log;
 public class Utils {
 
 	public static final int ANIMATION_FADE_IN_TIME = 200;
-	public static final String SCHEME_VIDEO = "video";
-	public static final String SCHEME_FILE = ContentResolver.SCHEME_FILE;
+    public static final String SCHEME_FILE = ContentResolver.SCHEME_FILE;
 	public static final String SCHEME_CONTENT = ContentResolver.SCHEME_CONTENT;
 	public static final String SCHEME_ANDROID_RESOURCE = ContentResolver.SCHEME_ANDROID_RESOURCE;
+    public static final String SCHEME_VIDEO = "video";
+    public static final String SCHEME_ASSETS = "asset";
 
-	private Utils() {
+    private Utils() {
 	};
 
 	/**
@@ -256,4 +261,29 @@ public class Utils {
 		|| url.startsWith(SCHEME_ANDROID_RESOURCE);
 		return isSpecial;
 	}
+
+    public static String getSchemeBaseUrl(String type, String url){
+        return type + "://" + url;
+    }
+
+    public static String getSchemeBaseUrl(String type, int id){
+        return type + "://" + id;
+    }
+
+    public static String getHeader(HttpResponse response, String key) {
+        Header header = response.getFirstHeader(key);
+        return header == null ? null : header.getValue();
+    }
+
+    public static boolean isSupportRange(HttpResponse response) {
+        if (TextUtils.equals(getHeader(response, "Accept-Ranges"), "bytes")) {
+            return true;
+        }
+        String value = getHeader(response, "Content-Range");
+        return value != null && value.startsWith("bytes");
+    }
+
+    public static boolean isGzipContent(HttpResponse response) {
+        return TextUtils.equals(getHeader(response, "Content-Encoding"), "gzip");
+    }
 }

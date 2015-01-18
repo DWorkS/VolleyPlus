@@ -172,6 +172,13 @@ public class RequestQueue {
     }
 
     /**
+     * Gets the thread pool size.
+     */
+    public int getThreadPoolSize() {
+        return mDispatchers.length;
+    }
+
+    /**
      * A simple predicate or filter interface for Requests, for use by
      * {@link RequestQueue#cancelAll(RequestFilter)}.
      */

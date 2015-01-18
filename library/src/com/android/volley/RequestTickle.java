@@ -141,7 +141,7 @@ public class RequestTickle {
 
             // Write to cache if applicable.
             // TODO: Only update cache metadata instead of entire record for 304s.
-            if (mRequest.shouldCache() && response.cacheEntry != null) {
+            if (mCache != null && mRequest.shouldCache() && response.cacheEntry != null) {
                 mCache.put(mRequest.getCacheKey(), response.cacheEntry);
                 mRequest.addMarker("network-cache-written");
             }

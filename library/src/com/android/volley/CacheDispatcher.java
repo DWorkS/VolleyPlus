@@ -82,7 +82,7 @@ public class CacheDispatcher extends Thread {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
         // Make a blocking call to initialize the cache.
-        mCache.initialize();
+        if (mCache != null) mCache.initialize();
 
         while (true) {
             try {
@@ -98,7 +98,7 @@ public class CacheDispatcher extends Thread {
                 }
 
                 // Attempt to retrieve this item from cache.
-                Cache.Entry entry = mCache.get(request.getCacheKey());
+                Cache.Entry entry = mCache != null ? mCache.get(request.getCacheKey()) : null;
                 if (entry == null) {
                     request.addMarker("cache-miss");
                     // Cache miss; send off to the network dispatcher.
