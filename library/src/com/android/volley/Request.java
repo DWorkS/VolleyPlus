@@ -124,6 +124,8 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /** {@link Priority} for this request     */
     private Priority mPriority;
 
+    private CachePolicy mCachePolicy;
+
     /** Force request to refresh network */
     private boolean mForceNetwork;
 
@@ -586,6 +588,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         HIGH,
         IMMEDIATE
     }
+
+    public enum CachePolicy {
+        CACHE_ONLY,
+        CACHE_THEN_NETWORK,
+        CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES,
+        NETWORK_ONLY;
+    }
     
     /**
      * Sets the priority for this request
@@ -605,6 +614,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      */
     public Priority getPriority() {
         return mPriority;
+    }
+
+    public CachePolicy getCachePolicy() {
+        return mCachePolicy;
+    }
+
+    public void setCachePolicy(CachePolicy cachePolicy) {
+        this.mCachePolicy = cachePolicy;
     }
 
     /**

@@ -3,6 +3,7 @@ package br.com.ilhasoft.volley;
 import android.util.Log;
 
 import com.android.volley.Cache;
+import com.android.volley.CacheDispatcher;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -30,17 +31,9 @@ public class RequestBuilder {
 
     public static final String DEFAULT_REQUEST_TAG = "DEFAULT_REQUEST_TAG";
 
-    private enum CachePolicy {
-        CACHE_ONLY,
-        CACHE_THEN_NETWORK,
-        CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES,
-        NETWORK_ONLY;
-    }
-
     private String url;
     private int httpMethod;
     private String contentType;
-    private CachePolicy cachePolicy;
 
     private RequestQueue requestQueue;
 
@@ -48,6 +41,7 @@ public class RequestBuilder {
     Response.Listener<String> responseListener;
 
     private Request.Priority priority;
+    private Request.CachePolicy cachePolicy;
     private RetryPolicy retryPolicy;
 
     int retryTimeout = DefaultRetryPolicy.DEFAULT_TIMEOUT_MS;
@@ -122,29 +116,32 @@ public class RequestBuilder {
     }
 
     public com.android.volley.Request<String> addToRequestQueue() {
-        switch(cachePolicy) {
-            case CACHE_ONLY:
-                callListenerWithCacheIfExists();
-                return null;
-            case NETWORK_ONLY:
-                Request request = buildRequest();
-                return requestQueue.add(request);
-            default:
-            case CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES:
-                String cacheKey = callListenerWithCacheIfExists();
-                Cache.Entry entry = requestQueue.getCache().get(cacheKey);
+//        switch(cachePolicy) {
+//            case CACHE_ONLY:
+//                callListenerWithCacheIfExists();
+//                return null;
+//            case NETWORK_ONLY:
+//                Request request = buildRequest();
+//                return requestQueue.add(request);
+//            default:
+//            case CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES:
+//                String cacheKey = callListenerWithCacheIfExists();
+//                Cache.Entry entry = requestQueue.getCache().get(cacheKey);
+//
+//                if(entry == null || entry.isExpired()) {
+//                    Request requestAfterNetworkWhenCacheExpires = buildRequest();
+//                    return requestQueue.add(requestAfterNetworkWhenCacheExpires);
+//                }
+//                return null;
+//            case CACHE_THEN_NETWORK:
+//                callListenerWithCacheIfExists();
+//
+//                Request requestAfterCache = buildRequest();
+//                return requestQueue.add(requestAfterCache);
+//        }
 
-                if(entry.isExpired()) {
-                    Request requestAfterNetworkWhenCacheExpires = buildRequest();
-                    return requestQueue.add(requestAfterNetworkWhenCacheExpires);
-                }
-                return null;
-            case CACHE_THEN_NETWORK:
-                callListenerWithCacheIfExists();
-
-                Request requestAfterCache = buildRequest();
-                return requestQueue.add(requestAfterCache);
-        }
+        Request requestAfterCache = buildRequest();
+        return requestQueue.add(requestAfterCache);
     }
 
     private String callListenerWithCacheIfExists() {
@@ -157,7 +154,6 @@ public class RequestBuilder {
         }
         return tag;
     }
-
 
     public String addToRequestQueueAndWaitResponseAlternative() {
         return ResponseWaiter.buildRequestAndWaitResponse(this);
@@ -178,6 +174,7 @@ public class RequestBuilder {
     private Request buildRequest() {
         Request request = new Request(httpMethod, url, responseListener, errorListener);
         request.setPriority(priority);
+        request.setCachePolicy(cachePolicy);
 
         if (fakeCacheOverride != null)
             request.setFakeCacheOverride(fakeCacheOverride);
@@ -333,22 +330,22 @@ public class RequestBuilder {
     }
 
     public RequestBuilder cacheThenNetwork() {
-        this.cachePolicy = CachePolicy.CACHE_THEN_NETWORK;
+        this.cachePolicy = Request.CachePolicy.CACHE_THEN_NETWORK;
         return this;
     }
 
     public RequestBuilder cacheOnly() {
-        this.cachePolicy = CachePolicy.CACHE_ONLY;
+        this.cachePolicy = Request.CachePolicy.CACHE_ONLY;
         return this;
     }
 
     public RequestBuilder networkOnly() {
-        this.cachePolicy = CachePolicy.NETWORK_ONLY;
+        this.cachePolicy = Request.CachePolicy.NETWORK_ONLY;
         return this;
     }
 
     public RequestBuilder cacheThenNetworkWhenCacheExpires() {
-        this.cachePolicy = CachePolicy.CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES;
+        this.cachePolicy = Request.CachePolicy.CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES;
         return this;
     }
 

@@ -226,7 +226,7 @@ public class RequestQueue {
         request.addMarker("add-to-queue");
 
         // If the request is uncacheable, skip the cache queue and go straight to the network.
-        if (!request.shouldCache() || request.shouldForceNetwork()) {
+        if (!request.shouldCache() || request.getCachePolicy() == Request.CachePolicy.NETWORK_ONLY) {
             mNetworkQueue.add(request);
             return request;
         }
@@ -250,9 +250,28 @@ public class RequestQueue {
                 // flight.
                 mWaitingRequests.put(cacheKey, null);
                 mCacheQueue.add(request);
+
+                if(request.getCachePolicy() == Request.CachePolicy.CACHE_THEN_NETWORK) {
+                    mNetworkQueue.add(request);
+                } else if(request.getCachePolicy() == Request.CachePolicy.CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES) {
+                    addNetworkQueueWhenCacheExpires(request, cacheKey);
+                }
             }
             return request;
         }
+    }
+
+    private <T> void addNetworkQueueWhenCacheExpires(final Request<T> request, final String cacheKey) {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                Cache.Entry entry = getCache().get(cacheKey);
+                if(entry.isExpired()) {
+                    mNetworkQueue.add(request);
+                }
+            }
+        };
+        thread.start();
     }
 
     /**
