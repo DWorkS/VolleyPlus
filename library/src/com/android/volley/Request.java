@@ -312,7 +312,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      */
     public String getUrl() {
 		try {
-	    	if(mMethod == Method.GET && getParams().size() != 0){
+	    	if(mMethod == Method.GET && (getParams() != null && getParams().size() != 0)){
 	            String encodedParams = getEncodedUrlParams();
 	            String extra = "";
 	            if (encodedParams != null && encodedParams.length() > 0) {
