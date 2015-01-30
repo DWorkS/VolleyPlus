@@ -24,6 +24,7 @@ public abstract class MultiPartRequest<T> extends Request<T> implements Progress
 	private Map<String, MultiPartParam> mMultipartParams = null;
 	private Map<String, String> mFileUploads = null;
 	public static final int TIMEOUT_MS = 30000;
+	private boolean isFixedStreamingMode;
 
     /**
      * Creates a new request with the given method.
@@ -129,5 +130,13 @@ public abstract class MultiPartRequest<T> extends Request<T> implements Progress
 	 */
 	public String getProtocolCharset() {
 		return PROTOCOL_CHARSET;
+	}
+
+	public boolean isFixedStreamingMode() {
+		return isFixedStreamingMode;
+	}
+	
+	public void setFixedStreamingMode(boolean isFixedStreamingMode) {
+		this.isFixedStreamingMode = isFixedStreamingMode;
 	}
 }
