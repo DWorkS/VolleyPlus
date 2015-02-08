@@ -1,5 +1,7 @@
 package com.android.volley.toolbox.multipart;
 
+import static com.android.volley.misc.MultipartUtils.*;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -70,12 +72,12 @@ public final class StringPart extends BasePart {
     }
     
     public long getContentLength(Boundary boundary) {
-        return getHeader(boundary).length + valueBytes.length + CRLF.length;
+        return getHeader(boundary).length + valueBytes.length + CRLF_BYTES.length;
     }
 
     public void writeTo(final OutputStream out, Boundary boundary) throws IOException {
         out.write(getHeader(boundary));
         out.write(valueBytes);
-        out.write(CRLF);
+        out.write(CRLF_BYTES);
     }
 }

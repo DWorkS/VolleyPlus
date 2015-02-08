@@ -16,6 +16,8 @@
 
 package com.android.volley.toolbox;
 
+import static com.android.volley.misc.MultipartUtils.*;
+
 import android.text.TextUtils;
 
 import com.android.volley.Request;
@@ -59,29 +61,6 @@ import javax.net.ssl.SSLSocketFactory;
  * An {@link HttpStack} based on {@link HttpURLConnection}.
  */
 public class HurlStack implements HttpStack {
-
-	private static final String HEADER_CONTENT_TYPE = "Content-Type";
-	private static final String HEADER_USER_AGENT = "User-Agent";
-	private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-	private static final String HEADER_CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding";
-	private static final String CONTENT_TYPE_MULTIPART = "multipart/form-data; charset=%s; boundary=%s";
-	private static final String BINARY = "binary";
-	private static final String CRLF = "\r\n";
-	private static final String FORM_DATA = "form-data; name=\"%s\"";
-	private static final String BOUNDARY_PREFIX = "--";
-	private static final String CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
-	private static final String FILENAME = "filename=\"%s\"";
-	private static final String COLON_SPACE = ": ";
-	private static final String SEMICOLON_SPACE = "; ";
-
-	private static final int CRLF_LENGTH = CRLF.getBytes().length;
-	private static final int HEADER_CONTENT_DISPOSITION_LENGTH = HEADER_CONTENT_DISPOSITION.getBytes().length;
-	private static final int COLON_SPACE_LENGTH = COLON_SPACE.getBytes().length;
-	private static final int HEADER_CONTENT_TYPE_LENGTH = HEADER_CONTENT_TYPE.getBytes().length;
-	private static final int CONTENT_TYPE_OCTET_STREAM_LENGTH = CONTENT_TYPE_OCTET_STREAM.getBytes().length;
-	private static final int HEADER_CONTENT_TRANSFER_ENCODING_LENGTH = HEADER_CONTENT_TRANSFER_ENCODING.getBytes().length;
-	private static final int BINARY_LENGTH = BINARY.getBytes().length;
-	private static final int BOUNDARY_PREFIX_LENGTH = BOUNDARY_PREFIX.getBytes().length;
 
 	private UrlRewriter mUrlRewriter;
 	private final SSLSocketFactory mSslSocketFactory;
@@ -221,7 +200,7 @@ public class HurlStack implements HttpStack {
 
         ProgressListener progressListener;
         progressListener = (ProgressListener) request;
-		
+
 		PrintWriter writer = null;
 		try {
 			OutputStream out = connection.getOutputStream();
@@ -294,42 +273,6 @@ public class HurlStack implements HttpStack {
 				writer.close();
 			}
 		}
-	}
-	
-	private static int getContentLengthForMultipartRequest(String boundary, Map<String, MultiPartParam> multipartParams, Map<String, String> filesToUpload) {
-		final int boundaryLength = boundary.getBytes().length;
-		
-		int contentLength = 0;
-		
-		for (String key : multipartParams.keySet()) {
-			MultiPartParam param = multipartParams.get(key);
-			
-			int size = boundaryLength + CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA, key).getBytes().length +
-				CRLF_LENGTH + HEADER_CONTENT_TYPE_LENGTH + COLON_SPACE_LENGTH + param.contentType.getBytes().length + CRLF_LENGTH + CRLF_LENGTH +
-				param.value.getBytes().length + CRLF_LENGTH;
-
-			contentLength += size;
-		}
-		
-		for (String key : filesToUpload.keySet()) {
-			File file = new File(filesToUpload.get(key));
-
-			int size = boundaryLength + CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA + SEMICOLON_SPACE + FILENAME, key, file.getName()).getBytes().length +
-				CRLF_LENGTH + HEADER_CONTENT_TYPE_LENGTH + COLON_SPACE_LENGTH + CONTENT_TYPE_OCTET_STREAM_LENGTH + CRLF_LENGTH +
-				HEADER_CONTENT_TRANSFER_ENCODING_LENGTH + COLON_SPACE_LENGTH + BINARY_LENGTH + CRLF_LENGTH + CRLF_LENGTH;
-			
-			size += (int) file.length();
-			
-			size += CRLF_LENGTH;
-			
-			contentLength += size;
-		}
-
-		int size = boundaryLength + BOUNDARY_PREFIX_LENGTH + CRLF_LENGTH;
-		
-		contentLength += size;
-		
-		return contentLength;
 	}
 
 	/**

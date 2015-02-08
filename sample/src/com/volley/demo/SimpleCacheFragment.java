@@ -82,15 +82,17 @@ public class SimpleCacheFragment extends Fragment implements AdapterView.OnItemC
 
 		// The ImageFetcher takes care of loading images into our ImageView
 		// children asynchronously
-		mImageLoader = new SimpleImageLoader(getActivity(), R.drawable.empty_photo, null);
+		mImageLoader = new SimpleImageLoader(getActivity(), null);
+        mImageLoader.setDefaultDrawable(R.drawable.empty_photo);
 		ImageCacheParams cacheParams = new ImageCacheParams(getActivity(), IMAGE_CACHE_DIR);
 		cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of
 													// app memory
 
 		// The ImageFetcher takes care of loading images into our ImageView
 		// children asynchronously
-		mImageLoader = new SimpleImageLoader(getActivity(), R.drawable.empty_photo, cacheParams);
-	}
+		mImageLoader = new SimpleImageLoader(getActivity(), cacheParams);
+        mImageLoader.setDefaultDrawable(R.drawable.empty_photo);
+    }
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

@@ -13,8 +13,6 @@ import org.apache.http.entity.AbstractHttpEntity;
  */
 public class MultipartEntity extends AbstractHttpEntity implements Cloneable {
     
-    /* package */ static final String CRLF = "\r\n";    //$NON-NLS-1$
-    
     private List<Part> parts = new ArrayList<Part>();
     
     private Boundary boundary;

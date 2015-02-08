@@ -6,6 +6,8 @@ import org.apache.http.util.EncodingUtils;
 
 import android.text.TextUtils;
 
+import com.android.volley.misc.MultipartUtils;
+
 /**
  * @author <a href="mailto:vit at cleverua.com">Vitaliy Khudenko</a>
  */
@@ -25,8 +27,8 @@ import android.text.TextUtils;
         }
         this.boundary = boundary;
         
-        final String starting = "--" + boundary + MultipartEntity.CRLF;         //$NON-NLS-1$
-        final String closing  = "--" + boundary + "--" + MultipartEntity.CRLF;  //$NON-NLS-1$
+        final String starting = "--" + boundary + MultipartUtils.CRLF;         //$NON-NLS-1$
+        final String closing  = "--" + boundary + "--" + MultipartUtils.CRLF;  //$NON-NLS-1$
         
         startingBoundary = EncodingUtils.getAsciiBytes(starting);
         closingBoundary  = EncodingUtils.getAsciiBytes(closing);

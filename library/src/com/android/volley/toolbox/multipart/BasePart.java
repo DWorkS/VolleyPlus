@@ -1,5 +1,7 @@
 package com.android.volley.toolbox.multipart;
 
+import static com.android.volley.misc.MultipartUtils.*;
+
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.http.util.EncodingUtils;
 
@@ -9,21 +11,7 @@ import org.apache.http.util.EncodingUtils;
  * @author <a href="mailto:vit at cleverua.com">Vitaliy Khudenko</a>
  */
 /* package */ abstract class BasePart implements Part {
-    
-    protected static final byte[] CRLF = EncodingUtils.getAsciiBytes(MultipartEntity.CRLF);
-    protected static final String HEADER_CONTENT_TYPE = "Content-Type";
-    protected static final String HEADER_USER_AGENT = "User-Agent";
-    protected static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-    protected static final String HEADER_CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding";
-    protected static final String CONTENT_TYPE_MULTIPART = "multipart/form-data; charset=%s; boundary=%s";
-    protected static final String BINARY = "binary";
-    protected static final String EIGHT_BIT = "8bit";
-    protected static final String FORM_DATA = "form-data; name=\"%s\"";
-    protected static final String BOUNDARY_PREFIX = "--";
-    protected static final String CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
-    protected static final String FILENAME = "filename=\"%s\"";
-    protected static final String COLON_SPACE = ": ";
-    protected static final String SEMICOLON_SPACE = "; ";
+
 	
     protected interface IHeadersProvider {
         public String getContentDisposition();
@@ -49,13 +37,13 @@ import org.apache.http.util.EncodingUtils;
         final ByteArrayBuffer buf = new ByteArrayBuffer(256);
         append(buf, boundary.getStartingBoundary());
         append(buf, headersProvider.getContentDisposition());
-        append(buf, CRLF);
+        append(buf, CRLF_BYTES);
         append(buf, headersProvider.getContentType());
-        append(buf, CRLF);
+        append(buf, CRLF_BYTES);
         //ContentTransferEncoding causes bug 
         //append(buf, headersProvider.getContentTransferEncoding());
-        //append(buf, CRLF);
-        append(buf, CRLF);
+        //append(buf, CRLF_BYTES);
+        append(buf, CRLF_BYTES);
         return buf.toByteArray();
     }
     

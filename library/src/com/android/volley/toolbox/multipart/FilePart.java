@@ -1,5 +1,7 @@
 package com.android.volley.toolbox.multipart;
 
+import static com.android.volley.misc.MultipartUtils.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,7 +61,7 @@ public final class FilePart extends BasePart {
     }
     
     public long getContentLength(Boundary boundary) {
-        return getHeader(boundary).length + file.length() + CRLF.length;
+        return getHeader(boundary).length + file.length() + CRLF_BYTES.length;
     }
 
     @Override
@@ -75,6 +77,6 @@ public final class FilePart extends BasePart {
         } finally {
             in.close();
         }
-        out.write(CRLF);
+        out.write(CRLF_BYTES);
     }
 }
