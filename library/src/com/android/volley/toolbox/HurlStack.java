@@ -74,6 +74,15 @@ public class HurlStack implements HttpStack {
 	private static final String COLON_SPACE = ": ";
 	private static final String SEMICOLON_SPACE = "; ";
 
+	private static final int CRLF_LENGTH = CRLF.getBytes().length;
+	private static final int HEADER_CONTENT_DISPOSITION_LENGTH = HEADER_CONTENT_DISPOSITION.getBytes().length;
+	private static final int COLON_SPACE_LENGTH = COLON_SPACE.getBytes().length;
+	private static final int HEADER_CONTENT_TYPE_LENGTH = HEADER_CONTENT_TYPE.getBytes().length;
+	private static final int CONTENT_TYPE_OCTET_STREAM_LENGTH = CONTENT_TYPE_OCTET_STREAM.getBytes().length;
+	private static final int HEADER_CONTENT_TRANSFER_ENCODING_LENGTH = HEADER_CONTENT_TRANSFER_ENCODING.getBytes().length;
+	private static final int BINARY_LENGTH = BINARY.getBytes().length;
+	private static final int BOUNDARY_PREFIX_LENGTH = BOUNDARY_PREFIX.getBytes().length;
+
 	private UrlRewriter mUrlRewriter;
 	private final SSLSocketFactory mSslSocketFactory;
 	private String mUserAgent;
@@ -197,13 +206,22 @@ public class HurlStack implements HttpStack {
 		connection.setRequestMethod("POST");
 		connection.setDoOutput(true);
 		connection.setRequestProperty(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, curTime));
-		connection.setChunkedStreamingMode(0);
+		
+		Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
+		Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
+		
+		if (((MultiPartRequest<?>) request).isFixedStreamingMode()) {
+			int contentLength = getContentLengthForMultipartRequest(boundary, multipartParams, filesToUpload);
+			
+			connection.setFixedLengthStreamingMode(contentLength);
+		} else {
+			connection.setChunkedStreamingMode(0);
+		}
+		// Modified end
 
         ProgressListener progressListener;
         progressListener = (ProgressListener) request;
-
-		Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
-		Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
+		
 		PrintWriter writer = null;
 		try {
 			OutputStream out = connection.getOutputStream();
@@ -276,6 +294,42 @@ public class HurlStack implements HttpStack {
 				writer.close();
 			}
 		}
+	}
+	
+	private static int getContentLengthForMultipartRequest(String boundary, Map<String, MultiPartParam> multipartParams, Map<String, String> filesToUpload) {
+		final int boundaryLength = boundary.getBytes().length;
+		
+		int contentLength = 0;
+		
+		for (String key : multipartParams.keySet()) {
+			MultiPartParam param = multipartParams.get(key);
+			
+			int size = boundaryLength + CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA, key).getBytes().length +
+				CRLF_LENGTH + HEADER_CONTENT_TYPE_LENGTH + COLON_SPACE_LENGTH + param.contentType.getBytes().length + CRLF_LENGTH + CRLF_LENGTH +
+				param.value.getBytes().length + CRLF_LENGTH;
+
+			contentLength += size;
+		}
+		
+		for (String key : filesToUpload.keySet()) {
+			File file = new File(filesToUpload.get(key));
+
+			int size = boundaryLength + CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA + SEMICOLON_SPACE + FILENAME, key, file.getName()).getBytes().length +
+				CRLF_LENGTH + HEADER_CONTENT_TYPE_LENGTH + COLON_SPACE_LENGTH + CONTENT_TYPE_OCTET_STREAM_LENGTH + CRLF_LENGTH +
+				HEADER_CONTENT_TRANSFER_ENCODING_LENGTH + COLON_SPACE_LENGTH + BINARY_LENGTH + CRLF_LENGTH + CRLF_LENGTH;
+			
+			size += (int) file.length();
+			
+			size += CRLF_LENGTH;
+			
+			contentLength += size;
+		}
+
+		int size = boundaryLength + BOUNDARY_PREFIX_LENGTH + CRLF_LENGTH;
+		
+		contentLength += size;
+		
+		return contentLength;
 	}
 
 	/**
