@@ -146,10 +146,8 @@ public class BasicNetwork implements Network {
                 if (httpResponse != null) {
                     statusCode = httpResponse.getStatusLine().getStatusCode();
                 } else {
-                    attemptRetryOnUnkownException("Unknown", request,
-                            new NoConnectionError(new NetworkResponse(-1, null, responseHeaders,
-                                    false, SystemClock.elapsedRealtime() - requestStart), e));
-                    continue;
+                    throw new NoConnectionError(new NetworkResponse(-1, null, responseHeaders,
+                            false, SystemClock.elapsedRealtime() - requestStart), e);
                 }
                 VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
                 if (responseContents != null) {
@@ -196,27 +194,6 @@ public class BasicNetwork implements Network {
     private static void attemptRetryOnException(String logPrefix, Request<?> request,
             VolleyError exception) throws VolleyError {
         RetryPolicy retryPolicy = request.getRetryPolicy();
-        int oldTimeout = request.getTimeoutMs();
-
-        try {
-            retryPolicy.retry(exception);
-        } catch (VolleyError e) {
-            request.addMarker(
-                    String.format("%s-timeout-giveup [timeout=%s]", logPrefix, oldTimeout));
-            throw e;
-        }
-        request.addMarker(String.format("%s-retry [timeout=%s]", logPrefix, oldTimeout));
-    }
-
-    /**
-     * Attempts to prepare the request for a retry. If there are no more attempts remaining in the
-     * request's retry policy, a incoming exception is thrown.
-     * @param request The request to use.
-     */
-    private static void attemptRetryOnUnkownException(String logPrefix, Request<?> request,
-                                                VolleyError exception) throws VolleyError {
-        RetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
-                3, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         int oldTimeout = request.getTimeoutMs();
 
         try {
