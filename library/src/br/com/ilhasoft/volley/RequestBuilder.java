@@ -55,6 +55,8 @@ public class RequestBuilder {
     private boolean onlyUrl = false;
     private Integer fakeCacheOverride = null;
 
+    private Request request;
+
     public RequestBuilder(RequestQueue requestQueue, String url) {
         errorListener = new LogOnErrorListener(url);
         this.requestQueue = requestQueue;
@@ -116,30 +118,6 @@ public class RequestBuilder {
     }
 
     public com.android.volley.Request<String> addToRequestQueue() {
-//        switch(cachePolicy) {
-//            case CACHE_ONLY:
-//                callListenerWithCacheIfExists();
-//                return null;
-//            case NETWORK_ONLY:
-//                Request request = buildRequest();
-//                return requestQueue.add(request);
-//            default:
-//            case CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES:
-//                String cacheKey = callListenerWithCacheIfExists();
-//                Cache.Entry entry = requestQueue.getCache().get(cacheKey);
-//
-//                if(entry == null || entry.isExpired()) {
-//                    Request requestAfterNetworkWhenCacheExpires = buildRequest();
-//                    return requestQueue.add(requestAfterNetworkWhenCacheExpires);
-//                }
-//                return null;
-//            case CACHE_THEN_NETWORK:
-//                callListenerWithCacheIfExists();
-//
-//                Request requestAfterCache = buildRequest();
-//                return requestQueue.add(requestAfterCache);
-//        }
-
         Request requestAfterCache = buildRequest();
         return requestQueue.add(requestAfterCache);
     }
@@ -172,7 +150,7 @@ public class RequestBuilder {
     }
 
     private Request buildRequest() {
-        Request request = new Request(httpMethod, url, responseListener, errorListener);
+        request = new Request(httpMethod, url, responseListener, errorListener);
         request.setPriority(priority);
         request.setCachePolicy(cachePolicy);
 
@@ -205,6 +183,13 @@ public class RequestBuilder {
 
     private String getBodyForKey() {
         return onlyUrl ? null : this.body;
+    }
+
+    public void requestCacheInfo(final OnCacheInfoResponseListener onCacheInfoResponseListener) {
+        if(request != null && onCacheInfoResponseListener != null) {
+            CacheInfoTask cacheInfoTask = new CacheInfoTask(requestQueue.getCache(), onCacheInfoResponseListener);
+            cacheInfoTask.execute(request.getCacheKey());
+        }
     }
 
     private void callListenerIfExistOnCache(String tag) {
@@ -371,6 +356,10 @@ public class RequestBuilder {
         digest.update(s.getBytes(), 0, s.length());
 
         return new BigInteger(1, digest.digest()).toString(16);
+    }
+
+    public interface OnCacheInfoResponseListener {
+        public void onCacheInfoResponse(Cache.Entry cache);
     }
 
 }

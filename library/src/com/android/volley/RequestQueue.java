@@ -266,7 +266,7 @@ public class RequestQueue {
             @Override
             public void run() {
                 Cache.Entry entry = getCache().get(cacheKey);
-                if(entry.isExpired()) {
+                if(entry != null && entry.isExpired()) {
                     mNetworkQueue.add(request);
                 }
             }
