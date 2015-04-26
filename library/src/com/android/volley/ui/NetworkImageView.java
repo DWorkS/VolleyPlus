@@ -27,6 +27,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ImageView;
 
 import com.android.volley.Response.Listener;
 import com.android.volley.cache.SimpleImageLoader;
@@ -40,7 +41,7 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
  * Handles fetching an image from a URL as well as the life-cycle of the
  * associated request.
  */
-public class NetworkImageView extends AnimateImageView {
+public class NetworkImageView extends ImageView {
     private static final ColorDrawable transparentDrawable = new ColorDrawable(
             android.R.color.transparent);
 	private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
@@ -63,7 +64,7 @@ public class NetworkImageView extends AnimateImageView {
     /** Current ImageContainer. (either in-flight or finished) */
     protected ImageContainer mImageContainer;
     
-	private boolean mFadeInImage = false;
+	private boolean mFadeInImage = true;
 	private int mMaxImageHeight = 0;
 	private int mMaxImageWidth = 0;
     private Listener<Bitmap> mListener;
@@ -151,6 +152,7 @@ public class NetworkImageView extends AnimateImageView {
 	void loadImageIfNecessary(final boolean isInLayoutPass) {
         int width = getWidth();
         int height = getHeight();
+        ScaleType scaleType = getScaleType();
 
         boolean wrapWidth = false, wrapHeight = false;
         if (getLayoutParams() != null) {
@@ -238,7 +240,7 @@ public class NetworkImageView extends AnimateImageView {
                             setImageResource(mDefaultImageId);
                         }
                     }
-        		}, maxWidth, maxHeight);
+        		}, maxWidth, maxHeight, scaleType);
 
         // update the ImageContainer to be the new bitmap container.
         mImageContainer = newContainer;
@@ -260,7 +262,6 @@ public class NetworkImageView extends AnimateImageView {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             setImageBitmap(bitmap);
-                            setImageDrawable(null);
                             animate()
                                     .alpha(1f)
                                     .scaleY(1f)

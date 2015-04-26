@@ -16,8 +16,6 @@
 
 package com.android.volley.cache;
 
-import java.util.ArrayList;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -46,6 +44,8 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageCache;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.ui.PhotoView;
+
+import java.util.ArrayList;
 
 /**
  * A class that wraps up remote image loading requests using the Volley library combined with a
@@ -168,12 +168,21 @@ public class SimpleImageLoader extends ImageLoader {
     public boolean isCached(String key) {
     	return getCache().get(key) != null;
 	}
-    
+
+    @Deprecated
     public void invalidate(String key) {
         final String cacheKey = getCacheKey(key, mMaxImageWidth, mMaxImageHeight);
     	getImageCache().invalidateBitmap(cacheKey);
     	getCache().invalidate(key, true);
 	}
+
+    public void invalidate(String key, ImageView view) {
+        final String cacheKey = getCacheKey(key, mMaxImageWidth, mMaxImageHeight, view.getScaleType());
+        getImageCache().invalidateBitmap(cacheKey);
+        getCache().invalidate(key, true);
+        //default cache
+        invalidate(key);
+    }
 
 	public SimpleImageLoader setFadeInImage(boolean fadeInImage) {
         mFadeInImage = fadeInImage;
@@ -263,7 +272,7 @@ public class SimpleImageLoader extends ImageLoader {
                 // Queue new request to fetch image
                 imageContainer = get(requestUrl,
                         getImageListener(getResources(), imageView, placeHolder, mFadeInImage),
-                        maxWidth, maxHeight);
+                        maxWidth, maxHeight, imageView.getScaleType());
                 // Store request in ImageView tag
                 imageView.setTag(imageContainer);
             } else {
@@ -313,7 +322,7 @@ public class SimpleImageLoader extends ImageLoader {
             // Queue new request to fetch image
             imageContainer = set(requestUrl,
                     getImageListener(getResources(), imageView, placeHolder, mFadeInImage),
-                    maxWidth, maxHeight, bitmap);
+                    maxWidth, maxHeight, imageView.getScaleType(), bitmap);
             // Store request in ImageView tag
             imageView.setTag(imageContainer);
         } else {
