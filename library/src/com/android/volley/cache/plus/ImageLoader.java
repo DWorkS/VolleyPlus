@@ -38,7 +38,6 @@ import com.android.volley.Response.Listener;
 import com.android.volley.error.VolleyError;
 import com.android.volley.misc.Utils;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.ui.AnimateImageView;
 import com.android.volley.ui.RecyclingBitmapDrawable;
 
 /**
@@ -155,40 +154,6 @@ public class ImageLoader {
             }
         };
     }
-
-    /**
-     * The default implementation of ImageListener which handles basic functionality
-     * of showing a default image until the network response is received, at which point
-     * it will switch to either the actual image or the error image.
-     *
-     * This version returns one specifically for AnimateImageView which allows it to animate
-     * the image changing
-     * @param defaultImageResId Default image resource ID to use, or 0 if it doesn't exist.
-     * @param errorImageResId Error image resource ID to use, or 0 if it doesn't exist.
-     */
-    public static ImageListener getImageListener(final AnimateImageView view,
-                                                 final int defaultImageResId, final int errorImageResId) {
-        return new ImageListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                if (errorImageResId != 0) {
-                    view.setImageResource(errorImageResId, false);
-                }
-            }
-
-            @Override
-            public void onResponse(ImageContainer response, boolean isImmediate) {
-                if (response.getBitmap() != null) {
-                    /**Animate the image changing only if the image was fetched from network */
-                    view.setImageDrawable(response.getBitmap(), !isImmediate);
-                } else if (defaultImageResId != 0) {
-                    view.setImageResource(defaultImageResId, false);
-                }
-            }
-        };
-    }
-
-
 
     /**
      * Interface for the response handlers on image requests.

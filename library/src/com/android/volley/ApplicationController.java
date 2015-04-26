@@ -69,7 +69,6 @@ public class ApplicationController extends Application {
 	 * Adds the specified request to the global queue using the Default TAG.
 	 * 
 	 * @param req
-	 * @param tag
 	 */
 	public <T> void addToRequestQueue(Request<T> req) {
 		// set the default tag if tag is empty

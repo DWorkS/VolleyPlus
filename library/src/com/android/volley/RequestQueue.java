@@ -19,9 +19,11 @@ package com.android.volley;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -37,6 +39,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * a parsed response on the main thread.
  */
 public class RequestQueue {
+
+    /** Callback interface for completed requests. */
+    public static interface RequestFinishedListener<T> {
+        /** Called when a request has finished processing. */
+        public void onRequestFinished(Request<T> request);
+    }
 
     /** Used for generating monotonically-increasing sequence numbers for requests. */
     private AtomicInteger mSequenceGenerator = new AtomicInteger();
@@ -86,6 +94,9 @@ public class RequestQueue {
 
     /** The cache dispatcher. */
     private CacheDispatcher mCacheDispatcher;
+
+    private List<RequestFinishedListener> mFinishedListeners =
+            new ArrayList<RequestFinishedListener>();
 
     /**
      * Creates the worker pool. Processing will not begin until {@link #start()} is called.
@@ -269,12 +280,16 @@ public class RequestQueue {
      * <p>Releases waiting requests for <code>request.getCacheKey()</code> if
      *      <code>request.shouldCache()</code>.</p>
      */
-    void finish(Request<?> request) {
+    <T> void finish(Request<T> request) {
         // Remove from the set of requests currently being processed.
         synchronized (mCurrentRequests) {
             mCurrentRequests.remove(request);
         }
-
+        synchronized (mFinishedListeners) {
+            for (RequestFinishedListener<T> listener : mFinishedListeners) {
+                listener.onRequestFinished(request);
+            }
+        }
         if (request.shouldCache()) {
             synchronized (mWaitingRequests) {
                 String cacheKey = request.getCacheKey();
@@ -289,6 +304,20 @@ public class RequestQueue {
                     mCacheQueue.addAll(waitingRequests);
                 }
             }
+        }
+    }
+
+    public  <T> void addRequestFinishedListener(RequestFinishedListener<T> listener) {
+        synchronized (mFinishedListeners) {
+            mFinishedListeners.add(listener);
+        }
+    }
+    /**
+     * Remove a RequestFinishedListener. Has no effect if listener was not previously added.
+     */
+    public  <T> void removeRequestFinishedListener(RequestFinishedListener<T> listener) {
+        synchronized (mFinishedListeners) {
+            mFinishedListeners.remove(listener);
         }
     }
 }

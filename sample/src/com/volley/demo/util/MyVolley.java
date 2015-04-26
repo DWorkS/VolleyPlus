@@ -19,7 +19,7 @@ import android.content.Context;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.cache.BitmapImageCache;
-import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.cache.SimpleImageLoader;
 import com.android.volley.toolbox.Volley;
 
 
@@ -31,7 +31,7 @@ import com.android.volley.toolbox.Volley;
  */
 public class MyVolley {
     private static RequestQueue mRequestQueue;
-    private static ImageLoader mImageLoader;
+    private static SimpleImageLoader mImageLoader;
 
 
     private MyVolley() {
@@ -40,7 +40,7 @@ public class MyVolley {
 
     public static void init(Context context) {
         mRequestQueue = Volley.newRequestQueue(context);
-        mImageLoader = new ImageLoader(mRequestQueue, BitmapImageCache.getInstance(null));
+        mImageLoader = new SimpleImageLoader(mRequestQueue, BitmapImageCache.getInstance(null));
     }
 
     public static RequestQueue getRequestQueue() {
@@ -58,7 +58,7 @@ public class MyVolley {
      * 
      * @return
      */
-    public static ImageLoader getImageLoader() {
+    public static SimpleImageLoader getImageLoader() {
         if (mImageLoader != null) {
             return mImageLoader;
         } else {

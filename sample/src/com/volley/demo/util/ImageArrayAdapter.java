@@ -26,14 +26,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.android.volley.cache.SimpleImageLoader;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.ui.NetworkImageView;
 import com.volley.demo.R;
 
 public class ImageArrayAdapter extends ArrayAdapter<ImageEntry> {
-	private ImageLoader mImageLoader;
+	private SimpleImageLoader mImageLoader;
 
-	public ImageArrayAdapter(Context context, int textViewResourceId, List<ImageEntry> objects, ImageLoader imageLoader) {
+	public ImageArrayAdapter(Context context, int textViewResourceId, List<ImageEntry> objects, SimpleImageLoader imageLoader) {
 		super(context, textViewResourceId, objects);
 		mImageLoader = imageLoader;
 	}

@@ -231,27 +231,43 @@ public class DiskLruBasedCache implements Cache {
         
         /**
          * Create a set of image cache parameters that can be provided to
-         * {@link EfficientImageCache#getInstance(FragmentManager, ImageCacheParams)} or
-         * {@link ImageWorker#addImageCache(FragmentManager, ImageCacheParams)}.
-         * @param context A context to use.
-         * @param diskCacheDirectoryName A unique subdirectory name that will be appended to the
-         *                               application cache directory. Usually "cache" or "images"
-         *                               is sufficient.
+         * @param maxCacheSizeInBytes cache size in bytes.
          */
         public ImageCacheParams(File rootDirectory, int maxCacheSizeInBytes) {
             diskCacheDir = rootDirectory;
             memCacheSize = maxCacheSizeInBytes;
         }
-        
+
+        /**
+         * Create a set of image cache parameters
+         * @param context A context to use.
+         * @param rootDirectory A unique subdirectory name that will be appended to the
+         *                               application cache directory. Usually "cache" or "images"
+         *                               is sufficient.
+         * @param maxCacheSizeInBytes cache size in bytes.
+         */
         public ImageCacheParams(Context context, String rootDirectory, int maxCacheSizeInBytes) {
             diskCacheDir = Utils.getDiskCacheDir(context, rootDirectory);
             memCacheSize = maxCacheSizeInBytes;
         }
 
+        /**
+         * Create a set of image cache parameters
+         * @param context A context to use.
+         * @param rootDirectory A unique subdirectory name that will be appended to the
+         *                               application cache directory. Usually "cache" or "images"
+         *                               is sufficient.
+         */
         public ImageCacheParams(Context context, String rootDirectory) {
             diskCacheDir = Utils.getDiskCacheDir(context, rootDirectory);
         }
 
+        /**
+         * Create a set of image cache parameters
+         * @param rootDirectory A unique subdirectory name that will be appended to the
+         *                               application cache directory. Usually "cache" or "images"
+         *                               is sufficient.
+         */
         public ImageCacheParams(File rootDirectory) {
             diskCacheDir = rootDirectory;
         }

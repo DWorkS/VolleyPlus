@@ -33,7 +33,7 @@ import java.io.UnsupportedEncodingException;
  */
 public abstract class JsonRequest<T> extends Request<T> {
     /** Charset for request. */
-    private static final String PROTOCOL_CHARSET = "utf-8";
+    protected static final String PROTOCOL_CHARSET = "utf-8";
 
     /** Content type for request. */
     private static final String PROTOCOL_CONTENT_TYPE =
