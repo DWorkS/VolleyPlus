@@ -69,7 +69,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     private final int mMethod;
 
     /** URL of this request. */
-    private final String mUrl;
+    private String mUrl;
 
     /** Default tag for {@link TrafficStats}. */
     private final int mDefaultTrafficStatsTag;
@@ -123,6 +123,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     
     /** {@link Priority} for this request     */
     private Priority mPriority;
+
+    private CachePolicy mCachePolicy;
+
+    /** Force request to refresh network */
+    private boolean mForceNetwork;
 
     /**
      * Creates a new request with the given method (one of the values from {@link Method}),
@@ -559,12 +564,18 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns true if responses to this request should be cached.
      */
     public final boolean shouldCache() {
-        
-        //Allow caching only if method is a GET request
-        if(mMethod == Method.GET) {
+        if(mMethod == Method.GET || mMethod == Method.POST) {
             return mShouldCache & true;
         }
         return false;
+    }
+
+    public final void setForceNetwork(boolean forceNetwork) {
+        mForceNetwork = forceNetwork;
+    }
+
+    public final boolean shouldForceNetwork() {
+        return mForceNetwork;
     }
 
     /**
@@ -576,6 +587,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         NORMAL,
         HIGH,
         IMMEDIATE
+    }
+
+    public enum CachePolicy {
+        CACHE_ONLY,
+        CACHE_THEN_NETWORK,
+        CACHE_THEN_NETWORK_WHEN_CACHE_EXPIRES,
+        NETWORK_ONLY;
     }
     
     /**
@@ -596,6 +614,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      */
     public Priority getPriority() {
         return mPriority;
+    }
+
+    public CachePolicy getCachePolicy() {
+        return mCachePolicy;
+    }
+
+    public void setCachePolicy(CachePolicy cachePolicy) {
+        this.mCachePolicy = cachePolicy;
     }
 
     /**
@@ -670,6 +696,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         if (mErrorListener != null) {
             mErrorListener.onErrorResponse(error);
         }
+    }
+
+    public void setRedirectUrl(String newUrl) {
+        mUrl = newUrl;
     }
 
     /**

@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.1.2'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
     }
 }
@@ -17,8 +17,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
 
 dependencies {
-    compile 'com.android.support:support-v4:+'
-    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'com.android.support:support-v4:22.0.0'
+    compile 'com.google.code.gson:gson:2.3.1'
 }
 
 android {
@@ -48,10 +48,17 @@ android {
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
     }
+
     task androidJavadocs(type: Javadoc) {
         source = android.sourceSets.main.java.srcDirs
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     }
+
+//    task androidJavadocs(type: Javadoc) {
+//        source = android.sourceSets.main.java.srcDirs
+//        ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+//        classpath += files(ext.androidJar)
+//    }
 
     task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
         classifier = 'javadoc'
