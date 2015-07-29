@@ -79,7 +79,17 @@ public abstract class MultiPartRequest<T> extends Request<T> implements Progress
     		mListener.onResponse(response);
     	}
 	}
-	
+
+	/**
+	 * Set listener for tracking download progress
+	 *
+	 * @param listener
+	 */
+	public void setOnProgressListener(ProgressListener listener){
+		mProgressListener = listener;
+	}
+
+
 	@Override
 	public void onProgress(long transferredBytes, long totalSize) {
 		if(null != mProgressListener){
