@@ -24,7 +24,7 @@ import com.android.volley.misc.IOUtils;
 import com.android.volley.misc.IOUtils.CountingInputStream;
 
 import java.io.BufferedInputStream;
-import java.io.EOFException;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -120,7 +120,7 @@ public class DiskBasedCache implements Cache {
         File file = getFileForKey(key);
         CountingInputStream cis = null;
         try {
-            cis = new CountingInputStream(new FileInputStream(file));
+            cis = new CountingInputStream(new BufferedInputStream(new FileInputStream(file)));
             CacheHeader.readHeader(cis); // eat header
             byte[] data = IOUtils.streamToBytes(cis, (int) (file.length() - cis.getBytesRead()));
             return entry.toCacheEntry(data);
@@ -179,7 +179,7 @@ public class DiskBasedCache implements Cache {
         pruneIfNeeded(entry.data.length);
         File file = getFileForKey(key);
         try {
-            FileOutputStream fos = new FileOutputStream(file);
+            BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(file));
             CacheHeader e = new CacheHeader(key, entry);
             boolean success = e.writeHeader(fos);
             if (!success) {

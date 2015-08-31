@@ -894,7 +894,7 @@ public class PhotoView extends NetworkImageView implements OnGestureListener,
      * NOTE: This method overwrites any values stored in {@link #mValues}.
      */
     private float getScale() {
-        return FloatMath.sqrt((float) Math.pow(getValue(mMatrix, Matrix.MSCALE_X), 2) + (float) Math.pow(getValue(mMatrix, Matrix.MSKEW_Y), 2));
+        return (float)Math.sqrt((float) Math.pow(getValue(mMatrix, Matrix.MSCALE_X), 2) + (float) Math.pow(getValue(mMatrix, Matrix.MSKEW_Y), 2));
     }
     
 

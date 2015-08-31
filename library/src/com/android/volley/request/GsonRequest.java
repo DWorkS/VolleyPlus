@@ -1,8 +1,5 @@
 package com.android.volley.request;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
-
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -13,6 +10,9 @@ import com.android.volley.error.ParseError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
  
 /**
  * Volley adapter for JSON requests that will be parsed into Java objects by Gson.
@@ -72,6 +72,10 @@ public class GsonRequest<T> extends Request<T> {
     	if(null != listener){
     		listener.onResponse(response);
     	}
+    }
+
+    public final Class<T> getClazz() {
+        return clazz;
     }
  
     @Override
