@@ -19,6 +19,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -42,6 +43,9 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
  * associated request.
  */
 public class NetworkImageView extends ImageView {
+    private final int[] attrsArray = {
+            android.R.attr.src,
+    };
     private static final ColorDrawable transparentDrawable = new ColorDrawable(
             android.R.color.transparent);
 	private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
@@ -79,6 +83,9 @@ public class NetworkImageView extends ImageView {
 
     public NetworkImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        final TypedArray a = context.obtainStyledAttributes(attrs, attrsArray);
+        setDefaultImageResId(a.getResourceId(0, 0));
+        a.recycle();
     }
 
     /**

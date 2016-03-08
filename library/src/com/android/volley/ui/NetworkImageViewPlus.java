@@ -19,6 +19,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -40,6 +41,9 @@ import com.android.volley.misc.Utils;
  * associated request.
  */
 public class NetworkImageViewPlus extends RecyclingImageView {
+    private final int[] attrsArray = {
+            android.R.attr.src,
+    };
     private static final ColorDrawable transparentDrawable = new ColorDrawable(
             android.R.color.transparent);
 	private static final int HALF_FADE_IN_TIME = Utils.ANIMATION_FADE_IN_TIME / 2;
@@ -77,6 +81,9 @@ public class NetworkImageViewPlus extends RecyclingImageView {
 
     public NetworkImageViewPlus(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        final TypedArray a = context.obtainStyledAttributes(attrs, attrsArray);
+        setDefaultImageResId(a.getResourceId(0, 0));
+        a.recycle();
     }
 
     /**
@@ -254,7 +261,6 @@ public class NetworkImageViewPlus extends RecyclingImageView {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             setImageDrawable(bitmap);
-                            setImageDrawable(null);
                             animate()
                                     .alpha(1f)
                                     .scaleY(1f)
