@@ -58,6 +58,18 @@ public abstract class MultiPartRequest<T> extends Request<T> implements Progress
 	}
 
 	/**
+	 * Add a string parameter to be sent in the multipart request
+	 *
+	 * @param name The name of the paramter
+	 * @param value the value of the paramter
+	 * @return The Multipart request for chaining calls
+	 */
+	public MultiPartRequest<T> addStringParam(String name, String value) {
+		mMultipartParams.put(name, new MultiPartParam("text/plain", value));
+		return this;
+	}
+
+	/**
 	 * Add a file to be uploaded in the multipart request
 	 * 
 	 * @param name The name of the file key

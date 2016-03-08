@@ -16,7 +16,6 @@
 
 package com.android.volley.toolbox;
 
-import com.android.volley.error.AuthFailureError;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -24,6 +23,8 @@ import android.accounts.AccountManagerFuture;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.android.volley.error.AuthFailureError;
 
 /**
  * An Authenticator that uses {@link AccountManager} to get auth
@@ -34,31 +35,26 @@ public class AndroidAuthenticator implements Authenticator {
     private final Account mAccount;
     private final String mAuthTokenType;
     private final boolean mNotifyAuthFailure;
-
     /**
      * Creates a new authenticator.
-     *
-     * @param context       Context for accessing AccountManager
-     * @param account       Account to authenticate as
+     * @param context Context for accessing AccountManager
+     * @param account Account to authenticate as
      * @param authTokenType Auth token type passed to AccountManager
      */
     public AndroidAuthenticator(Context context, Account account, String authTokenType) {
         this(context, account, authTokenType, false);
     }
-
     /**
      * Creates a new authenticator.
-     *
-     * @param context           Context for accessing AccountManager
-     * @param account           Account to authenticate as
-     * @param authTokenType     Auth token type passed to AccountManager
+     * @param context Context for accessing AccountManager
+     * @param account Account to authenticate as
+     * @param authTokenType Auth token type passed to AccountManager
      * @param notifyAuthFailure Whether to raise a notification upon auth failure
      */
     public AndroidAuthenticator(Context context, Account account, String authTokenType,
                                 boolean notifyAuthFailure) {
         this(AccountManager.get(context), account, authTokenType, notifyAuthFailure);
     }
-
     // Visible for testing. Allows injection of a mock AccountManager.
     AndroidAuthenticator(AccountManager accountManager, Account account,
                          String authTokenType, boolean notifyAuthFailure) {
@@ -67,14 +63,18 @@ public class AndroidAuthenticator implements Authenticator {
         mAuthTokenType = authTokenType;
         mNotifyAuthFailure = notifyAuthFailure;
     }
-
     /**
      * Returns the Account being used by this authenticator.
      */
     public Account getAccount() {
         return mAccount;
     }
-
+    /**
+     * Returns the Auth Token Type used by this authenticator.
+     */
+    public String getAuthTokenType() {
+        return mAuthTokenType;
+    }
     // TODO: Figure out what to do about notifyAuthFailure
     @SuppressWarnings("deprecation")
     @Override
@@ -100,7 +100,6 @@ public class AndroidAuthenticator implements Authenticator {
         }
         return authToken;
     }
-
     @Override
     public void invalidateAuthToken(String authToken) {
         mAccountManager.invalidateAuthToken(mAccount.type, authToken);

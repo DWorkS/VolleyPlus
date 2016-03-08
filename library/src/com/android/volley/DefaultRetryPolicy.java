@@ -38,7 +38,7 @@ public class DefaultRetryPolicy implements RetryPolicy {
     public static final int DEFAULT_TIMEOUT_MS = 30000; //2500
 
     /** The default number of retries */
-    public static final int DEFAULT_MAX_RETRIES = 1;
+    public static final int DEFAULT_MAX_RETRIES = 0;
 
     /** The default backoff multiplier */
     public static final float DEFAULT_BACKOFF_MULT = 1f;
