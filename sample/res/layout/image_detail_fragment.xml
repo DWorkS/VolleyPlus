@@ -23,12 +23,4 @@
             android:contentDescription="@string/imageview_description" />
     </FrameLayout>
 
-    <com.google.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        ads:adSize="SMART_BANNER"
-        ads:adUnitId="ca-app-pub-6407484780907805/5449003679"
-        ads:loadAdOnCreate="true" />
-
 </LinearLayout>

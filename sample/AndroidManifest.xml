@@ -4,7 +4,7 @@
     android:versionName="1.1" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="9"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -82,12 +82,10 @@
             android:name="com.volley.demo.ImageDetailActivity"
             android:parentActivityName="com.volley.demo.SimpleCacheActivity"
             android:theme="@style/AppTheme.Translucent" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.ImageGridActivity" />
         </activity>
         <activity
-            android:name="com.google.ads.AdActivity"
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:theme="@android:style/Theme.Translucent"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
     </application>
 

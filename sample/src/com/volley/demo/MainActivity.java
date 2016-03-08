@@ -1,7 +1,5 @@
 package com.volley.demo;
 
-import java.util.ArrayList;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +20,8 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity implements OnItemClickListener {
 
@@ -113,11 +112,11 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 						android.R.layout.simple_list_item_1, parent, false);
 			}
 			ActivityInfo item = getItem(position);
-			if (!TextUtils.isEmpty(item.nonLocalizedLabel)) {
+/*			if (!TextUtils.isEmpty(item.nonLocalizedLabel)) {
 				tv.setText(item.nonLocalizedLabel);
 			} else {
 				tv.setText(item.labelRes);
-			}
+			}*/
 			return tv;
 		}
 	}

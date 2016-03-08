@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -18,12 +17,9 @@
         android:paddingRight="10dp"
         android:scrollbarStyle="outsideOverlay" />
 
-    <com.google.ads.AdView
-        android:id="@+id/adView"
+    <com.volley.demo.util.AdWrapper
+        android:id="@+id/adWrapper"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        ads:adSize="SMART_BANNER"
-        ads:adUnitId="ca-app-pub-6407484780907805/5449003679"
-        ads:loadAdOnCreate="true" />
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>
