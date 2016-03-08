@@ -16,7 +16,6 @@
 
 package com.android.volley.toolbox;
 
-import static com.android.volley.misc.MultipartUtils.*;
 
 import android.text.TextUtils;
 
@@ -30,6 +29,7 @@ import com.android.volley.request.MultiPartRequest.MultiPartParam;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.entity.BasicHttpEntity;
@@ -56,6 +56,9 @@ import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
+
+import static com.android.volley.misc.MultipartUtils.*;
+
 
 /**
  * An {@link HttpStack} based on {@link HttpURLConnection}.
@@ -156,7 +159,9 @@ public class HurlStack implements HttpStack {
 		}
 		StatusLine responseStatus = new BasicStatusLine(protocolVersion, connection.getResponseCode(), connection.getResponseMessage());
 		BasicHttpResponse response = new BasicHttpResponse(responseStatus);
-		response.setEntity(entityFromConnection(connection));
+		if (hasResponseBody(request.getMethod(), responseStatus.getStatusCode())) {
+			response.setEntity(entityFromConnection(connection));
+		}
 		for (Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
 			if (header.getKey() != null) {
 				Header h = new BasicHeader(header.getKey(), header.getValue().get(0));
@@ -164,6 +169,20 @@ public class HurlStack implements HttpStack {
 			}
 		}
 		return response;
+	}
+
+	/**
+	 * Checks if a response message contains a body.
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3">RFC 7230 section 3.3</a>
+	 * @param requestMethod request method
+	 * @param responseCode response status code
+	 * @return whether the response has a body
+	 */
+	private static boolean hasResponseBody(int requestMethod, int responseCode) {
+		return requestMethod != Request.Method.HEAD
+				&& !(HttpStatus.SC_CONTINUE <= responseCode && responseCode < HttpStatus.SC_OK)
+				&& responseCode != HttpStatus.SC_NO_CONTENT
+				&& responseCode != HttpStatus.SC_NOT_MODIFIED;
 	}
 
 	/**
@@ -379,10 +398,10 @@ public class HurlStack implements HttpStack {
 			connection.setRequestMethod("TRACE");
 			break;
 		case Method.PATCH:
-			// connection.setRequestMethod("PATCH");
-			// If server doesnt support patch uncomment this
-			connection.setRequestMethod("POST");
-			connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+            // connection.setRequestMethod("PATCH");
+            // If server doesnt support patch uncomment this
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
 			addBodyIfExists(connection, request);
 			break;
 		default:
