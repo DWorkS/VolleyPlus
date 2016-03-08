@@ -124,6 +124,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /** {@link Priority} for this request     */
     private Priority mPriority;
 
+    /** Whether or not patch method should be overridden. */
+    private boolean mShouldOverridePatch = false;
+
     /**
      * Creates a new request with the given method (one of the values from {@link Method}),
      * URL, and error listener.  Note that the normal response listener is not provided here as
@@ -694,4 +697,21 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         return (mCanceled ? "[X] " : "[ ] ") + getUrl() + " " + trafficStatsTag + " "
                 + getPriority() + " " + mSequence;
     }
+
+
+    /**
+     * @param override if true overrides patch method to post with X-HTTP-Method-Override
+     */
+    public final void overridePatch(boolean override) {
+        mShouldOverridePatch = override;
+    }
+
+
+    /**
+     * Returns true if responses to this request should be cached.
+     */
+    public final boolean shouldOverridePatch() {
+        return mShouldCache;
+    }
+
 }

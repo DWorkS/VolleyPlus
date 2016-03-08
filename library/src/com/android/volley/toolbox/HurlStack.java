@@ -398,11 +398,13 @@ public class HurlStack implements HttpStack {
 			connection.setRequestMethod("TRACE");
 			break;
 		case Method.PATCH:
-            // connection.setRequestMethod("PATCH");
-            // If server doesnt support patch uncomment this
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
-			addBodyIfExists(connection, request);
+            if(request.shouldOverridePatch()){
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+            } else {
+                connection.setRequestMethod("PATCH");
+            }
+            addBodyIfExists(connection, request);
 			break;
 		default:
 			throw new IllegalStateException("Unknown method type.");
