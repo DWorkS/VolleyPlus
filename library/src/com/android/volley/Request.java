@@ -697,7 +697,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns true if responses to this request should be cached.
      */
     public final boolean shouldOverridePatch() {
-        return mShouldCache;
+        return mShouldOverridePatch;
     }
 
 }
