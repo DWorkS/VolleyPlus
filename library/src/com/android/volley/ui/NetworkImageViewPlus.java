@@ -189,8 +189,8 @@ public class NetworkImageViewPlus extends RecyclingImageView {
             }
         }
         
-        int maxWidth = 0;
-        int maxHeight = 0;
+        int maxWidth;
+        int maxHeight;
         if(mImageLoader instanceof SimpleImageLoader){
         	final SimpleImageLoader loader = (SimpleImageLoader) mImageLoader;
         	maxWidth = mMaxImageWidth == 0 ? loader.getMaxImageWidth() : mMaxImageWidth;

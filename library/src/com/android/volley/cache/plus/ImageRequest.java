@@ -193,7 +193,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
 		decodeOptions.inInputShareable = true;
 		decodeOptions.inPurgeable = true;
 		decodeOptions.inPreferredConfig = mDecodeConfig;
-		Bitmap bitmap = null;
+		Bitmap bitmap;
 		if (mMaxWidth == 0 && mMaxHeight == 0) {
 
 			bitmap = getVideoFrame(bitmapFile.getAbsolutePath());
@@ -271,7 +271,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
 		decodeOptions.inInputShareable = true;
 		decodeOptions.inPurgeable = true;
 		decodeOptions.inPreferredConfig = mDecodeConfig;
-		Bitmap bitmap = null;
+		Bitmap bitmap;
 		if (mMaxWidth == 0 && mMaxHeight == 0) {
 
 			bitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
@@ -343,7 +343,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
 		decodeOptions.inInputShareable = true;
 		decodeOptions.inPurgeable = true;
 		decodeOptions.inPreferredConfig = mDecodeConfig;
-		Bitmap bitmap = null;
+		Bitmap bitmap;
 		
 		if (mMaxWidth == 0 && mMaxHeight == 0) {
 			bitmap = ImageUtils.decodeStream(mContentResolver, imageUri, decodeOptions);
@@ -409,7 +409,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
 		decodeOptions.inInputShareable = true;
 		decodeOptions.inPurgeable = true;
 		decodeOptions.inPreferredConfig = mDecodeConfig;
-		Bitmap bitmap = null;
+		Bitmap bitmap;
 		if (mMaxWidth == 0 && mMaxHeight == 0) {
 
 			bitmap = BitmapFactory.decodeResource(mResources, resourceId,
@@ -469,7 +469,7 @@ public class ImageRequest extends Request<BitmapDrawable> {
 		decodeOptions.inInputShareable = true;
 		decodeOptions.inPurgeable = true;
 		decodeOptions.inPreferredConfig = mDecodeConfig;
-        Bitmap bitmap = null;
+        Bitmap bitmap;
         if (mMaxWidth == 0 && mMaxHeight == 0) {
             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
         } else {
