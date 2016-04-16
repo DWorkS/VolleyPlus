@@ -122,7 +122,9 @@ public class HttpClientStack implements HttpStack {
 		case Method.GET:
 			return new HttpGet(request.getUrl());
 		case Method.DELETE:
-			return new HttpDelete(request.getUrl());
+			HttpDelete deleteRequest = new HttpDelete(request.getUrl());
+			setEntityIfNonEmptyBody(deleteRequest, request);
+			return deleteRequest;
 		case Method.POST: {
 			HttpPost postRequest = new HttpPost(request.getUrl());
 			setEntityIfNonEmptyBody(postRequest, request);
