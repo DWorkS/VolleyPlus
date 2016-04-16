@@ -59,16 +59,16 @@ public class ExtHttpClientStack implements HttpStack {
 	}
 
 	private static void addHeaders(HttpUriRequest httpRequest, Map<String, String> headers) {
-		for (String key : headers.keySet()) {
-			httpRequest.setHeader(key, headers.get(key));
+		for (Map.Entry<String, String> header : headers.entrySet()) {
+			httpRequest.setHeader(header.getKey(), header.getValue());
 		}
 	}
 
 	@SuppressWarnings("unused")
 	private static List<NameValuePair> getPostParameterPairs(Map<String, String> postParams) {
 		List<NameValuePair> result = new ArrayList<NameValuePair>(postParams.size());
-		for (String key : postParams.keySet()) {
-			result.add(new BasicNameValuePair(key, postParams.get(key)));
+		for (Map.Entry<String, String> postParam : postParams.entrySet()) {
+			result.add(new BasicNameValuePair(postParam.getKey(), postParam.getValue()));
 		}
 		return result;
 	}
