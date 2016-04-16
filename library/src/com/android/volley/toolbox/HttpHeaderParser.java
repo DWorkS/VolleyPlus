@@ -34,6 +34,8 @@ import com.android.volley.NetworkResponse;
  */
 public class HttpHeaderParser {
 
+    private HttpHeaderParser() {}
+
     /**
      * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.
      *

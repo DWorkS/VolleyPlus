@@ -13,6 +13,8 @@ import java.util.Map;
  */
 public class MultipartUtils {
 
+    private MultipartUtils() {}
+
     public static final String CRLF = "\r\n";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
     public static final String HEADER_USER_AGENT = "User-Agent";

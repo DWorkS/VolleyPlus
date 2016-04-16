@@ -25,6 +25,9 @@ import android.util.Log;
 
 /** Logging helper class. */
 public class VolleyLog {
+
+    private VolleyLog() {}
+
     public static String TAG = "Volley";
 
     public static boolean DEBUG = BuildConfig.DEBUG;//Log.isLoggable(TAG, Log.VERBOSE);

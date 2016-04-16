@@ -23,6 +23,9 @@ import android.os.Build;
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public abstract class Trace {
+
+	private Trace() {}
+
 	/**
 	 * Begins systrace tracing for a given tag. No-op on unsupported platform
 	 * versions.

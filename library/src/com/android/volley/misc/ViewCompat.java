@@ -22,6 +22,8 @@ import android.view.View;
 
 
 public class ViewCompat {
+
+	private ViewCompat() {}
 	
 	@SuppressLint("NewApi")
 	@SuppressWarnings("deprecation")
