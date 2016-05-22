@@ -21,6 +21,8 @@ package com.volley.demo.util;
  */
 public class Images {
 
+    private Images() {}
+
     /**
      * This are PicasaWeb URLs and could potentially change. Ideally the PicasaWeb API should be
      * used to fetch the URLs.

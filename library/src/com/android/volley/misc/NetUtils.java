@@ -22,6 +22,9 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 
 public class NetUtils {
+
+    private NetUtils() {}
+
     private static final String TAG = "NetUtils";
     private static String mUserAgent = null;
 

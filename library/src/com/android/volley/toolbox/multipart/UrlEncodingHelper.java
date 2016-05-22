@@ -7,6 +7,8 @@ import org.apache.http.protocol.HTTP;
 
 public class UrlEncodingHelper {
 
+    private UrlEncodingHelper() {}
+
     public static String encode(final String content, final String encoding) {
         try {
             return URLEncoder.encode(

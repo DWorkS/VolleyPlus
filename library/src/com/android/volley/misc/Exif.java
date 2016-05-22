@@ -22,6 +22,9 @@ import java.io.InputStream;
 import android.util.Log;
 
 public class Exif {
+
+    private Exif() {}
+
     private static final String TAG = "CameraExif";
 
     /**

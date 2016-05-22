@@ -29,6 +29,8 @@ import com.android.volley.misc.Utils;
 
 public class Volley {
 
+    private Volley() {}
+
     /** Default on-disk cache directory. */
     private static final String DEFAULT_CACHE_DIR = "volley";
 

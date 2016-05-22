@@ -32,6 +32,8 @@ import com.android.volley.misc.Utils;
 
 public class VolleyTickle {
 
+    private VolleyTickle() {}
+
     /** Default on-disk cache directory. */
     private static final String DEFAULT_CACHE_DIR = "volley";
 
