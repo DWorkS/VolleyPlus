@@ -19,7 +19,6 @@ package com.android.volley.toolbox;
 import android.os.SystemClock;
 
 import com.android.volley.Cache;
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -27,6 +26,7 @@ import com.android.volley.Response.ProgressListener;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyLog;
 import com.android.volley.error.AuthFailureError;
+import com.android.volley.error.ClientError;
 import com.android.volley.error.NetworkError;
 import com.android.volley.error.NoConnectionError;
 import com.android.volley.error.ServerError;
@@ -117,14 +117,14 @@ public class BasicNetwork implements Network {
                             SystemClock.elapsedRealtime() - requestStart);
                 }
 
-	            // Some responses such as 204s do not have content.  We must check.
-	            if (httpResponse.getEntity() != null) {
-	              responseContents = entityToBytes(request, httpResponse.getEntity());
-	            } else {
-	              // Add 0 byte response as a way of honestly representing a
-	              // no-content request.
-	              responseContents = new byte[0];
-	            }
+                // Some responses such as 204s do not have content.  We must check.
+                if (httpResponse.getEntity() != null) {
+                    responseContents = entityToBytes(request, httpResponse.getEntity());
+                } else {
+                    // Add 0 byte response as a way of honestly representing a
+                    // no-content request.
+                    responseContents = new byte[0];
+                }
                 // if the request is slow, log it.
                 long requestLifetime = SystemClock.elapsedRealtime() - requestStart;
                 logSlowRequests(requestLifetime, request, responseContents, statusLine);
@@ -141,8 +141,7 @@ public class BasicNetwork implements Network {
             } catch (MalformedURLException e) {
                 throw new RuntimeException("Bad URL " + request.getUrl(), e);
             } catch (IOException e) {
-                int statusCode;
-                NetworkResponse networkResponse = null;
+                int statusCode = 0;
                 if (httpResponse != null) {
                     statusCode = httpResponse.getStatusLine().getStatusCode();
                 } else {
@@ -150,24 +149,31 @@ public class BasicNetwork implements Network {
                             false, SystemClock.elapsedRealtime() - requestStart), e);
                 }
                 VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
+                NetworkResponse networkResponse;
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
                             responseHeaders, false, SystemClock.elapsedRealtime() - requestStart);
-                    
-                    if(statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR){
-                        throw new ServerError(networkResponse);
-                    }
-                    else{
-                        if (statusCode == HttpStatus.SC_UNAUTHORIZED ||
-                                statusCode == HttpStatus.SC_FORBIDDEN) {
-                            attemptRetryOnException("auth",
-                                    request, new AuthFailureError(networkResponse));
+
+                    if (statusCode == HttpStatus.SC_UNAUTHORIZED ||
+                            statusCode == HttpStatus.SC_FORBIDDEN) {
+                        attemptRetryOnException("auth",
+                                request, new AuthFailureError(networkResponse));
+                    } else if (statusCode >= 400 && statusCode <= 499) {
+                        // Don't retry other client errors.
+                        throw new ClientError(networkResponse);
+                    } else if (statusCode >= 500 && statusCode <= 599) {
+                        if (request.shouldRetryServerErrors()) {
+                            attemptRetryOnException("server",
+                                    request, new ServerError(networkResponse));
                         } else {
-                            throw new VolleyError(networkResponse);
+                            throw new ServerError(networkResponse);
                         }
+                    } else {
+                        // 3xx? No reason to retry.
+                        throw new VolleyError(networkResponse);
                     }
                 } else {
-                    throw new NetworkError(networkResponse);
+                    attemptRetryOnException("network", request, new NetworkError());
                 }
             }
         }
