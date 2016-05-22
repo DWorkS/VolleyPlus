@@ -72,7 +72,7 @@ public class SsX509TrustManager implements javax.net.ssl.X509TrustManager {
 
 
     private TrustManagerFactory prepareTrustManagerFactory(InputStream keyStore, String keyStorePassword) throws GeneralSecurityException {
-        TrustManagerFactory ret = null;
+        TrustManagerFactory ret;
         
         KeyStore ks;
         ks = KeyStore.getInstance("BKS");

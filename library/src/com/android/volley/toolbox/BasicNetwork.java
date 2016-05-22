@@ -141,7 +141,7 @@ public class BasicNetwork implements Network {
             } catch (MalformedURLException e) {
                 throw new RuntimeException("Bad URL " + request.getUrl(), e);
             } catch (IOException e) {
-                int statusCode = 0;
+                int statusCode;
                 NetworkResponse networkResponse = null;
                 if (httpResponse != null) {
                     statusCode = httpResponse.getStatusLine().getStatusCode();
