@@ -384,6 +384,7 @@ public class HurlStack implements HttpStack {
 			break;
 		case Method.DELETE:
 			connection.setRequestMethod("DELETE");
+			addBodyIfExists(connection, request);
 			break;
 		case Method.POST:
 			connection.setRequestMethod("POST");

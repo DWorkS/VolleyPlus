@@ -16,18 +16,20 @@
 
 package com.android.volley.toolbox;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.android.volley.Request;
+import com.android.volley.Request.Method;
+import com.android.volley.Response.ProgressListener;
+import com.android.volley.error.AuthFailureError;
+import com.android.volley.request.MultiPartRequest;
+import com.android.volley.request.MultiPartRequest.MultiPartParam;
+import com.android.volley.toolbox.multipart.FilePart;
+import com.android.volley.toolbox.multipart.MultipartProgressEntity;
+import com.android.volley.toolbox.multipart.StringPart;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -41,15 +43,12 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
-import com.android.volley.Request;
-import com.android.volley.Request.Method;
-import com.android.volley.Response.ProgressListener;
-import com.android.volley.error.AuthFailureError;
-import com.android.volley.request.MultiPartRequest;
-import com.android.volley.request.MultiPartRequest.MultiPartParam;
-import com.android.volley.toolbox.multipart.FilePart;
-import com.android.volley.toolbox.multipart.MultipartProgressEntity;
-import com.android.volley.toolbox.multipart.StringPart;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An HttpStack that performs request over an {@link HttpClient}.
@@ -230,6 +229,38 @@ public class HttpClientStack implements HttpStack {
 		 *             if the uri is invalid.
 		 */
 		public HttpPatch(final String uri) {
+			super();
+			setURI(URI.create(uri));
+		}
+
+		@Override
+		public String getMethod() {
+			return METHOD_NAME;
+		}
+
+	}
+
+	/**
+	 * The HttpDelete class which extends HttpEntityEnclosingRequestBase instead HttpRequestBase
+	 */
+	public static final class HttpDelete extends HttpEntityEnclosingRequestBase {
+
+		public final static String METHOD_NAME = "DELETE";
+
+		public HttpDelete() {
+			super();
+		}
+
+		public HttpDelete(final URI uri) {
+			super();
+			setURI(uri);
+		}
+
+		/**
+		 * @throws IllegalArgumentException
+		 *             if the uri is invalid.
+		 */
+		public HttpDelete(final String uri) {
 			super();
 			setURI(URI.create(uri));
 		}
