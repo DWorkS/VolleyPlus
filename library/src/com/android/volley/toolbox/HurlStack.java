@@ -138,8 +138,8 @@ public class HurlStack implements HttpStack {
 			connection.setRequestProperty(HEADER_USER_AGENT, mUserAgent);
 		}
 
-		for (String headerName : map.keySet()) {
-			connection.addRequestProperty(headerName, map.get(headerName));
+		for (Entry<String, String> header : map.entrySet()) {
+			connection.addRequestProperty(header.getKey(), header.getValue());
 		}
 		if (request instanceof MultiPartRequest) {
 			setConnectionParametersForMultipartRequest(connection, request);
@@ -225,17 +225,17 @@ public class HurlStack implements HttpStack {
 			OutputStream out = connection.getOutputStream();
 			writer = new PrintWriter(new OutputStreamWriter(out, charset), true);
 
-			for (String key : multipartParams.keySet()) {
-				MultiPartParam param = multipartParams.get(key);
+			for (Entry<String, MultiPartParam> multipartParam : multipartParams.entrySet()) {
+				MultiPartParam param = multipartParam.getValue();
 
-				writer.append(boundary).append(CRLF).append(String.format(HEADER_CONTENT_DISPOSITION + COLON_SPACE + FORM_DATA, key)).append(CRLF)
+				writer.append(boundary).append(CRLF).append(String.format(HEADER_CONTENT_DISPOSITION + COLON_SPACE + FORM_DATA, multipartParam.getKey())).append(CRLF)
 						.append(HEADER_CONTENT_TYPE + COLON_SPACE + param.contentType).append(CRLF).append(CRLF).append(param.value).append(CRLF)
 						.flush();
 			}
 
-			for (String key : filesToUpload.keySet()) {
+			for (Entry<String, String> fileToUpload : filesToUpload.entrySet()) {
 
-				File file = new File(filesToUpload.get(key));
+				File file = new File(fileToUpload.getValue());
 
 				if (!file.exists()) {
 					throw new IOException(String.format("File not found: %s", file.getAbsolutePath()));
@@ -247,7 +247,7 @@ public class HurlStack implements HttpStack {
 
 				writer.append(boundary)
 						.append(CRLF)
-						.append(String.format(HEADER_CONTENT_DISPOSITION + COLON_SPACE + FORM_DATA + SEMICOLON_SPACE + FILENAME, key, file.getName()))
+						.append(String.format(HEADER_CONTENT_DISPOSITION + COLON_SPACE + FORM_DATA + SEMICOLON_SPACE + FILENAME, fileToUpload.getKey(), file.getName()))
 						.append(CRLF).append(HEADER_CONTENT_TYPE + COLON_SPACE + CONTENT_TYPE_OCTET_STREAM).append(CRLF)
 						.append(HEADER_CONTENT_TRANSFER_ENCODING + COLON_SPACE + BINARY).append(CRLF).append(CRLF).flush();
 

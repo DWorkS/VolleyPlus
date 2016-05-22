@@ -44,20 +44,20 @@ public class MultipartUtils {
     public static int getContentLengthForMultipartRequest(String boundary, Map<String, MultiPartRequest.MultiPartParam> multipartParams, Map<String, String> filesToUpload) {
         final int boundaryLength = boundary.getBytes().length;
         int contentLength = 0;
-        for (String key : multipartParams.keySet()) {
-            MultiPartRequest.MultiPartParam param = multipartParams.get(key);
+        for (Map.Entry<String, MultiPartRequest.MultiPartParam> multipartParam : multipartParams.entrySet()) {
+            MultiPartRequest.MultiPartParam param = multipartParam.getValue();
             int size = boundaryLength +
-                    CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA, key).getBytes().length +
+                    CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA, multipartParam.getKey()).getBytes().length +
                     CRLF_LENGTH + HEADER_CONTENT_TYPE_LENGTH + COLON_SPACE_LENGTH + param.contentType.getBytes().length +
                     CRLF_LENGTH + CRLF_LENGTH + param.value.getBytes().length + CRLF_LENGTH;
 
             contentLength += size;
         }
 
-        for (String key : filesToUpload.keySet()) {
-            File file = new File(filesToUpload.get(key));
+        for (Map.Entry<String, String> filetoUpload : filesToUpload.entrySet()) {
+            File file = new File(filetoUpload.getValue());
             int size = boundaryLength +
-                    CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA + SEMICOLON_SPACE + FILENAME, key, file.getName()).getBytes().length +
+                    CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA + SEMICOLON_SPACE + FILENAME, filetoUpload.getKey(), file.getName()).getBytes().length +
                     CRLF_LENGTH + HEADER_CONTENT_TYPE_LENGTH + COLON_SPACE_LENGTH + CONTENT_TYPE_OCTET_STREAM_LENGTH +
                     CRLF_LENGTH + HEADER_CONTENT_TRANSFER_ENCODING_LENGTH + COLON_SPACE_LENGTH + BINARY_LENGTH + CRLF_LENGTH + CRLF_LENGTH;
 
