@@ -121,6 +121,7 @@ public class NetworkImageView extends ImageView {
      */
     public void setDefaultImageResId(int defaultImage) {
         mDefaultImageId = defaultImage;
+        setDefaultImageOrNull();
     }
 
     /**
@@ -238,10 +239,10 @@ public class NetworkImageView extends ImageView {
 
                         if (response.getBitmap() != null) {
                             //setImageBitmap(response.getBitmap(), mFadeInImage);
-                            setAnimateImageBitmap(response.getBitmap(), mFadeInImage);
-                        	if(null != mListener){
-                        		mListener.onResponse(response.getBitmap());
-                        	}
+                            setAnimateImageBitmap(response.getBitmap(), mFadeInImage && !isImmediate);
+                            if(null != mListener){
+                                mListener.onResponse(response.getBitmap());
+                            }
 
                         } else if (mDefaultImageId != 0) {
                             setImageResource(mDefaultImageId);

@@ -119,6 +119,7 @@ public class NetworkImageViewPlus extends RecyclingImageView {
      */
     public void setDefaultImageResId(int defaultImage) {
         mDefaultImageId = defaultImage;
+        setDefaultImageOrNull();
     }
 
     /**
@@ -230,10 +231,10 @@ public class NetworkImageViewPlus extends RecyclingImageView {
                         }
 
                         if (response.getBitmap() != null) {
-                            setAnimateImageBitmap(response.getBitmap(), mFadeInImage);
-                        	if(null != mListener){
-                        		mListener.onResponse(response.getBitmap());
-                        	}
+                            setAnimateImageBitmap(response.getBitmap(), mFadeInImage && !isImmediate);
+                            if(null != mListener){
+                                mListener.onResponse(response.getBitmap());
+                            }
 
                         } else if (mDefaultImageId != 0) {
                             setImageResource(mDefaultImageId);
