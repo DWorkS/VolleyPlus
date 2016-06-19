@@ -1,5 +1,20 @@
 package com.android.volley.cache;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.util.Log;
+
+import com.android.volley.BuildConfig;
+import com.android.volley.Cache;
+import com.android.volley.VolleyLog;
+import com.android.volley.cache.DiskBasedCache.CacheHeader;
+import com.android.volley.misc.CountingInputStream;
+import com.android.volley.misc.DiskLruCache;
+import com.android.volley.misc.IOUtils;
+import com.android.volley.misc.ImageUtils;
+import com.android.volley.misc.Utils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -8,22 +23,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.support.v4.app.FragmentManager;
-import android.util.Log;
-
-import com.android.volley.BuildConfig;
-import com.android.volley.Cache;
-import com.android.volley.VolleyLog;
-import com.android.volley.cache.DiskBasedCache.CacheHeader;
-import com.android.volley.misc.DiskLruCache;
-import com.android.volley.misc.IOUtils;
-import com.android.volley.misc.IOUtils.CountingInputStream;
-import com.android.volley.misc.ImageUtils;
-import com.android.volley.misc.Utils;
 
 /**
  * Cache implementation that caches files directly onto the hard disk in the specified directory

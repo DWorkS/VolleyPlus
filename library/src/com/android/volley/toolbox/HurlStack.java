@@ -23,8 +23,8 @@ import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.Response.ProgressListener;
 import com.android.volley.error.AuthFailureError;
+import com.android.volley.misc.CountingOutputStream;
 import com.android.volley.request.MultiPartRequest;
-import com.android.volley.request.MultiPartRequest.MultiPartParam;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -37,17 +37,10 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 
-import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +50,8 @@ import java.util.Map.Entry;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-import static com.android.volley.misc.MultipartUtils.*;
+import static com.android.volley.misc.MultipartUtils.HEADER_CONTENT_TYPE;
+import static com.android.volley.misc.MultipartUtils.HEADER_USER_AGENT;
 
 
 /**
@@ -92,24 +86,19 @@ public class HurlStack implements HttpStack {
 		this(urlRewriter, null);
 	}
 
-	/**
-	 * @param urlRewriter
-	 *            Rewriter to use for request URLs
-	 * @param sslSocketFactory
-	 *            SSL factory to use for HTTPS connections
-	 */
-	public HurlStack(UrlRewriter urlRewriter, SSLSocketFactory sslSocketFactory) {
-		mUrlRewriter = urlRewriter;
-		mSslSocketFactory = sslSocketFactory;
-	}
+    /**
+     * @param urlRewriter Rewriter to use for request URLs
+     * @param sslSocketFactory SSL factory to use for HTTPS connections
+     */
+    public HurlStack(UrlRewriter urlRewriter, SSLSocketFactory sslSocketFactory) {
+        mUrlRewriter = urlRewriter;
+        mSslSocketFactory = sslSocketFactory;
+    }
 
 	/**
-	 * @param urlRewriter
-	 *            Rewriter to use for request URLs
-	 * @param sslSocketFactory
-	 *            SSL factory to use for HTTPS connections
-	 * @param userAgent
-	 *            User Agent for HTTPS connections
+	 * @param urlRewriter Rewriter to use for request URLs
+	 * @param sslSocketFactory SSL factory to use for HTTPS connections
+	 * @param userAgent User Agent for HTTPS connections
 	 */
 	public HurlStack(UrlRewriter urlRewriter, SSLSocketFactory sslSocketFactory, String userAgent) {
 
@@ -141,11 +130,7 @@ public class HurlStack implements HttpStack {
 		for (Entry<String, String> header : map.entrySet()) {
 			connection.addRequestProperty(header.getKey(), header.getValue());
 		}
-		if (request instanceof MultiPartRequest) {
-			setConnectionParametersForMultipartRequest(connection, request);
-		} else {
-			setConnectionParametersForRequest(connection, request);
-		}
+		setConnectionParametersForRequest(connection, request);
 
 		// Initialize HttpResponse with data from the HttpURLConnection.
 		ProtocolVersion protocolVersion = new ProtocolVersion("HTTP", 1, 1);
@@ -185,148 +170,39 @@ public class HurlStack implements HttpStack {
 				&& responseCode != HttpStatus.SC_NOT_MODIFIED;
 	}
 
-	/**
-	 * Perform a multipart request on a connection
-	 * 
-	 * @param connection
-	 *            The Connection to perform the multi part request
-	 * @param request
-	 *            The params to add to the Multi Part request
-	 *            The files to upload
-	 * @throws ProtocolException
-	 */
-	private static void setConnectionParametersForMultipartRequest(HttpURLConnection connection, Request<?> request) throws IOException,
-			ProtocolException {
+    /**
+     * Initializes an {@link HttpEntity} from the given {@link HttpURLConnection}.
+     * @param connection
+     * @return an HttpEntity populated with data from <code>connection</code>.
+     */
+    private static HttpEntity entityFromConnection(HttpURLConnection connection) {
+        BasicHttpEntity entity = new BasicHttpEntity();
+        InputStream inputStream;
+        try {
+            inputStream = connection.getInputStream();
+        } catch (IOException ioe) {
+            inputStream = connection.getErrorStream();
+        }
+        entity.setContent(inputStream);
+        entity.setContentLength(connection.getContentLength());
+        entity.setContentEncoding(connection.getContentEncoding());
+        entity.setContentType(connection.getContentType());
+        return entity;
+    }
 
-		final String charset = ((MultiPartRequest<?>) request).getProtocolCharset();
-		final int curTime = (int) (System.currentTimeMillis() / 1000);
-		final String boundary = BOUNDARY_PREFIX + curTime;
-		connection.setRequestMethod("POST");
-		connection.setDoOutput(true);
-		connection.setRequestProperty(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, curTime));
-		
-		Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
-		Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
-		
-		if (((MultiPartRequest<?>) request).isFixedStreamingMode()) {
-			int contentLength = getContentLengthForMultipartRequest(boundary, multipartParams, filesToUpload);
-			
-			connection.setFixedLengthStreamingMode(contentLength);
-		} else {
-			connection.setChunkedStreamingMode(0);
-		}
-		// Modified end
-
-        ProgressListener progressListener;
-        progressListener = (ProgressListener) request;
-
-		PrintWriter writer = null;
-		try {
-			OutputStream out = connection.getOutputStream();
-			writer = new PrintWriter(new OutputStreamWriter(out, charset), true);
-
-			for (Entry<String, MultiPartParam> multipartParam : multipartParams.entrySet()) {
-				MultiPartParam param = multipartParam.getValue();
-
-				writer.append(boundary).append(CRLF).append(String.format(HEADER_CONTENT_DISPOSITION + COLON_SPACE + FORM_DATA, multipartParam.getKey())).append(CRLF)
-						.append(HEADER_CONTENT_TYPE + COLON_SPACE + param.contentType).append(CRLF).append(CRLF).append(param.value).append(CRLF)
-						.flush();
-			}
-
-			for (Entry<String, String> fileToUpload : filesToUpload.entrySet()) {
-
-				File file = new File(fileToUpload.getValue());
-
-				if (!file.exists()) {
-					throw new IOException(String.format("File not found: %s", file.getAbsolutePath()));
-				}
-
-				if (file.isDirectory()) {
-					throw new IOException(String.format("File is a directory: %s", file.getAbsolutePath()));
-				}
-
-				writer.append(boundary)
-						.append(CRLF)
-						.append(String.format(HEADER_CONTENT_DISPOSITION + COLON_SPACE + FORM_DATA + SEMICOLON_SPACE + FILENAME, fileToUpload.getKey(), file.getName()))
-						.append(CRLF).append(HEADER_CONTENT_TYPE + COLON_SPACE + CONTENT_TYPE_OCTET_STREAM).append(CRLF)
-						.append(HEADER_CONTENT_TRANSFER_ENCODING + COLON_SPACE + BINARY).append(CRLF).append(CRLF).flush();
-
-				BufferedInputStream input = null;
-				try {
-					FileInputStream fis = new FileInputStream(file);
-                    int transferredBytes = 0;
-                    int totalSize = (int) file.length();
-					input = new BufferedInputStream(fis);
-					int bufferLength = 0;
-
-					byte[] buffer = new byte[1024];
-					while ((bufferLength = input.read(buffer)) > 0) {
-						out.write(buffer, 0, bufferLength);
-                        transferredBytes += bufferLength;
-                        progressListener.onProgress(transferredBytes, totalSize);
-					}
-					out.flush(); // Important! Output cannot be closed. Close of
-									// writer will close
-									// output as well.
-				} finally {
-					if (input != null)
-						try {
-							input.close();
-						} catch (IOException ex) {
-							ex.printStackTrace();
-						}
-				}
-				writer.append(CRLF).flush(); // CRLF is important! It indicates
-												// end of binary
-												// boundary.
-			}
-
-			// End of multipart/form-data.
-			writer.append(boundary + BOUNDARY_PREFIX).append(CRLF).flush();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-
-		} finally {
-			if (writer != null) {
-				writer.close();
-			}
-		}
-	}
-
-	/**
-	 * Initializes an {@link HttpEntity} from the given
-	 * {@link HttpURLConnection}.
-	 * 
-	 * @param connection
-	 * @return an HttpEntity populated with data from <code>connection</code>.
-	 */
-	private static HttpEntity entityFromConnection(HttpURLConnection connection) {
-		BasicHttpEntity entity = new BasicHttpEntity();
-		InputStream inputStream;
-		try {
-			inputStream = connection.getInputStream();
-		} catch (IOException ioe) {
-			inputStream = connection.getErrorStream();
-		}
-		entity.setContent(inputStream);
-		entity.setContentLength(connection.getContentLength());
-		entity.setContentEncoding(connection.getContentEncoding());
-		entity.setContentType(connection.getContentType());
-		return entity;
-	}
-
-	/**
-	 * Create an {@link HttpURLConnection} for the specified {@code url}.
-	 */
-	protected HttpURLConnection createConnection(URL url) throws IOException {
+    /**
+     * Create an {@link HttpURLConnection} for the specified {@code url}.
+     */
+    protected HttpURLConnection createConnection(URL url) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
         // Workaround for the M release HttpURLConnection not observing the
         // HttpURLConnection.setFollowRedirects() property.
         // https://code.google.com/p/android/issues/detail?id=194495
         connection.setInstanceFollowRedirects(HttpURLConnection.getFollowRedirects());
+
         return connection;
-	}
+    }
 
 	/**
 	 * Opens an {@link HttpURLConnection} with parameters.
@@ -420,32 +296,34 @@ public class HurlStack implements HttpStack {
 	private static void addBodyIfExists(HttpURLConnection connection, Request<?> request) throws IOException, AuthFailureError {
 		byte[] body = request.getBody();
 		if (body != null) {
+			connection.setDoOutput(true);
+			connection.setRequestProperty(HEADER_CONTENT_TYPE, request.getBodyContentType());
+
+			if(request instanceof MultiPartRequest){
+				if (((MultiPartRequest<?>) request).isFixedStreamingMode()) {
+					int contentLength = ((MultiPartRequest<?>) request).getContentLength();
+					connection.setFixedLengthStreamingMode(contentLength);
+				} else {
+					connection.setChunkedStreamingMode(0);
+				}
+			}
+
 			ProgressListener progressListener = null;
 			if (request instanceof ProgressListener) {
 				progressListener = (ProgressListener) request;
 			}
-			connection.setDoOutput(true);
-			connection.addRequestProperty(HEADER_CONTENT_TYPE, request.getBodyContentType());
-			DataOutputStream out = new DataOutputStream(connection.getOutputStream());
 
 			if (progressListener != null) {
-				int transferredBytes = 0;
-				int totalSize = body.length;
-				int offset = 0;
-				int chunkSize = Math.min(2048, Math.max(totalSize - offset, 0));
-				while (chunkSize > 0 && offset + chunkSize <= totalSize) {
-					out.write(body, offset, chunkSize);
-					transferredBytes += chunkSize;
-					progressListener.onProgress(transferredBytes, totalSize);
-					offset += chunkSize;
-					chunkSize = Math.min(chunkSize, Math.max(totalSize - offset, 0));
-				}
+                CountingOutputStream cos = new CountingOutputStream(connection.getOutputStream(), body.length,
+                                                                           progressListener);
+                cos.write(body);
+                cos.close();
 			}
 			else{
-				out.write(body);
+                DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                out.write(body);
+                out.close();
 			}
-
-			out.close();
 		}
 	}
 }

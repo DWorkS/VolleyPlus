@@ -1,8 +1,5 @@
 package com.android.volley.misc;
 
-import com.android.volley.request.MultiPartRequest;
-import com.android.volley.toolbox.multipart.MultipartEntity;
-
 import org.apache.http.util.EncodingUtils;
 
 import java.io.File;
@@ -41,11 +38,11 @@ public class MultipartUtils {
 
     public static final byte[] CRLF_BYTES = EncodingUtils.getAsciiBytes(CRLF);
 
-    public static int getContentLengthForMultipartRequest(String boundary, Map<String, MultiPartRequest.MultiPartParam> multipartParams, Map<String, String> filesToUpload) {
+    public static int getContentLengthForMultipartRequest(String boundary, Map<String, MultiPartParam> multipartParams, Map<String, String> filesToUpload) {
         final int boundaryLength = boundary.getBytes().length;
         int contentLength = 0;
-        for (Map.Entry<String, MultiPartRequest.MultiPartParam> multipartParam : multipartParams.entrySet()) {
-            MultiPartRequest.MultiPartParam param = multipartParam.getValue();
+        for (Map.Entry<String, MultiPartParam> multipartParam : multipartParams.entrySet()) {
+            MultiPartParam param = multipartParam.getValue();
             int size = boundaryLength +
                     CRLF_LENGTH + HEADER_CONTENT_DISPOSITION_LENGTH + COLON_SPACE_LENGTH + String.format(FORM_DATA, multipartParam.getKey()).getBytes().length +
                     CRLF_LENGTH + HEADER_CONTENT_TYPE_LENGTH + COLON_SPACE_LENGTH + param.contentType.getBytes().length +

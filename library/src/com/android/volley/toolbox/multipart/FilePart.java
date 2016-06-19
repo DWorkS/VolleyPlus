@@ -1,6 +1,8 @@
 package com.android.volley.toolbox.multipart;
 
-import static com.android.volley.misc.MultipartUtils.*;
+import com.android.volley.Response.ProgressListener;
+
+import org.apache.http.protocol.HTTP;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,9 +10,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.http.protocol.HTTP;
-
-import com.android.volley.Response.ProgressListener;
+import static com.android.volley.misc.MultipartUtils.BINARY;
+import static com.android.volley.misc.MultipartUtils.COLON_SPACE;
+import static com.android.volley.misc.MultipartUtils.CRLF_BYTES;
+import static com.android.volley.misc.MultipartUtils.FILENAME;
+import static com.android.volley.misc.MultipartUtils.FORM_DATA;
+import static com.android.volley.misc.MultipartUtils.HEADER_CONTENT_DISPOSITION;
+import static com.android.volley.misc.MultipartUtils.HEADER_CONTENT_TRANSFER_ENCODING;
+import static com.android.volley.misc.MultipartUtils.HEADER_CONTENT_TYPE;
+import static com.android.volley.misc.MultipartUtils.SEMICOLON_SPACE;
 
 
 /**
@@ -19,6 +27,7 @@ import com.android.volley.Response.ProgressListener;
 public final class FilePart extends BasePart {
 
     private final File file;
+    private ProgressListener mProgressListener;
 
     /**
      * @param name String - name of parameter (may not be <code>null</code>).
@@ -60,6 +69,10 @@ public final class FilePart extends BasePart {
         };
     }
     
+    public void setProgressListener(ProgressListener listner){
+        mProgressListener = listner;
+    }
+
     public long getContentLength(Boundary boundary) {
         return getHeader(boundary).length + file.length() + CRLF_BYTES.length;
     }
@@ -67,15 +80,32 @@ public final class FilePart extends BasePart {
     @Override
     public void writeTo(OutputStream out, Boundary boundary) throws IOException {
         out.write(getHeader(boundary));
-        InputStream in = new FileInputStream(file);
-        try {
-            byte[] tmp = new byte[4096];
-            int l;
-            while ((l = in.read(tmp)) != -1) {
-                out.write(tmp, 0, l);
+        if (mProgressListener != null) {
+            InputStream in = new FileInputStream(file);
+            try {
+                int transferredBytes = 0;
+                int totalSize = (int) file.length();
+                byte[] tmp = new byte[4096];
+                int l;
+                while ((l = in.read(tmp)) != -1) {
+                    out.write(tmp, 0, l);
+                    transferredBytes += l;
+                    mProgressListener.onProgress(transferredBytes, totalSize);
+                }
+            } finally {
+                in.close();
             }
-        } finally {
-            in.close();
+        } else {
+            InputStream in = new FileInputStream(file);
+            try {
+                byte[] tmp = new byte[4096];
+                int l;
+                while ((l = in.read(tmp)) != -1) {
+                    out.write(tmp, 0, l);
+                }
+            } finally {
+                in.close();
+            }
         }
         out.write(CRLF_BYTES);
     }

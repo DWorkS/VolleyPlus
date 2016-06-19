@@ -20,11 +20,8 @@ import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.Response.ProgressListener;
 import com.android.volley.error.AuthFailureError;
+import com.android.volley.misc.ProgressHttpEntity;
 import com.android.volley.request.MultiPartRequest;
-import com.android.volley.request.MultiPartRequest.MultiPartParam;
-import com.android.volley.toolbox.multipart.FilePart;
-import com.android.volley.toolbox.multipart.MultipartProgressEntity;
-import com.android.volley.toolbox.multipart.StringPart;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,21 +40,19 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.android.volley.misc.MultipartUtils.HEADER_CONTENT_TYPE;
+
 /**
  * An HttpStack that performs request over an {@link HttpClient}.
  */
 public class HttpClientStack implements HttpStack {
 	protected final HttpClient mClient;
-
-	private static final String CONTENT_TYPE_MULTIPART = "multipart/form-data; charset=%s; boundary=%s";
-	private final static String HEADER_CONTENT_TYPE = "Content-Type";
 
 	public HttpClientStack(HttpClient client) {
 		mClient = client;
@@ -131,7 +126,6 @@ public class HttpClientStack implements HttpStack {
 		}
 		case Method.PUT: {
 			HttpPut putRequest = new HttpPut(request.getUrl());
-			putRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
 			setEntityIfNonEmptyBody(putRequest, request);
 			return putRequest;
 		}
@@ -142,9 +136,16 @@ public class HttpClientStack implements HttpStack {
 		case Method.TRACE:
 			return new HttpTrace(request.getUrl());
 		case Method.PATCH: {
-			HttpPatch patchRequest = new HttpPatch(request.getUrl());
-			setEntityIfNonEmptyBody(patchRequest, request);
-			return patchRequest;
+			if(request.shouldOverridePatch()){
+				HttpPost postRequest = new HttpPost(request.getUrl());
+				postRequest.addHeader("X-HTTP-Method-Override", "PATCH");
+				setEntityIfNonEmptyBody(postRequest, request);
+				return postRequest;
+			} else {
+				HttpPatch patchRequest = new HttpPatch(request.getUrl());
+				setEntityIfNonEmptyBody(patchRequest, request);
+				return patchRequest;
+			}
 		}
 		default:
 			throw new IllegalStateException("Unknown request method.");
@@ -153,43 +154,55 @@ public class HttpClientStack implements HttpStack {
 
 	private static void setEntityIfNonEmptyBody(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) throws IOException, AuthFailureError {
 
-		if (request instanceof MultiPartRequest) {
+		byte[] body = request.getBody();
+		if (body != null) {
 			ProgressListener progressListener = null;
 			if (request instanceof ProgressListener) {
 				progressListener = (ProgressListener) request;
 			}
-            MultipartProgressEntity multipartEntity = new MultipartProgressEntity();
-            multipartEntity.setListener(progressListener);
-			final String charset = ((MultiPartRequest<?>) request).getProtocolCharset();
-			httpRequest.addHeader(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, multipartEntity.getBoundary()));
 
-			final Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
-			final Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
+			if (null != progressListener) {
+/*				MultipartEntity multipartEntity = new MultipartEntity();
+				final String charset = ((MultiPartRequest<?>) request).getProtocolCharset();
+				httpRequest.addHeader(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, multipartEntity.getBoundary()));
 
-			for (Map.Entry<String, MultiPartParam> multipartParam : multipartParams.entrySet()) {
-				multipartEntity.addPart(new StringPart(multipartParam.getKey(), multipartParam.getValue().value));
-			}
+				final Map<String, MultiPartParam> multipartParams = ((MultiPartRequest<?>) request).getMultipartParams();
+				final Map<String, String> filesToUpload = ((MultiPartRequest<?>) request).getFilesToUpload();
 
-			for (Map.Entry<String, String> fileToUpload : filesToUpload.entrySet()) {
-				File file = new File(fileToUpload.getValue());
-
-				if (!file.exists()) {
-					throw new IOException(String.format("File not found: %s", file.getAbsolutePath()));
+				for (Map.Entry<String, MultiPartParam> multipartParam : multipartParams.entrySet()) {
+					multipartEntity.addPart(new StringPart(multipartParam.getKey(), multipartParam.getValue().value));
 				}
 
-				if (file.isDirectory()) {
-					throw new IOException(String.format("File is a directory: %s", file.getAbsolutePath()));
+				for (Map.Entry<String, String> fileToUpload : filesToUpload.entrySet()) {
+					File file = new File(fileToUpload.getValue());
+
+					if (!file.exists()) {
+						throw new IOException(String.format("File not found: %s", file.getAbsolutePath()));
+					}
+
+					if (file.isDirectory()) {
+						throw new IOException(String.format("File is a directory: %s", file.getAbsolutePath()));
+					}
+
+					FilePart filePart = new FilePart(fileToUpload.getKey(), file, null, null);
+					filePart.setProgressListener(progressListener);
+					multipartEntity.addPart(filePart);
 				}
+				httpRequest.setEntity(multipartEntity);*/
 
-				FilePart filePart = new FilePart(fileToUpload.getKey(), file, null, null);
-				multipartEntity.addPart(filePart);
-			}
-			httpRequest.setEntity(multipartEntity);
+				ByteArrayEntity entity = new ByteArrayEntity(body);
+				ProgressHttpEntity progressHttpEntity = new ProgressHttpEntity(entity, progressListener);
 
-		} else {
-			httpRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
-			byte[] body = request.getBody();
-			if (body != null) {
+				if (((MultiPartRequest<?>) request).isFixedStreamingMode()) {
+					int contentLength = ((MultiPartRequest<?>) request).getContentLength();
+					progressHttpEntity.setContentLength(contentLength);
+				} else {
+					entity.setChunked(false);
+				}
+				entity.setContentType(request.getBodyContentType());
+				httpRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
+				httpRequest.setEntity(progressHttpEntity);
+			} else {
 				HttpEntity entity = new ByteArrayEntity(body);
 				httpRequest.setEntity(entity);
 			}
