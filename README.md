@@ -26,7 +26,7 @@ VolleyPlus
 * JsonArrayRequest
 * GsonRequest
 * GZipRequest
-* MultiPartRequest
+* [MultiPartRequest](https://github.com/DWorkS/VolleyPlus/wiki/Multipart-Request)
 * SimpleMultiPartRequest
 * DownloadRequest
 * ImageRequest
