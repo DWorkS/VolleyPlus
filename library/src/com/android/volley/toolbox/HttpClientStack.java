@@ -20,8 +20,11 @@ import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.Response.ProgressListener;
 import com.android.volley.error.AuthFailureError;
-import com.android.volley.misc.ProgressHttpEntity;
+import com.android.volley.misc.MultiPartParam;
 import com.android.volley.request.MultiPartRequest;
+import com.android.volley.toolbox.multipart.FilePart;
+import com.android.volley.toolbox.multipart.MultipartEntity;
+import com.android.volley.toolbox.multipart.StringPart;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -40,12 +43,14 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.android.volley.misc.MultipartUtils.CONTENT_TYPE_MULTIPART;
 import static com.android.volley.misc.MultipartUtils.HEADER_CONTENT_TYPE;
 
 /**
@@ -162,7 +167,7 @@ public class HttpClientStack implements HttpStack {
 			}
 
 			if (null != progressListener) {
-/*				MultipartEntity multipartEntity = new MultipartEntity();
+				MultipartEntity multipartEntity = new MultipartEntity();
 				final String charset = ((MultiPartRequest<?>) request).getProtocolCharset();
 				httpRequest.addHeader(HEADER_CONTENT_TYPE, String.format(CONTENT_TYPE_MULTIPART, charset, multipartEntity.getBoundary()));
 
@@ -188,9 +193,9 @@ public class HttpClientStack implements HttpStack {
 					filePart.setProgressListener(progressListener);
 					multipartEntity.addPart(filePart);
 				}
-				httpRequest.setEntity(multipartEntity);*/
+				httpRequest.setEntity(multipartEntity);
 
-				ByteArrayEntity entity = new ByteArrayEntity(body);
+/*				ByteArrayEntity entity = new ByteArrayEntity(body);
 				ProgressHttpEntity progressHttpEntity = new ProgressHttpEntity(entity, progressListener);
 
 				if (((MultiPartRequest<?>) request).isFixedStreamingMode()) {
@@ -201,9 +206,10 @@ public class HttpClientStack implements HttpStack {
 				}
 				entity.setContentType(request.getBodyContentType());
 				httpRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
-				httpRequest.setEntity(progressHttpEntity);
+				httpRequest.setEntity(progressHttpEntity);*/
 			} else {
 				HttpEntity entity = new ByteArrayEntity(body);
+				httpRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
 				httpRequest.setEntity(entity);
 			}
 		}

@@ -254,8 +254,8 @@ public class BasicNetwork implements Network {
             while ((count = in.read(buffer)) != -1) {
                 bytes.write(buffer, 0, count);
                 transferredBytes += count;
-                if(null != progressListener){
-                	progressListener.onProgress(transferredBytes, totalSize);
+                if (null != progressListener) {
+                    progressListener.onProgress(transferredBytes, totalSize);
                 }
             }
             return bytes.toByteArray();

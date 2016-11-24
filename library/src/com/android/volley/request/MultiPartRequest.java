@@ -10,7 +10,6 @@ import com.android.volley.Response.ProgressListener;
 import com.android.volley.error.AuthFailureError;
 import com.android.volley.misc.MultiPartParam;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -262,30 +261,22 @@ public abstract class MultiPartRequest<T> extends Request<T> implements Progress
 		dataOutputStream.writeBytes(CRLF);
 		dataOutputStream.writeBytes(CRLF);
 
-		BufferedInputStream input = null;
-		try {
-			FileInputStream fis = new FileInputStream(file);
-			int transferredBytes = 0;
-			int totalSize = (int) file.length();
-			input = new BufferedInputStream(fis);
-			int bufferLength = 0;
+		FileInputStream fileInputStream = new FileInputStream(file);
+		int bytesAvailable = fileInputStream.available();
 
-			byte[] buffer = new byte[1024];
-			while ((bufferLength = input.read(buffer)) > 0) {
-				dataOutputStream.write(buffer, 0, bufferLength);
-				transferredBytes += bufferLength;
-				if(null != mProgressListener) {
-					mProgressListener.onProgress(transferredBytes, totalSize);
-				}
-			}
-		} finally {
-			if (input != null)
-				try {
-					input.close();
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
+		int maxBufferSize = 1024 * 1024;
+		int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+		byte[] buffer = new byte[bufferSize];
+
+		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+		while (bytesRead > 0) {
+			dataOutputStream.write(buffer, 0, bufferSize);
+			bytesAvailable = fileInputStream.available();
+			bufferSize = Math.min(bytesAvailable, maxBufferSize);
+			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 		}
+
 
 		dataOutputStream.writeBytes(CRLF);
 	}
