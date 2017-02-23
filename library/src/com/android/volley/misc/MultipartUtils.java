@@ -27,7 +27,7 @@ public class MultipartUtils {
     public static final String COLON_SPACE = ": ";
     public static final String SEMICOLON_SPACE = "; ";
 
-    public static final int CRLF_LENGTH = CRLF.getBytes().length;
+    public static final int CRLF_LENGTH = 2; //CRLF.getBytes().length;
     public static final int HEADER_CONTENT_DISPOSITION_LENGTH = HEADER_CONTENT_DISPOSITION.getBytes().length;
     public static final int COLON_SPACE_LENGTH = COLON_SPACE.getBytes().length;
     public static final int HEADER_CONTENT_TYPE_LENGTH = HEADER_CONTENT_TYPE.getBytes().length;
@@ -36,7 +36,7 @@ public class MultipartUtils {
     public static final int BINARY_LENGTH = BINARY.getBytes().length;
     public static final int BOUNDARY_PREFIX_LENGTH = BOUNDARY_PREFIX.getBytes().length;
 
-    public static final byte[] CRLF_BYTES = EncodingUtils.getAsciiBytes(CRLF);
+    public static final byte[] CRLF_BYTES = {0x0D, 0x0A};
 
     public static int getContentLengthForMultipartRequest(String boundary, Map<String, MultiPartParam> multipartParams, Map<String, String> filesToUpload) {
         final int boundaryLength = boundary.getBytes().length;
