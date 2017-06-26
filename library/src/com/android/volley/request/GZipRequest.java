@@ -56,6 +56,6 @@ public class GZipRequest extends StringRequest {
 		} catch (IOException e) {
 			return Response.error(new ParseError());
 		}
-		return Response.success(output, HttpHeaderParser.parseCacheHeaders(response));
+		return Response.success(output, HttpHeaderParser.parseCacheHeaders(response, getSoftExpire(), getExpire()));
 	}
 }

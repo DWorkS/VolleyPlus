@@ -16,18 +16,17 @@
 
 package com.android.volley.toolbox;
 
-import java.io.ByteArrayOutputStream;
-import java.util.Map;
+import android.graphics.Bitmap;
+
+import com.android.volley.Cache;
+import com.android.volley.NetworkResponse;
 
 import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.protocol.HTTP;
 
-import android.graphics.Bitmap;
-import android.support.v4.util.ArrayMap;
-
-import com.android.volley.Cache;
-import com.android.volley.NetworkResponse;
+import java.io.ByteArrayOutputStream;
+import java.util.Map;
 
 /**
  * Utility methods for parsing HTTP headers.
@@ -35,6 +34,21 @@ import com.android.volley.NetworkResponse;
 public class HttpHeaderParser {
 
     private HttpHeaderParser() {}
+    /**
+     * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.
+     * Cache-control headers are ignored if soft_expire and expire both are non zero
+     * @param response The network response to parse headers from
+     * @param soft_expire The soft expire duration in milli seconds
+     * @param expire The full expire duration in milli seconds
+     * @return a cache entry for the given response, or null if the response is not cacheable.
+     */
+    public static Cache.Entry parseCacheHeaders(NetworkResponse response, long soft_expire, long expire) {
+        if(soft_expire == 0 && expire == 0){
+            return parseCacheHeaders(response);
+        } else {
+            return parseIgnoreCacheHeaders(response, soft_expire, expire);
+        }
+    }
 
     /**
      * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.

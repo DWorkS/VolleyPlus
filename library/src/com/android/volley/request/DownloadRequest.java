@@ -92,7 +92,7 @@ public class DownloadRequest extends Request<String> implements ProgressListener
 			}
 		}
         
-        return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
+        return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response, getSoftExpire(), getExpire()));
     }
 
 	@Override

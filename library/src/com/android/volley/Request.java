@@ -123,6 +123,12 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /** Whether or not patch method should be overridden. */
     private boolean mShouldOverridePatch = false;
 
+    /** The duration in which cache will be hit, but also refreshed on background. */
+    private long mSoftCacheExpire = 0;
+
+    /** The duration this cache entry expires completely. */
+    private long mCacheExpire = 0;
+
     /**
      * Creates a new request with the given method (one of the values from {@link Method}),
      * URL, and error listener.  Note that the normal response listener is not provided here as
@@ -730,10 +736,38 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 
     /**
-     * Returns true if responses to this request should be cached.
+     * @return true if responses to this request should be cached.
      */
     public final boolean shouldOverridePatch() {
         return mShouldOverridePatch;
+    }
+
+
+    /**
+     *
+     * @param soft_expire
+     * @param expire
+     */
+    public final void setCacheExpire(long soft_expire, long expire){
+        mSoftCacheExpire = soft_expire;
+        mCacheExpire = expire;
+        setShouldCache(mSoftCacheExpire != 0 && mCacheExpire != 0);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public final long getSoftExpire(){
+        return mSoftCacheExpire;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public final long getExpire(){
+        return mCacheExpire;
     }
 
 }

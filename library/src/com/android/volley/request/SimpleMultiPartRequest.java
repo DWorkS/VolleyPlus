@@ -55,6 +55,6 @@ public class SimpleMultiPartRequest extends MultiPartRequest<String> {
         } catch (UnsupportedEncodingException e) {
             parsed = new String(response.data);
         }
-        return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
+        return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response, getSoftExpire(), getExpire()));
     }
 }

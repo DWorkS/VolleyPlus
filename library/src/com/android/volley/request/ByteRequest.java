@@ -1,14 +1,11 @@
 
 package com.android.volley.request;
 
-import com.android.volley.Response.Listener;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.Request.Method;
+import com.android.volley.Response.Listener;
 import com.android.volley.toolbox.HttpHeaderParser;
-
-import java.io.UnsupportedEncodingException;
 
 public class ByteRequest extends Request<byte[]> {
     private final Listener<byte[]> mListener;
@@ -46,7 +43,7 @@ public class ByteRequest extends Request<byte[]> {
 
     @Override
     protected Response<byte[]> parseNetworkResponse(NetworkResponse response) {
-        return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
+        return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response, getSoftExpire(), getExpire()));
     }
 
     @Override
