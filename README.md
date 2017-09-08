@@ -1,8 +1,6 @@
 VolleyPlus
 ==========
 
-<a href="https://app.codesponsor.io/link/DDouVAHvg5bDgXhVeHCW8XH1/DWorkS/VolleyPlus" rel="nofollow"><img src="https://app.codesponsor.io/embed/DDouVAHvg5bDgXhVeHCW8XH1/DWorkS/VolleyPlus.svg" style="width: 888px; height: 68px;" alt="Sponsor" /></a>
-
 ![VolleyPlus](https://github.com/DWorkS/VolleyPlus/raw/master/header.png)
 
 **VolleyPlus** library Project improvements to Volley along with full image caching.It involves using **RequestQueue**, **RequestTickle** and **Request**.
@@ -148,4 +146,6 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+<a href="https://app.codesponsor.io/link/DDouVAHvg5bDgXhVeHCW8XH1/DWorkS/VolleyPlus" rel="nofollow"><img src="https://app.codesponsor.io/embed/DDouVAHvg5bDgXhVeHCW8XH1/DWorkS/VolleyPlus.svg" style="width: 888px; height: 68px;" alt="Sponsor" /></a>
 
