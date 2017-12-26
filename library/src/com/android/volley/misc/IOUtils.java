@@ -1,5 +1,6 @@
 package com.android.volley.misc;
 
+import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,7 +78,7 @@ public class IOUtils {
         os.write(b, 0, b.length);
     }
 
-    public static String readString(InputStream is) throws IOException {
+    public static String readString(CountingInputStream is) throws IOException {
         int n = (int) readLong(is);
         byte[] b = streamToBytes(is, n);
         return new String(b, "UTF-8");
@@ -95,7 +96,7 @@ public class IOUtils {
         }
     }
 
-    public static Map<String, String> readStringStringMap(InputStream is) throws IOException {
+    public static Map<String, String> readStringStringMap(CountingInputStream is) throws IOException {
         int size = readInt(is);
         Map<String, String> result = (size == 0)
                 ? Collections.<String, String>emptyMap()
@@ -107,21 +108,22 @@ public class IOUtils {
         }
         return result;
     }
-    
 
     /**
-     * Reads the contents of an InputStream into a byte[].
-     * */
-    public static byte[] streamToBytes(InputStream in, int length) throws IOException {
-        byte[] bytes = new byte[length];
-        int count;
-        int pos = 0;
-        while (pos < length && ((count = in.read(bytes, pos, length - pos)) != -1)) {
-            pos += count;
+     * Reads length bytes from CountingInputStream into byte array.
+     * @param cis input stream
+     * @param length number of bytes to read
+     * @throws IOException if fails to read all bytes
+     */
+    //VisibleForTesting
+    public static byte[] streamToBytes(CountingInputStream cis, long length) throws IOException {
+        long maxLength = cis.bytesRemaining();
+        // Length cannot be negative or greater than bytes remaining, and must not overflow int.
+        if (length < 0 || length > maxLength || (int) length != length) {
+            throw new IOException("streamToBytes length=" + length + ", maxLength=" + maxLength);
         }
-        if (pos != length) {
-            throw new IOException("Expected " + length + " bytes, read " + pos + " bytes");
-        }
+        byte[] bytes = new byte[(int) length];
+        new DataInputStream(cis).readFully(bytes);
         return bytes;
     }
 }
