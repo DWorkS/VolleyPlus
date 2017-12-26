@@ -220,8 +220,8 @@ public class HttpHeaderParser {
 
         final long cacheHitButRefreshed = soft_expire; // in this duration cache will be hit, but also refreshed on background
         final long cacheExpired = expire; // in this duration this cache entry expires completely
-        final long softExpire = now  + cacheHitButRefreshed;
-        final long ttl = now + cacheExpired;
+        final long softExpire = soft_expire == 0 ? 0 : now + soft_expire;
+        final long ttl = expire == 0 ? 0 : now + expire;
 
         Cache.Entry entry = new Cache.Entry();
         entry.data = response.data;
@@ -256,18 +256,21 @@ public class HttpHeaderParser {
      * or the defaultCharset if none can be found.
      */
     public static String parseCharset(Map<String, String> headers, String defaultCharset) {
-        String contentType = headers.get(HTTP.CONTENT_TYPE);
-        if (contentType != null) {
+        String contentType = (String)headers.get("Content-Type");
+        if(null == contentType) {
+            contentType = (String) headers.get("content-type");
+        }
+        if(contentType != null) {
             String[] params = contentType.split(";");
-            for (int i = 1; i < params.length; i++) {
+
+            for(int i = 1; i < params.length; ++i) {
                 String[] pair = params[i].trim().split("=");
-                if (pair.length == 2) {
-                    if (pair[0].equals("charset")) {
-                        return pair[1];
-                    }
+                if(pair.length == 2 && pair[0].equals("charset")) {
+                    return pair[1];
                 }
             }
         }
+
         return defaultCharset;
     }
     /**
