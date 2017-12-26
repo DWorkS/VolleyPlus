@@ -25,7 +25,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +39,7 @@ import com.android.volley.cache.SimpleImageLoader;
 import com.volley.demo.util.Images;
 import com.volley.demo.util.Utils;
 
-public class ImageDetailActivity extends ActionBarActivity implements OnClickListener {
+public class ImageDetailActivity extends AppCompatActivity implements OnClickListener {
     private static final String IMAGE_CACHE_DIR = "images";
     public static final String EXTRA_IMAGE = "extra_image";
 

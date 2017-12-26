@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -44,7 +44,7 @@ import com.volley.demo.util.MyVolley;
  * @author Ognyan Bankov
  * 
  */
-public class ExampleParams extends ActionBarActivity {
+public class ExampleParams extends AppCompatActivity {
     private TextView mTvResult;
     private EditText mEtNum1;
     private EditText mEtNum2;

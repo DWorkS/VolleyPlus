@@ -17,7 +17,7 @@
 package com.volley.demo;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -36,7 +36,7 @@ import com.volley.demo.util.MyVolley;
  * @author Ognyan Bankov
  *
  */
-public class ExampleSimpleRequest extends ActionBarActivity {
+public class ExampleSimpleRequest extends AppCompatActivity {
     private TextView mTvResult;
 
 

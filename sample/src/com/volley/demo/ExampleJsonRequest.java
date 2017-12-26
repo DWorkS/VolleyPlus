@@ -20,7 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -38,7 +38,7 @@ import com.volley.demo.util.MyVolley;
  * @author Ognyan Bankov
  *
  */
-public class ExampleJsonRequest extends ActionBarActivity {
+public class ExampleJsonRequest extends AppCompatActivity {
     private TextView mTvResult;
     
     @Override

@@ -19,7 +19,7 @@ package com.volley.demo;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -42,7 +42,7 @@ import com.volley.demo.misc.ExtHttpClientStack;
  * @author Ognyan Bankov
  * 
  */
-public class ExampleNewHttpClient extends ActionBarActivity {
+public class ExampleNewHttpClient extends AppCompatActivity {
     private TextView mTvResult;
 
 

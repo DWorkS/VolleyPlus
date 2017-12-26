@@ -19,7 +19,7 @@ package com.volley.demo;
 import java.io.InputStream;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -40,7 +40,7 @@ import com.volley.demo.misc.OkHttpStack;
  * @author Ognyan Bankov
  *
  */
-public class ExampleSsSslHttpClient extends ActionBarActivity {
+public class ExampleSsSslHttpClient extends AppCompatActivity {
     private TextView mTvResult;
 
 

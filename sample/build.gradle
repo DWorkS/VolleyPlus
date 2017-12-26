@@ -1,9 +1,10 @@
 buildscript {
     repositories {
+        google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:+'
+        classpath 'com.android.tools.build:gradle:3.1.0-alpha05'
     }
 }
 
@@ -18,8 +19,8 @@ dependencies {
 
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.1'
     useLibrary 'org.apache.http.legacy'
     sourceSets {
         main {
@@ -41,4 +42,7 @@ android {
     // conflict with src/ being used by the main source set.
     // Adding new build types or product flavors should be accompanied
     // by a similar customization.
+    defaultConfig {
+        minSdkVersion 14
+    }
 }

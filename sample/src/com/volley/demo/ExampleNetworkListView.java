@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
@@ -49,7 +49,7 @@ import com.volley.demo.util.MyVolley;
  * @author Ognyan Bankov (ognyan.bankov@bulpros.com)
  *
  */
-public class ExampleNetworkListView extends ActionBarActivity {
+public class ExampleNetworkListView extends AppCompatActivity {
     private static final int RESULTS_PAGE_SIZE = 20;
 
     private ListView mLvPicasa;
