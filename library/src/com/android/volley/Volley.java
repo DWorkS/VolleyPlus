@@ -43,9 +43,9 @@ public class Volley {
     private static Volley mVolleyHelper;
 
     private final Context mContext;
-    private RequestTickle mRequestTickle;
-    private RequestQueue mRequestQueue;
-    private SimpleImageLoader mImageLoader;
+    protected RequestTickle mRequestTickle;
+    protected RequestQueue mRequestQueue;
+    protected SimpleImageLoader mImageLoader;
     private String mUrl;
     private int mPlaceHolder;
     private boolean mCrossfade;
@@ -99,6 +99,10 @@ public class Volley {
         return mCrossfade;
     }
 
+    public Context getContext() {
+        return mContext;
+    }
+
     public ImageLoader.ImageContainer into(ImageView view) {
         return getImageLoader().get(getUrl(), view);
     }
@@ -150,6 +154,23 @@ public class Volley {
         return queue;
     }
 
+    public static RequestQueue newRequestQueue(Context context, HttpStack stack, String path) {
+        File cacheDir = new File(context.getCacheDir(), path);
+        if (stack == null) {
+            stack = Utils.hasHoneycomb() ?
+                    new HurlStack() :
+                    new HttpClientStack(AndroidHttpClient.newInstance(
+                            NetUtils.getUserAgent(context)));
+        }
+
+        Network network = new BasicNetwork(stack);
+
+        RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir), network);
+        queue.start();
+
+        return queue;
+    }
+
     /**
      * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
      *
@@ -157,9 +178,12 @@ public class Volley {
      * @return A started {@link RequestQueue} instance.
      */
     public static RequestQueue newRequestQueue(Context context) {
-        return newRequestQueue(context, null);
+        return newRequestQueue(context, (HttpStack) null);
     }
 
+    public static RequestQueue newRequestQueue(Context context, String path) {
+        return newRequestQueue(context, null, path);
+    }
 
     public RequestTickle getRequestTickle() {
         if (mRequestTickle == null) {
