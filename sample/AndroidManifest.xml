@@ -83,6 +83,12 @@
             android:parentActivityName="com.volley.demo.SimpleCacheActivity"
             android:theme="@style/AppTheme.Translucent" >
         </activity>
+
+        <activity
+            android:name="com.volley.demo.ExampleRxGsonRequest"
+            android:label="RxTest" >
+            >
+        </activity>
         <activity
             android:name="com.google.android.gms.ads.AdActivity"
             android:theme="@android:style/Theme.Translucent"
