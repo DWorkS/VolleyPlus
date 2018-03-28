@@ -19,13 +19,13 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
 
 dependencies {
-    compile 'com.android.support:support-v4:27.0.0'
-    compile 'com.google.code.gson:gson:2.2.4'
+    implementation 'com.android.support:support-v4:27.0.2'
+    implementation 'com.google.code.gson:gson:2.8.2'
 }
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.1'
+    buildToolsVersion '27.0.3'
     useLibrary 'org.apache.http.legacy'
     sourceSets {
         main {
@@ -39,7 +39,7 @@ android {
         }
 
         // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
+        androidTest.setRoot('tests')
 
         // Move the build types to build-types/<type>
         // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
