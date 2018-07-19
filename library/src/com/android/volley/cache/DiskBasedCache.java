@@ -128,6 +128,10 @@ public class DiskBasedCache implements Cache {
             VolleyLog.d("%s: %s", file.getAbsolutePath(), e.toString());
             remove(key);
             return null;
+        } catch (NegativeArraySizeException e) {
+            VolleyLog.d("%s: %s", file.getAbsolutePath(), e.toString());
+            remove(key);
+            return null;
         } catch (OutOfMemoryError e) {
             VolleyLog.e("Caught OOM for %d byte image, path=%s: %s", file.length(), file.getAbsolutePath(), e.toString());
             return null;
