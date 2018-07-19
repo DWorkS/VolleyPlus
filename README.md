@@ -1,7 +1,7 @@
 VolleyPlus
 ==========
 
-<a href="https://app.codesponsor.io/link/DDouVAHvg5bDgXhVeHCW8XH1/DWorkS/VolleyPlus" rel="nofollow"><img src="https://app.codesponsor.io/embed/DDouVAHvg5bDgXhVeHCW8XH1/DWorkS/VolleyPlus.svg" style="width: 888px; height: 68px;" alt="Sponsor" /></a>
+<a href='https://ko-fi.com/H2H6BPBP' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi4.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 ![VolleyPlus](https://github.com/DWorkS/VolleyPlus/raw/master/header.png)
 
