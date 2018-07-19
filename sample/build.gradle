@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.0-alpha05'
+        classpath 'com.android.tools.build:gradle:3.2.0-alpha08'
     }
 }
 
@@ -12,15 +12,15 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
-    compile 'com.android.support:appcompat-v7:+'
-    compile 'com.google.android.gms:play-services-ads:+'
+    compile 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.google.android.gms:play-services-ads:15.0.1'
     compile project(':library')
 }
 
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.1'
+    buildToolsVersion '27.0.3'
     useLibrary 'org.apache.http.legacy'
     sourceSets {
         main {
@@ -34,7 +34,7 @@ android {
         }
 
         // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
+        //instrumentTest.setRoot('tests')
     }
     // Move the build types to build-types/<type>
     // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
