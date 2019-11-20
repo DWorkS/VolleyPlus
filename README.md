@@ -29,8 +29,16 @@ VolleyPlus
 * JsonArrayRequest
 * GsonRequest
 * GZipRequest
-* [MultiPartRequest](https://github.com/DWorkS/VolleyPlus/wiki/Multipart-Request)
-* SimpleMultiPartRequest
+* MultiPartRequest/SimpleMultiPartRequest
+```
+    SimpleMultipartRequest request = new SimpleMultipartRequest(Method.POST, apiUrl, mListener, mErrorListener);
+    request.addFile("photo", imagePath);
+    request.addMultipartParam("body", "text/plain", "some text");
+
+    RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+    mRequestQueue.add(request);
+    mRequestQueue.start();
+```
 * DownloadRequest
 * ImageRequest
 
