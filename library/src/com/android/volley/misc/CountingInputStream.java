@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class CountingInputStream extends FilterInputStream {
-    private int bytesRead = 0;
+    private final long length;
+    private long bytesRead;
 
-    public CountingInputStream(InputStream in) {
+    public CountingInputStream(InputStream in, long length) {
         super(in);
+        this.length = length;
     }
 
     @Override
@@ -29,7 +31,12 @@ public class CountingInputStream extends FilterInputStream {
         return result;
     }
 
-    public long getBytesRead() {
+    //VisibleForTesting
+    long bytesRead() {
         return bytesRead;
+    }
+
+    public long bytesRemaining() {
+        return length - bytesRead;
     }
 }

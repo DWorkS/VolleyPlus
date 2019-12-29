@@ -40,10 +40,10 @@ public class ExampleImageLoading extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_loading);
 
-        mImageView = findViewById(R.id.iv_image);
+        mImageView = (ImageView) findViewById(R.id.iv_image);
 
 
-        Button btnImageLoadingRequest = findViewById(R.id.btn_image_loading);
+        Button btnImageLoadingRequest = (Button) findViewById(R.id.btn_image_loading);
         btnImageLoadingRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,7 +55,7 @@ public class ExampleImageLoading extends AppCompatActivity {
             }
         });
 
-        Button btnImageLoadingErrorRequest = findViewById(R.id.btn_image_loading_error);
+        Button btnImageLoadingErrorRequest = (Button) findViewById(R.id.btn_image_loading_error);
         btnImageLoadingErrorRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

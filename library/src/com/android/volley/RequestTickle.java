@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 
 import com.android.volley.error.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 
 
 /**
@@ -107,6 +108,10 @@ public class RequestTickle {
     	if(null == mRequest){
     		return null;
     	}
+
+        // Make a blocking call to initialize the cache.
+        if (mCache != null) mCache.initialize();
+
         NetworkResponse networkResponse = null;
         long startTimeMs = SystemClock.elapsedRealtime();
         try {
@@ -119,33 +124,61 @@ public class RequestTickle {
                 return null;
             }
 
-            // Tag the request (if API >= 14)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                TrafficStats.setThreadStatsTag(mRequest.getTrafficStatsTag());
+            // Attempt to retrieve this item from cache.
+            Cache.Entry entry = mCache != null ? mCache.get(mRequest.getCacheKey()) : null;
+            if (entry != null) {
+                // If it is completely expired, just send it to the network.
+                if (entry.isExpired()) {
+                    mRequest.addMarker("cache-hit-expired");
+                    mRequest.setCacheEntry(entry);
+                }
+
+                // We have a cache hit; parse its data for delivery back to the request.
+                mRequest.addMarker("cache-hit");
+                response = mRequest.parseNetworkResponse(
+                        new NetworkResponse(entry.data, entry.responseHeaders));
+                networkResponse = new NetworkResponse(entry.data, entry.responseHeaders);
+                mRequest.addMarker("cache-hit-parsed");
+            } else {
+                mRequest.addMarker("cache-miss");
+                // Cache miss; continue.
             }
-            
-            // Perform the network request.
-            networkResponse = mNetwork.performRequest(mRequest);
-            //mRequest.addMarker("network-http-complete");
 
-            // If the server returned 304 AND we delivered a response already,
-            // we're done -- don't deliver a second identical response.
-            if (networkResponse.notModified && mRequest.hasHadResponseDelivered()) {
-                mRequest.finish("not-modified");
-                return networkResponse;
-            }
 
-            // Parse the response here on the worker thread.
-            response = mRequest.parseNetworkResponse(networkResponse);
-            mRequest.addMarker("network-parse-complete");
+            if (entry == null || entry.refreshNeeded()) {
 
-            // Write to cache if applicable.
-            // TODO: Only update cache metadata instead of entire record for 304s.
-            if (mCache != null && mRequest.shouldCache() && response.cacheEntry != null) {
-                mCache.put(mRequest.getCacheKey(), response.cacheEntry);
+                // Tag the request (if API >= 14)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                    TrafficStats.setThreadStatsTag(mRequest.getTrafficStatsTag());
+                }
+
+                // Perform the network request.
+                networkResponse = mNetwork.performRequest(mRequest);
+                //mRequest.addMarker("network-http-complete");
+
+                // If the server returned 304 AND we delivered a response already,
+                // we're done -- don't deliver a second identical response.
+                if (networkResponse.notModified && mRequest.hasHadResponseDelivered()) {
+                    mRequest.finish("not-modified");
+                    return networkResponse;
+                }
+
+                // Parse the response here on the worker thread.
+                response = mRequest.parseNetworkResponse(networkResponse);
+                mRequest.addMarker("network-parse-complete");
+
+                if(mRequest.shouldCache()){
+                    // Write to cache if applicable.
+                    // TODO: Only update cache metadata instead of entire record for 304s.
+                    if (mCache != null && response.cacheEntry != null) {
+                        entry = HttpHeaderParser.parseIgnoreCacheHeaders(networkResponse,
+                                mRequest.getSoftExpire(),
+                                mRequest.getExpire());
+                        mCache.put(mRequest.getCacheKey(), entry);
+                    }
+                }
                 mRequest.addMarker("network-cache-written");
             }
-
             // Post the response back.
             mRequest.markDelivered();
             mDelivery.postResponse(mRequest, response);

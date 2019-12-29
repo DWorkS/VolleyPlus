@@ -26,6 +26,7 @@ import com.android.volley.VolleyLog.MarkerLog;
 import com.android.volley.error.AuthFailureError;
 import com.android.volley.error.TimeoutError;
 import com.android.volley.error.VolleyError;
+import com.android.volley.toolbox.VolleyTickle;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -769,5 +770,4 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     public final long getExpire(){
         return mCacheExpire;
     }
-
 }

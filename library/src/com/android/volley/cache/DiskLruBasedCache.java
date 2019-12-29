@@ -15,6 +15,7 @@ import com.android.volley.misc.IOUtils;
 import com.android.volley.misc.ImageUtils;
 import com.android.volley.misc.Utils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -368,9 +369,9 @@ public class DiskLruBasedCache implements Cache {
                         }
                         inputStream = snapshot.getInputStream(DISK_CACHE_INDEX);
                         if (inputStream != null) {
-                            CountingInputStream cis = new CountingInputStream(inputStream);
+                            CountingInputStream cis = new CountingInputStream(inputStream, file.length());
                             CacheHeader entry = CacheHeader.readHeader(cis); // eat header
-                            byte[] dataBytes = IOUtils.streamToBytes(cis, (int) (file.length() - cis.getBytesRead()));
+                            byte[] dataBytes = IOUtils.streamToBytes(cis, cis.bytesRemaining());
 							return entry.toCacheEntry(dataBytes);
                         }
                     }

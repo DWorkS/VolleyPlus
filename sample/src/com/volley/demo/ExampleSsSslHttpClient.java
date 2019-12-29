@@ -27,9 +27,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.Volley;
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.squareup.okhttp.OkHttpClient;
 import com.volley.demo.misc.OkHttpStack;
 
@@ -38,8 +38,8 @@ import java.io.InputStream;
 
 /**
  * Demonstrates how to execute HTTPS request against server with self-signed certificate.
- * @author Ognyan Bankov
  *
+ * @author Ognyan Bankov
  */
 public class ExampleSsSslHttpClient extends AppCompatActivity {
     private TextView mTvResult;

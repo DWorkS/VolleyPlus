@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 tv = (TextView) mInflater.inflate(
                         android.R.layout.simple_list_item_1, parent, false);
             }
-/*			ActivityInfo item = getItem(position);
+/*            ActivityInfo item = getItem(position);
 			if (!TextUtils.isEmpty(item.nonLocalizedLabel)) {
 				tv.setText(item.nonLocalizedLabel);
 			} else {

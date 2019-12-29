@@ -43,7 +43,6 @@ import java.util.Map;
  * present only in newer versions of HttpClient)
  *
  * @author Ognyan Bankov
- *
  */
 public class ExampleParams extends AppCompatActivity {
     private TextView mTvResult;
@@ -56,11 +55,11 @@ public class ExampleParams extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_params);
 
-        mTvResult = (TextView) findViewById(R.id.tv_result);
-        mEtNum1 = (EditText) findViewById(R.id.et_num1);
-        mEtNum2 = (EditText) findViewById(R.id.et_num2);
+        mTvResult = findViewById(R.id.tv_result);
+        mEtNum1 = findViewById(R.id.et_num1);
+        mEtNum2 = findViewById(R.id.et_num2);
 
-        Button btnGetRequest = (Button) findViewById(R.id.btn_get);
+        Button btnGetRequest = findViewById(R.id.btn_get);
         btnGetRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,7 +67,7 @@ public class ExampleParams extends AppCompatActivity {
 
                 String num1 = mEtNum1.getText().toString();
                 String num2 = mEtNum2.getText().toString();
-                if (num1 != null && !num1.equals("") && num2 != null && !num2.equals("")) {
+                if (!num1.equals("") && !num2.equals("")) {
                     String uri = String
                             .format("http://ave.bolyartech.com/params.php?param1=%1$s&param2=%2$s",
                                     num1,
@@ -83,7 +82,7 @@ public class ExampleParams extends AppCompatActivity {
             }
         });
 
-        Button btnPostRequest = (Button) findViewById(R.id.btn_post);
+        Button btnPostRequest = findViewById(R.id.btn_post);
         btnPostRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,20 +90,19 @@ public class ExampleParams extends AppCompatActivity {
 
                 final String num1 = mEtNum1.getText().toString();
                 final String num2 = mEtNum2.getText().toString();
-                if (num1 != null && !num1.equals("") && num2 != null && !num2.equals("")) {
+                if (!num1.equals("") && !num2.equals("")) {
                     StringRequest myReq = new StringRequest(Method.POST,
                             "http://ave.bolyartech.com/params.php",
                             createMyReqSuccessListener(),
                             createMyReqErrorListener()) {
 
-                        protected Map<String, String> getParams() throws com.android.volley.error.AuthFailureError {
-                            Map<String, String> params = new HashMap<String, String>();
+                        protected Map<String, String> getParams() {
+                            Map<String, String> params = new HashMap<>();
                             params.put("param1", num1);
                             params.put("param2", num2);
                             return params;
                         }
 
-                        ;
                     };
                     queue.add(myReq);
                 }

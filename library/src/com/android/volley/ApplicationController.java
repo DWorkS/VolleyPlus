@@ -3,7 +3,6 @@ package com.android.volley;
 import android.app.Application;
 import android.text.TextUtils;
 
-import com.android.volley.toolbox.Volley;
 
 public class ApplicationController extends Application {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.volley.cache;
+package com.android.volley.error;
 
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -36,6 +36,17 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Cache implementation that caches files directly onto the hard disk in the specified
@@ -285,8 +296,8 @@ public class DiskBasedCache implements Cache {
             if (deleted) {
                 mTotalSize -= e.size;
             } else {
-                VolleyLog.d("Could not delete cache entry for key=%s, filename=%s",
-                        e.key, getFilenameForKey(e.key));
+               VolleyLog.d("Could not delete cache entry for key=%s, filename=%s",
+                       e.key, getFilenameForKey(e.key));
             }
             iterator.remove();
             prunedFiles++;
@@ -432,7 +443,7 @@ public class DiskBasedCache implements Cache {
          */
         public boolean writeHeader(OutputStream os) {
             try {
-                IOUtils.writeInt(os, CACHE_MAGIC);
+            	IOUtils.writeInt(os, CACHE_MAGIC);
                 IOUtils.writeString(os, key);
                 IOUtils.writeString(os, etag == null ? "" : etag);
                 IOUtils.writeLong(os, serverDate);
@@ -449,13 +460,13 @@ public class DiskBasedCache implements Cache {
         }
     }
 
-    @Override
-    public void flush() {
-        // TODO Auto-generated method stub
-    }
+	@Override
+	public void flush() {
+		// TODO Auto-generated method stub
+	}
 
-    @Override
-    public void close() {
-        // TODO Auto-generated method stub
-    }
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+	}
 }

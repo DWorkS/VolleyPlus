@@ -52,10 +52,8 @@ import java.util.ArrayList;
 public class ExampleNetworkListView extends AppCompatActivity {
     private static final int RESULTS_PAGE_SIZE = 20;
 
-    private ListView mLvPicasa;
-    private boolean mHasData = false;
     private boolean mInError = false;
-    private ArrayList<ImageEntry> mEntries = new ArrayList<ImageEntry>();
+    private ArrayList<ImageEntry> mEntries = new ArrayList<>();
     private ImageArrayAdapter mAdapter;
 
 
@@ -64,10 +62,10 @@ public class ExampleNetworkListView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_network_list_view);
 
-        mLvPicasa = (ListView) findViewById(R.id.lv_picasa);
+        ListView listViewPicassa = findViewById(R.id.lv_picasa);
         mAdapter = new ImageArrayAdapter(this, 0, mEntries, MyVolley.getImageLoader());
-        mLvPicasa.setAdapter(mAdapter);
-        mLvPicasa.setOnScrollListener(new EndlessScrollListener());
+        listViewPicassa.setAdapter(mAdapter);
+        listViewPicassa.setOnScrollListener(new EndlessScrollListener());
     }
 
 
@@ -75,7 +73,7 @@ public class ExampleNetworkListView extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (!mHasData && !mInError) {
+        if (!mInError) {
             loadPage();
         }
     }
@@ -115,9 +113,9 @@ public class ExampleNetworkListView extends AppCompatActivity {
                         String url = null;
 
                         JSONObject media = entry.getJSONObject("media$group");
-                        if (media != null && media.has("media$thumbnail")) {
+                        if (media.has("media$thumbnail")) {
                             JSONArray thumbs = media.getJSONArray("media$thumbnail");
-                            if (thumbs != null && thumbs.length() > 0) {
+                            if (thumbs.length() > 0) {
                                 url = thumbs.getJSONObject(0).getString("url");
                             }
                         }
@@ -165,7 +163,7 @@ public class ExampleNetworkListView extends AppCompatActivity {
         private int previousTotal = 0;
         private boolean loading = true;
 
-        public EndlessScrollListener() {
+        EndlessScrollListener() {
         }
 
         public EndlessScrollListener(int visibleThreshold) {

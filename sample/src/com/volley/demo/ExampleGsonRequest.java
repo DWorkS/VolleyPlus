@@ -33,8 +33,8 @@ import com.volley.demo.util.MyVolley;
 
 /**
  * Demonstrates how to use Volley along with Gson
- * @author Ognyan Bankov
  *
+ * @author Ognyan Bankov
  */
 public class ExampleGsonRequest extends AppCompatActivity {
     private TextView mTvResult;
@@ -46,14 +46,14 @@ public class ExampleGsonRequest extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gson_request);
 
-        mTvResult = (TextView) findViewById(R.id.tv_result);
+        mTvResult = findViewById(R.id.tv_result);
 
-        Button btnSimpleRequest = (Button) findViewById(R.id.btn_gson_request);
+        Button btnSimpleRequest = findViewById(R.id.btn_gson_request);
         btnSimpleRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 RequestQueue queue = MyVolley.getRequestQueue();
-                GsonRequest<MyClass> myReq = new GsonRequest<MyClass>(
+                GsonRequest<MyClass> myReq = new GsonRequest<>(
                         "http://validate.jsontest.com/?json={'key':'value'}",
                         MyClass.class,
                         null,

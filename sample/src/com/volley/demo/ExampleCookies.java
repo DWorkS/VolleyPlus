@@ -27,10 +27,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.Volley;
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.StringRequest;
 import com.android.volley.toolbox.HttpClientStack;
-import com.android.volley.toolbox.Volley;
 
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
@@ -50,8 +50,8 @@ import java.util.List;
  * <p>
  * When pressing "Set cookie and execute" app sets the cookie to 41 and then executes the request.
  * </p>
- * @author Ognyan Bankov
  *
+ * @author Ognyan Bankov
  */
 public class ExampleCookies extends AppCompatActivity {
     private TextView mTvCookie;
@@ -97,12 +97,11 @@ public class ExampleCookies extends AppCompatActivity {
 
 
     private StringRequest createRequest() {
-        StringRequest myReq = new StringRequest(Method.GET,
+
+        return new StringRequest(Method.GET,
                 "http://khs.bolyartech.com/http_cookie.php",
                 createMyReqSuccessListener(),
                 createMyReqErrorListener());
-
-        return myReq;
     }
 
 
