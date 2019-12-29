@@ -45,7 +45,7 @@ public class BitmapImageCache implements ImageCache {
     
     /**
      * Don't instantiate this class directly, use
-     * {@link #getInstance(android.support.v4.app.FragmentManager, float)}.
+     * {@link #getInstance(FragmentManager, float)}.
      * @param memCacheSize Memory cache size in KB.
      */
     public BitmapImageCache(int memCacheSize) {

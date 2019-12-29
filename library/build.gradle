@@ -17,13 +17,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
 
 dependencies {
-    compile 'com.android.support:support-v4:+'
-    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'androidx.legacy:legacy-support-v4:1.0.0'
+    compile 'com.google.code.gson:gson:2.8.5'
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 28
     useLibrary 'org.apache.http.legacy'
     sourceSets {
         main {
@@ -61,6 +60,9 @@ android {
     task androidSourcesJar(type: Jar) {
         classifier = 'sources'
         from android.sourceSets.main.java.sourceFiles
+    }
+    defaultConfig {
+        minSdkVersion 14
     }
 
     artifacts {
