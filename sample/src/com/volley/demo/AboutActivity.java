@@ -19,56 +19,57 @@ package com.volley.demo;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class AboutActivity extends ActionBarActivity {
+import androidx.appcompat.app.AppCompatActivity;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_about);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-	}
+public class AboutActivity extends AppCompatActivity {
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.about, menu);
-		return true;
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_about);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			finish();
-			break;
-		case R.id.action_github:
-			startActivity(new Intent("android.intent.action.VIEW",
-					Uri.parse("https://github.com/DWorkS")));
-			break;
-		case R.id.action_gplus:
-			startActivity(new Intent("android.intent.action.VIEW",
-					Uri.parse("https://plus.google.com/109240246596102887385")));
-			break;
-		case R.id.action_twitter:
-			startActivity(new Intent("android.intent.action.VIEW",
-					Uri.parse("https://twitter.com/1HaKr")));
-			break;
-		case R.id.action_feedback:
-			Intent intentFeedback = new Intent("android.intent.action.SEND");
-			intentFeedback.setType("text/email");
-			intentFeedback.putExtra("android.intent.extra.EMAIL", new String[]{"hakr@dworks.in"});
-			intentFeedback.putExtra("android.intent.extra.SUBJECT", "VolleyPlus Feedback");
-			startActivity(Intent.createChooser(intentFeedback, "Send Feedback"));
-			break;
-		case R.id.action_support:
-			Intent intentMarketAll = new Intent("android.intent.action.VIEW");
-			intentMarketAll.setData(Uri.parse("market://search?q=pub:D WorkS"));
-			startActivity(intentMarketAll);
-			break;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.about, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+            case R.id.action_github:
+                startActivity(new Intent("android.intent.action.VIEW",
+                        Uri.parse("https://github.com/DWorkS")));
+                break;
+            case R.id.action_gplus:
+                startActivity(new Intent("android.intent.action.VIEW",
+                        Uri.parse("https://plus.google.com/109240246596102887385")));
+                break;
+            case R.id.action_twitter:
+                startActivity(new Intent("android.intent.action.VIEW",
+                        Uri.parse("https://twitter.com/1HaKr")));
+                break;
+            case R.id.action_feedback:
+                Intent intentFeedback = new Intent("android.intent.action.SEND");
+                intentFeedback.setType("text/email");
+                intentFeedback.putExtra("android.intent.extra.EMAIL", new String[]{"hakr@dworks.in"});
+                intentFeedback.putExtra("android.intent.extra.SUBJECT", "VolleyPlus Feedback");
+                startActivity(Intent.createChooser(intentFeedback, "Send Feedback"));
+                break;
+            case R.id.action_support:
+                Intent intentMarketAll = new Intent("android.intent.action.VIEW");
+                intentMarketAll.setData(Uri.parse("market://search?q=pub:D WorkS"));
+                startActivity(intentMarketAll);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

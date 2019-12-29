@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 Ognyan Bankov
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,18 +16,13 @@
 
 package com.volley.demo;
 
-import java.util.ArrayList;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.AlertDialog;
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBarActivity;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
@@ -38,18 +33,23 @@ import com.volley.demo.util.ImageArrayAdapter;
 import com.volley.demo.util.ImageEntry;
 import com.volley.demo.util.MyVolley;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
 
 /**
- * Demonstrates: 1. ListView which is populated by HTTP paginated requests; 2. Usage of NetworkImageView; 
+ * Demonstrates: 1. ListView which is populated by HTTP paginated requests; 2. Usage of NetworkImageView;
  * 3. "Endless" ListView pagination with read-ahead
- * 
- * Please note that for production environment you will need to add functionality like handling rotation, 
+ * <p>
+ * Please note that for production environment you will need to add functionality like handling rotation,
  * showing/hiding (indeterminate) progress indicator while loading, indicating that there are no more records, etc...
- *   
- * @author Ognyan Bankov (ognyan.bankov@bulpros.com)
  *
+ * @author Ognyan Bankov (ognyan.bankov@bulpros.com)
  */
-public class ExampleNetworkListView extends ActionBarActivity {
+public class ExampleNetworkListView extends AppCompatActivity {
     private static final int RESULTS_PAGE_SIZE = 20;
 
     private ListView mLvPicasa;
@@ -57,7 +57,7 @@ public class ExampleNetworkListView extends ActionBarActivity {
     private boolean mInError = false;
     private ArrayList<ImageEntry> mEntries = new ArrayList<ImageEntry>();
     private ImageArrayAdapter mAdapter;
-    
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,16 +86,16 @@ public class ExampleNetworkListView extends ActionBarActivity {
 
         int startIndex = 1 + mEntries.size();
         JsonObjectRequest myReq = new JsonObjectRequest(Method.GET,
-                                                "https://picasaweb.google.com/data/feed/api/all?q=kitten&max-results="
-                                                        +
-                                                        RESULTS_PAGE_SIZE
-                                                        +
-                                                        "&thumbsize=160&alt=json"
-                                                        + "&start-index="
-                                                        + startIndex,
-                                                        null,
-                                                createMyReqSuccessListener(),
-                                                createMyReqErrorListener());
+                "https://picasaweb.google.com/data/feed/api/all?q=kitten&max-results="
+                        +
+                        RESULTS_PAGE_SIZE
+                        +
+                        "&thumbsize=160&alt=json"
+                        + "&start-index="
+                        + startIndex,
+                null,
+                createMyReqSuccessListener(),
+                createMyReqErrorListener());
 
         queue.add(myReq);
     }
@@ -111,9 +111,9 @@ public class ExampleNetworkListView extends ActionBarActivity {
                     JSONObject entry;
                     for (int i = 0; i < entries.length(); i++) {
                         entry = entries.getJSONObject(i);
-                        
+
                         String url = null;
-                        
+
                         JSONObject media = entry.getJSONObject("media$group");
                         if (media != null && media.has("media$thumbnail")) {
                             JSONArray thumbs = media.getJSONArray("media$thumbnail");
@@ -121,7 +121,7 @@ public class ExampleNetworkListView extends ActionBarActivity {
                                 url = thumbs.getJSONObject(0).getString("url");
                             }
                         }
-                        
+
                         mEntries.add(new ImageEntry(entry.getJSONObject("title").getString("$t"), url));
                     }
                     mAdapter.notifyDataSetChanged();
@@ -145,17 +145,17 @@ public class ExampleNetworkListView extends ActionBarActivity {
 
     private void showErrorDialog() {
         mInError = true;
-        
+
         AlertDialog.Builder b = new AlertDialog.Builder(ExampleNetworkListView.this);
         b.setMessage("Error occured");
         b.show();
     }
-    
-    
+
+
     /**
      * Detects when user is close to the end of the current page and starts loading the next page
      * so the user will not have to wait (that much) for the next entries.
-     * 
+     *
      * @author Ognyan Bankov (ognyan.bankov@bulpros.com)
      */
     public class EndlessScrollListener implements OnScrollListener {
@@ -167,13 +167,14 @@ public class ExampleNetworkListView extends ActionBarActivity {
 
         public EndlessScrollListener() {
         }
+
         public EndlessScrollListener(int visibleThreshold) {
             this.visibleThreshold = visibleThreshold;
         }
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem,
-                int visibleItemCount, int totalItemCount) {
+                             int visibleItemCount, int totalItemCount) {
             if (loading) {
                 if (totalItemCount > previousTotal) {
                     loading = false;
@@ -191,10 +192,10 @@ public class ExampleNetworkListView extends ActionBarActivity {
 
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
-            
+
         }
-        
-        
+
+
         public int getCurrentPage() {
             return currentPage;
         }

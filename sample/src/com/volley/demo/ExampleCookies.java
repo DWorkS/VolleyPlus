@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 Ognyan Bankov
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,20 +16,13 @@
 
 package com.volley.demo;
 
-import java.util.List;
-
-import org.apache.http.client.CookieStore;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.AbstractHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.BasicClientCookie;
-
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBarActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
@@ -39,20 +32,28 @@ import com.android.volley.request.StringRequest;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.Volley;
 
+import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
+
+import java.util.List;
+
 
 /**
  * Demonstrates how to use cookies.
  * <p>
  * When pressing "Execute request" app executes the request, server reads the cookie (if present), increases it with one and sends its back.
  * </p>
- * 
+ *
  * <p>
  * When pressing "Set cookie and execute" app sets the cookie to 41 and then executes the request.
  * </p>
  * @author Ognyan Bankov
  *
  */
-public class ExampleCookies extends ActionBarActivity {
+public class ExampleCookies extends AppCompatActivity {
     private TextView mTvCookie;
     private RequestQueue mQueue;
     private AbstractHttpClient mHttpClient;
@@ -69,10 +70,10 @@ public class ExampleCookies extends ActionBarActivity {
 
         mQueue = Volley.newRequestQueue(ExampleCookies.this, new HttpClientStack(mHttpClient));
 
-        mTvCookie = (TextView) findViewById(R.id.tv_cookie);
+        mTvCookie = findViewById(R.id.tv_cookie);
         setTvCookieText("n/a");
 
-        Button btnRequest = (Button) findViewById(R.id.btn_execute_request);
+        Button btnRequest = findViewById(R.id.btn_execute_request);
         btnRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,7 +81,7 @@ public class ExampleCookies extends ActionBarActivity {
             }
         });
 
-        mBtnSetCookie = (Button) findViewById(R.id.btn_set_cookie);
+        mBtnSetCookie = findViewById(R.id.btn_set_cookie);
         mBtnSetCookie.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,9 +98,9 @@ public class ExampleCookies extends ActionBarActivity {
 
     private StringRequest createRequest() {
         StringRequest myReq = new StringRequest(Method.GET,
-                                                "http://khs.bolyartech.com/http_cookie.php",
-                                                createMyReqSuccessListener(),
-                                                createMyReqErrorListener());
+                "http://khs.bolyartech.com/http_cookie.php",
+                createMyReqSuccessListener(),
+                createMyReqErrorListener());
 
         return myReq;
     }

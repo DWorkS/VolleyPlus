@@ -8,7 +8,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,111 +20,109 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 
-public class MainActivity extends ActionBarActivity implements OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements OnItemClickListener {
 
-	private ListView mList;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		setContentView(R.layout.activity_main);
-		mList = (ListView)findViewById(android.R.id.list);
-		mList.setOnItemClickListener(this);
-		mList.setAdapter(getSampleAdapter());
-	}
+        setContentView(R.layout.activity_main);
+        ListView list = findViewById(android.R.id.list);
+        list.setOnItemClickListener(this);
+        list.setAdapter(getSampleAdapter());
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_about:
-			Intent aboutIntent = new Intent(getApplicationContext(), AboutActivity.class);
-			startActivity(aboutIntent);
-			break;
-		}
-		return super.onOptionsItemSelected(item);
-	}
-	
-	private ListAdapter getSampleAdapter() {
-		ArrayList<ActivityInfo> items = new ArrayList<ActivityInfo>();
-		final String thisClazzName = getClass().getName();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_about) {
+            Intent aboutIntent = new Intent(getApplicationContext(), AboutActivity.class);
+            startActivity(aboutIntent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
-		try {
-			PackageInfo pInfo = getPackageManager().getPackageInfo(
-					getPackageName(), PackageManager.GET_ACTIVITIES);
-			ActivityInfo[] aInfos = pInfo.activities;
+    private ListAdapter getSampleAdapter() {
+        ArrayList<ActivityInfo> items = new ArrayList<>();
+        final String thisClazzName = getClass().getName();
 
-			for (ActivityInfo aInfo : aInfos) {
-				if (!thisClazzName.equals(aInfo.name) 
-						&& !aInfo.name.endsWith("AboutActivity")
-						&& !aInfo.name.endsWith("ImageDetailActivity")
-						&& !aInfo.name.endsWith("AdActivity")) {
-					items.add(aInfo);
-				}
-			}
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(
+                    getPackageName(), PackageManager.GET_ACTIVITIES);
+            ActivityInfo[] aInfos = pInfo.activities;
 
-		return new SampleAdapter(this, items);
-	}
+            for (ActivityInfo aInfo : aInfos) {
+                if (!thisClazzName.equals(aInfo.name)
+                        && !aInfo.name.endsWith("AboutActivity")
+                        && !aInfo.name.endsWith("ImageDetailActivity")
+                        && !aInfo.name.endsWith("AdActivity")) {
+                    items.add(aInfo);
+                }
+            }
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
-	private static class SampleAdapter extends BaseAdapter {
+        return new SampleAdapter(this, items);
+    }
 
-		private final ArrayList<ActivityInfo> mItems;
+    private static class SampleAdapter extends BaseAdapter {
 
-		private final LayoutInflater mInflater;
+        private final ArrayList<ActivityInfo> mItems;
 
-		public SampleAdapter(Context context, ArrayList<ActivityInfo> activities) {
-			mItems = activities;
-			mInflater = LayoutInflater.from(context);
-		}
+        private final LayoutInflater mInflater;
 
-		@Override
-		public int getCount() {
-			return mItems.size();
-		}
+        SampleAdapter(Context context, ArrayList<ActivityInfo> activities) {
+            mItems = activities;
+            mInflater = LayoutInflater.from(context);
+        }
 
-		@Override
-		public ActivityInfo getItem(int position) {
-			return mItems.get(position);
-		}
+        @Override
+        public int getCount() {
+            return mItems.size();
+        }
 
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
+        @Override
+        public ActivityInfo getItem(int position) {
+            return mItems.get(position);
+        }
 
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView tv = (TextView) convertView;
-			if (tv == null) {
-				tv = (TextView) mInflater.inflate(
-						android.R.layout.simple_list_item_1, parent, false);
-			}
-			ActivityInfo item = getItem(position);
-/*			if (!TextUtils.isEmpty(item.nonLocalizedLabel)) {
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView tv = (TextView) convertView;
+            if (tv == null) {
+                tv = (TextView) mInflater.inflate(
+                        android.R.layout.simple_list_item_1, parent, false);
+            }
+/*			ActivityInfo item = getItem(position);
+			if (!TextUtils.isEmpty(item.nonLocalizedLabel)) {
 				tv.setText(item.nonLocalizedLabel);
 			} else {
 				tv.setText(item.labelRes);
 			}*/
-			return tv;
-		}
-	}
+            return tv;
+        }
+    }
 
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		ActivityInfo info = (ActivityInfo) parent.getItemAtPosition(position);
-		Intent intent = new Intent();
-		intent.setComponent(new ComponentName(this, info.name));
-		startActivity(intent);		
-	}
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ActivityInfo info = (ActivityInfo) parent.getItemAtPosition(position);
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(this, info.name));
+        startActivity(intent);
+    }
 }

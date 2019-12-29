@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 Ognyan Bankov
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,11 +17,12 @@
 package com.volley.demo;
 
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBarActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -35,7 +36,7 @@ import com.volley.demo.util.MyVolley;
  * @author Ognyan Bankov
  *
  */
-public class ExampleGsonRequest extends ActionBarActivity {
+public class ExampleGsonRequest extends AppCompatActivity {
     private TextView mTvResult;
 
 
@@ -53,18 +54,18 @@ public class ExampleGsonRequest extends ActionBarActivity {
             public void onClick(View v) {
                 RequestQueue queue = MyVolley.getRequestQueue();
                 GsonRequest<MyClass> myReq = new GsonRequest<MyClass>(
-                                                        "http://validate.jsontest.com/?json={'key':'value'}",
-                                                        MyClass.class,
-                                                        null,
-                                                        createMyReqSuccessListener(),
-                                                        createMyReqErrorListener());
+                        "http://validate.jsontest.com/?json={'key':'value'}",
+                        MyClass.class,
+                        null,
+                        createMyReqSuccessListener(),
+                        createMyReqErrorListener());
 
                 queue.add(myReq);
             }
         });
     }
-    
-    
+
+
     private Response.Listener<MyClass> createMyReqSuccessListener() {
         return new Response.Listener<MyClass>() {
             @Override
@@ -73,8 +74,8 @@ public class ExampleGsonRequest extends ActionBarActivity {
             }
         };
     }
-    
-    
+
+
     private Response.ErrorListener createMyReqErrorListener() {
         return new Response.ErrorListener() {
             @Override

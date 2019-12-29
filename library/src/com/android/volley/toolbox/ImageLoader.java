@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2013 The Android Open Source Project
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,9 +22,10 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.util.ArrayMap;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+
+import androidx.collection.ArrayMap;
 
 import com.android.volley.Cache;
 import com.android.volley.Request;
@@ -73,15 +74,15 @@ public class ImageLoader {
 
     /** Runnable for in-flight response delivery. */
     private Runnable mRunnable;
-    
+
     /** {@link Resources} instance for loading resource uris */
     private Resources mResources;
 
     /** {@link ContentResolver} instance for loading content uris */
     private ContentResolver mContentResolver;
-    
+
     private ArrayMap<String, String> mHeaders;
-    
+
     /**
      * Constructs a new ImageLoader with a default LruCache
      * implementation
@@ -99,7 +100,7 @@ public class ImageLoader {
     public ImageLoader(RequestQueue queue, ImageCache imageCache) {
         this(queue, imageCache, null);
     }
-    
+
     /**
      * Constructs a new ImageLoader.
      * @param queue The RequestQueue to use for making image requests.
@@ -111,19 +112,19 @@ public class ImageLoader {
         mCache = imageCache;
         mResources = resources;
     }
-    
+
     protected RequestQueue getRequestQueue() {
-		return mRequestQueue;
-	}
+        return mRequestQueue;
+    }
 
     protected ImageCache getImageCache() {
-		return mCache;
-	}
-    
+        return mCache;
+    }
+
     protected Cache getCache() {
-		return mRequestQueue.getCache();
-	}
-    
+        return mRequestQueue.getCache();
+    }
+
     /**
      * The default implementation of ImageListener which handles basic functionality
      * of showing a default image until the network response is received, at which point
@@ -133,7 +134,7 @@ public class ImageLoader {
      * @param errorImageResId Error image resource ID to use, or 0 if it doesn't exist.
      */
     public static ImageListener getImageListener(final ImageView view,
-            final int defaultImageResId, final int errorImageResId) {
+                                                 final int defaultImageResId, final int errorImageResId) {
         return new ImageListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -243,7 +244,7 @@ public class ImageLoader {
      *     the currently available image (default if remote is not loaded).
      */
     public ImageContainer get(String requestUrl, ImageListener imageListener,
-            int maxWidth, int maxHeight, ScaleType scaleType) {
+                              int maxWidth, int maxHeight, ScaleType scaleType) {
 
         // only fulfill requests that were initiated from the main thread.
         throwIfNotOnMainThread();
@@ -299,7 +300,7 @@ public class ImageLoader {
      *     the currently available image (default if remote is not loaded).
      */
     public ImageContainer set(String requestUrl, ImageListener imageListener,
-            int maxWidth, int maxHeight, ScaleType scaleType, Bitmap bitmap) {
+                              int maxWidth, int maxHeight, ScaleType scaleType, Bitmap bitmap) {
         // only fulfill requests that were initiated from the main thread.
         throwIfNotOnMainThread();
 
@@ -312,7 +313,7 @@ public class ImageLoader {
         // Update the caller to let them know that they should use the default bitmap.
         imageListener.onResponse(imageContainer, true);
         //setImageSuccess(cacheKey, bitmap);
-        
+
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, bitmap);
 
@@ -323,7 +324,7 @@ public class ImageLoader {
         Entry cache = getCache().get(requestUrl);
         cache.data = response.cacheEntry.data;
         getCache().put(requestUrl, cache);*/
-        
+
         return imageContainer;
     }
 
@@ -371,14 +372,14 @@ public class ImageLoader {
             batchResponse(cacheKey, request);
         }
     }
-    
+
     /**
      * Handler for when an image was successfully loaded.
      * @param cacheKey The cache key that is associated with the image request.
      * @param response The bitmap that was returned from the network.
      */
     @SuppressWarnings("unused")
-	protected void setImageSuccess(String cacheKey, Bitmap response) {
+    protected void setImageSuccess(String cacheKey, Bitmap response) {
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, response);
 
@@ -406,7 +407,7 @@ public class ImageLoader {
         if (request != null) {
             // Set the error for this request
             request.setError(error);
-            
+
             // Send the batched response
             batchResponse(cacheKey, request);
         }
@@ -437,7 +438,7 @@ public class ImageLoader {
          * @param cacheKey The cache key that identifies the requested URL for this container.
          */
         public ImageContainer(Bitmap bitmap, String requestUrl,
-                String cacheKey, ImageListener listener) {
+                              String cacheKey, ImageListener listener) {
             mBitmap = bitmap;
             mRequestUrl = requestUrl;
             mCacheKey = cacheKey;
@@ -615,39 +616,39 @@ public class ImageLoader {
      * @param scaleType The scaleType of the imageView.
      */
     public static String getCacheKey(String url, int maxWidth, int maxHeight, ScaleType scaleType) {
-        if(scaleType == ScaleType.CENTER_INSIDE){
+        if (scaleType == ScaleType.CENTER_INSIDE) {
             return getCacheKey(url, maxWidth, maxHeight);
         }
         return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)
                 .append("#H").append(maxHeight).append("#S").append(scaleType.ordinal()).append(url)
                 .toString();
     }
-    
+
     /**
      * Set a {@link Resources} instance if you need to support resource uris for loading images
      * @param resources {@link Resources} instance for loading images. Get from {@link Context#getResources()}
      */
     public void setResources(Resources resources) {
-    	mResources = resources;
+        mResources = resources;
     }
 
     public Resources getResources() {
-    	return mResources;
+        return mResources;
     }
-    
+
     /**
      * Set a {@link ContentResolver} instance if you need to support content uris for loading images
      * @param contentResolver {@link ContentResolver} instance for loading images. Get from {@link Context#getContentResolver()}
      */
     public void setContetResolver(ContentResolver contentResolver) {
-    	mContentResolver = contentResolver;
+        mContentResolver = contentResolver;
     }
-    
+
     public ContentResolver getContentResolver() {
-    	return mContentResolver;
+        return mContentResolver;
     }
-    
-	public void setHeaders(ArrayMap<String, String> headers) {
+
+    public void setHeaders(ArrayMap<String, String> headers) {
         mHeaders = headers;
     }
 }

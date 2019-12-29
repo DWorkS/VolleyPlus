@@ -13,6 +13,7 @@ dependencies {
     implementation fileTree(include: '*.jar', dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.gms:play-services-ads:18.3.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
     implementation project(':library')
 }
 
@@ -32,7 +33,7 @@ android {
         }
 
         // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
+        androidTest.setRoot('tests')
     }
     defaultConfig {
         minSdkVersion 14

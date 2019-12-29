@@ -2,8 +2,9 @@ package com.android.volley.cache;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
-import android.os.Build;
-import android.support.v4.util.LruCache;
+
+import androidx.annotation.NonNull;
+import androidx.collection.LruCache;
 
 import com.android.volley.toolbox.ImageCache;
 import com.android.volley.toolbox.ImageLoader;
@@ -12,7 +13,7 @@ import com.android.volley.toolbox.ImageLoader;
 /**
  * Basic implementation of a Bitmap LRU cache to use
  * with {@link ImageLoader#ImageLoader(com.android.volley.RequestQueue)}
- *
+ * <p>
  * Added by Vinay S Shenoy on 19/5/13
  */
 public class LruImageCache implements ImageCache {
@@ -26,18 +27,12 @@ public class LruImageCache implements ImageCache {
 
         mLruCache = new LruCache<String, Bitmap>(cacheSize) {
             @SuppressLint("NewApi")
-			@Override
-            protected int sizeOf(String key, Bitmap bitmap) {
+            @Override
+            protected int sizeOf(@NonNull String key, @NonNull Bitmap bitmap) {
                 // The cache size will be measured in kilobytes rather than
                 // number of items.
-            	
-            	if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-            		return bitmap.getByteCount() / 1024;
-            	}
-            	
-            	else {
-            		return (bitmap.getRowBytes() * bitmap.getHeight()) / 1024;
-            	}
+
+                return bitmap.getByteCount() / 1024;
             }
         };
 
@@ -51,17 +46,17 @@ public class LruImageCache implements ImageCache {
     @Override
     public void putBitmap(String key, Bitmap bitmap) {
         //if(mLruCache.get(key) == null) {
-            mLruCache.put(key, bitmap);
+        mLruCache.put(key, bitmap);
         //}
     }
 
-	@Override
-	public void invalidateBitmap(String url) {
-		mLruCache.remove(url);
-	}
+    @Override
+    public void invalidateBitmap(String url) {
+        mLruCache.remove(url);
+    }
 
-	@Override
-	public void clear() {
-		mLruCache.evictAll();
-	}
+    @Override
+    public void clear() {
+        mLruCache.evictAll();
+    }
 }

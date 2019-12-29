@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 Ognyan Bankov
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,11 +17,12 @@
 package com.volley.demo;
 
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBarActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
@@ -32,11 +33,10 @@ import com.volley.demo.util.MyVolley;
 
 /**
  * Demonstrates how to execute "plain" HTTP request, i.e. non-JSON.
- * 
- * @author Ognyan Bankov
  *
+ * @author Ognyan Bankov
  */
-public class ExampleSimpleRequest extends ActionBarActivity {
+public class ExampleSimpleRequest extends AppCompatActivity {
     private TextView mTvResult;
 
 
@@ -45,17 +45,17 @@ public class ExampleSimpleRequest extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_request);
 
-        mTvResult = (TextView) findViewById(R.id.tv_result);
+        mTvResult = findViewById(R.id.tv_result);
 
-        Button btnSimpleRequest = (Button) findViewById(R.id.btn_simple_request);
+        Button btnSimpleRequest = findViewById(R.id.btn_simple_request);
         btnSimpleRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 RequestQueue queue = MyVolley.getRequestQueue();
-                StringRequest myReq = new StringRequest(Method.GET, 
-                                                        "http://www.google.com/",
-                                                        createMyReqSuccessListener(),
-                                                        createMyReqErrorListener());
+                StringRequest myReq = new StringRequest(Method.GET,
+                        "http://www.google.com/",
+                        createMyReqSuccessListener(),
+                        createMyReqErrorListener());
 
                 queue.add(myReq);
             }

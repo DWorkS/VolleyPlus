@@ -17,8 +17,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
 
 dependencies {
-    compile 'androidx.legacy:legacy-support-v4:1.0.0'
-    compile 'com.google.code.gson:gson:2.8.5'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
 }
 
 android {
@@ -36,7 +36,7 @@ android {
         }
 
         // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
+        androidTest.setRoot('tests')
 
         // Move the build types to build-types/<type>
         // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...

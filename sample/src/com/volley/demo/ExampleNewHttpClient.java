@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 Ognyan Bankov
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,14 +16,13 @@
 
 package com.volley.demo;
 
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBarActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request.Method;
 import com.android.volley.RequestQueue;
@@ -33,16 +32,17 @@ import com.android.volley.request.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.volley.demo.misc.ExtHttpClientStack;
 
+import org.apache.http.impl.client.DefaultHttpClient;
+
 
 /**
  * Demonstrates how to use external HttpClient. You may want this approach if you need to use newer version of
  * HttpClient. Basically this demo does exactly the same as {@see Act_SimpleRequest} but uses HttpClient 4.2.x.
  * For this example to work you will need khandroid-httpclient-4.2.3.jar which resides in libs/
- * 
+ *
  * @author Ognyan Bankov
- * 
  */
-public class ExampleNewHttpClient extends ActionBarActivity {
+public class ExampleNewHttpClient extends AppCompatActivity {
     private TextView mTvResult;
 
 
@@ -51,9 +51,9 @@ public class ExampleNewHttpClient extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_http_client);
 
-        mTvResult = (TextView) findViewById(R.id.tv_result);
+        mTvResult = findViewById(R.id.tv_result);
 
-        Button btnSimpleRequest = (Button) findViewById(R.id.btn_simple_request);
+        Button btnSimpleRequest = findViewById(R.id.btn_simple_request);
         btnSimpleRequest.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,12 +61,12 @@ public class ExampleNewHttpClient extends ActionBarActivity {
                 // Current approach is used just for brevity
                 RequestQueue queue = Volley
                         .newRequestQueue(ExampleNewHttpClient.this,
-                                         new ExtHttpClientStack(new DefaultHttpClient()));
+                                new ExtHttpClientStack(new DefaultHttpClient()));
 
                 StringRequest myReq = new StringRequest(Method.GET,
-                                                        "http://www.google.com/",
-                                                        createMyReqSuccessListener(),
-                                                        createMyReqErrorListener());
+                        "http://www.google.com/",
+                        createMyReqSuccessListener(),
+                        createMyReqErrorListener());
 
                 queue.add(myReq);
             }

@@ -17,15 +17,16 @@
 package com.volley.demo;
 
 import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.appcompat.app.ActionBarActivity;
 
 import com.volley.demo.util.Utils;
 
 /**
  * Simple FragmentActivity to hold the main {@link SimpleCacheFragment} and not much else.
  */
-public class SimpleCacheActivity extends ActionBarActivity {
+public class SimpleCacheActivity extends AppCompatActivity {
     private static final String TAG = "ImageGridActivity";
 
     @Override

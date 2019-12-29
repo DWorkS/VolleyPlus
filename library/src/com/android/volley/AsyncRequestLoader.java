@@ -1,7 +1,8 @@
 package com.android.volley;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
+
+import androidx.loader.content.AsyncTaskLoader;
 
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.GsonRequest;

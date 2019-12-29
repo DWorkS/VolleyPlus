@@ -20,12 +20,6 @@ import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.core.app.NavUtils;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,12 +28,19 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
 import com.android.volley.cache.DiskLruBasedCache.ImageCacheParams;
 import com.android.volley.cache.SimpleImageLoader;
 import com.volley.demo.util.Images;
 import com.volley.demo.util.Utils;
 
-public class ImageDetailActivity extends ActionBarActivity implements OnClickListener {
+public class ImageDetailActivity extends AppCompatActivity implements OnClickListener {
     private static final String IMAGE_CACHE_DIR = "images";
     public static final String EXTRA_IMAGE = "extra_image";
 
@@ -75,7 +76,7 @@ public class ImageDetailActivity extends ActionBarActivity implements OnClickLis
         cacheParams.setMemCacheSizePercent(0.25f); // Set memory cache to 25% of app memory
 
         // The ImageFetcher takes care of loading images into our ImageView children asynchronously
-        
+
         mImageLoader = new SimpleImageLoader(this, cacheParams);//, R.drawable.empty_photo);
         //mImageFetcher.setFadeInImage(false);
         mImageLoader.setMaxImageSize(longest);
@@ -148,7 +149,7 @@ public class ImageDetailActivity extends ActionBarActivity implements OnClickLis
             case R.id.clear_cache:
                 mImageLoader.clearCache();
                 Toast.makeText(
-                        this, R.string.clear_cache_complete_toast,Toast.LENGTH_SHORT).show();
+                        this, R.string.clear_cache_complete_toast, Toast.LENGTH_SHORT).show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
