@@ -28,7 +28,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
-import android.support.v4.app.FragmentActivity;
 import android.widget.ImageView;
 
 import com.android.volley.Cache;
@@ -46,6 +45,8 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.ui.PhotoView;
 
 import java.util.ArrayList;
+
+import androidx.fragment.app.FragmentActivity;
 
 /**
  * A class that wraps up remote image loading requests using the Volley library combined with a

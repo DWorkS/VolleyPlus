@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.http.AndroidHttpClient;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
 import android.widget.ImageView;
 
@@ -23,9 +21,9 @@ import com.android.volley.toolbox.VolleyTickle;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 
-import static com.android.volley.toolbox.HttpHeaderParser.parseDateAsEpoch;
+import androidx.collection.ArrayMap;
+import androidx.core.content.ContextCompat;
 
 /**
  * Created by HaKr on 13/05/17.

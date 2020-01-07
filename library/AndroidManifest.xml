@@ -4,6 +4,9 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <application />
+    <application android:usesCleartextTraffic="true">
+        <uses-library android:name="org.apache.http.legacy"
+            android:required="false"/>
+    </application>
 
 </manifest>

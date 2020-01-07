@@ -22,7 +22,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.util.ArrayMap;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
@@ -37,6 +36,8 @@ import com.android.volley.error.VolleyError;
 import com.android.volley.request.ImageRequest;
 
 import java.util.LinkedList;
+
+import androidx.collection.ArrayMap;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
