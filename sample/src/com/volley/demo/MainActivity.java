@@ -8,7 +8,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -112,11 +114,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 						android.R.layout.simple_list_item_1, parent, false);
 			}
 			ActivityInfo item = getItem(position);
-/*			if (!TextUtils.isEmpty(item.nonLocalizedLabel)) {
+			if (!TextUtils.isEmpty(item.nonLocalizedLabel)) {
 				tv.setText(item.nonLocalizedLabel);
 			} else {
 				tv.setText(item.labelRes);
-			}*/
+			}
 			return tv;
 		}
 	}

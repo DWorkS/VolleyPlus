@@ -3,10 +3,11 @@ package com.android.volley.cache;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.support.v4.util.LruCache;
 
 import com.android.volley.toolbox.ImageCache;
 import com.android.volley.toolbox.ImageLoader;
+
+import androidx.collection.LruCache;
 
 
 /**

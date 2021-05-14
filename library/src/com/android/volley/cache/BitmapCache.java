@@ -20,13 +20,14 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.util.LruCache;
 
 import com.android.volley.VolleyLog;
 import com.android.volley.misc.Utils;
 import com.android.volley.toolbox.ImageCache;
+
+import androidx.collection.LruCache;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 /**
  * This class holds our bitmap caches (memory and disk).
@@ -41,7 +42,7 @@ public class BitmapCache implements ImageCache {
 
     /**
      * Don't instantiate this class directly, use
-     * {@link #getInstance(android.support.v4.app.FragmentManager, float)}.
+     * {@link #getInstance(FragmentManager, float)}.
      * @param memCacheSize Memory cache size in KB.
      */
     private BitmapCache(int memCacheSize) {
