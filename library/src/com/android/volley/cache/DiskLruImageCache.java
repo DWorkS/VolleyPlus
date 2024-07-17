@@ -14,7 +14,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.android.volley.BuildConfig;
+import com.android.volley.BuildConfigs;
 import com.android.volley.misc.DiskLruCache;
 import com.android.volley.toolbox.ImageCache;
 
@@ -73,17 +73,17 @@ public class DiskLruImageCache implements ImageCache {
 			if (writeBitmapToFile(data, editor)) {
 				mDiskCache.flush();
 				editor.commit();
-				if (BuildConfig.DEBUG) {
+				if (BuildConfigs.DEBUG) {
 					Log.d("cache_test_DISK_", "image put on disk cache " + key);
 				}
 			} else {
 				editor.abort();
-				if (BuildConfig.DEBUG) {
+				if (BuildConfigs.DEBUG) {
 					Log.d("cache_test_DISK_", "ERROR on: image put on disk cache " + key);
 				}
 			}
 		} catch (IOException e) {
-			if (BuildConfig.DEBUG) {
+			if (BuildConfigs.DEBUG) {
 				Log.d("cache_test_DISK_", "ERROR on: image put on disk cache " + key);
 			}
 			try {
@@ -119,7 +119,7 @@ public class DiskLruImageCache implements ImageCache {
 			}
 		}
 
-		if (BuildConfig.DEBUG) {
+		if (BuildConfigs.DEBUG) {
 			Log.d("cache_test_DISK_", bitmap == null ? "" : "image read from disk " + key);
 		}
 
@@ -150,7 +150,7 @@ public class DiskLruImageCache implements ImageCache {
 	}
 
 	public void clearCache() {
-		if (BuildConfig.DEBUG) {
+		if (BuildConfigs.DEBUG) {
 			Log.d("cache_test_DISK_", "disk cache CLEARED");
 		}
 		try {

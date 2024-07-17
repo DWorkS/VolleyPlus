@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.3'
+        classpath 'com.android.tools.build:gradle:8.5.1'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
     }
 }
@@ -16,17 +16,16 @@ allprojects {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.jfrog.bintray'
 
 dependencies {
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
 }
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdk 34
     useLibrary 'org.apache.http.legacy'
+    namespace 'com.android.volley'
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -50,23 +49,7 @@ android {
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
     }
-    task androidJavadocs(type: Javadoc) {
-        source = android.sourceSets.main.java.srcDirs
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    }
-    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-        classifier = 'javadoc'
-        from androidJavadocs.destinationDir
-    }
-    task androidSourcesJar(type: Jar) {
-        classifier = 'sources'
-        from android.sourceSets.main.java.sourceFiles
-    }
-    artifacts {
-        archives androidSourcesJar
-        archives androidJavadocsJar
-    }
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 21
     }
 }

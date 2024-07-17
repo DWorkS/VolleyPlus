@@ -9,7 +9,6 @@ import android.widget.FrameLayout;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
 import com.volley.demo.R;
 
 
@@ -19,7 +18,6 @@ import com.volley.demo.R;
 public class AdWrapper extends FrameLayout {
 
     private AdView mAdView;
-    private InterstitialAd mInterstitialAd;
     private boolean showInterstiatial = true;
 
     public AdWrapper(Context context) {
@@ -39,13 +37,11 @@ public class AdWrapper extends FrameLayout {
 
     private void init(Context context) {
         //Ads
-        mInterstitialAd = new InterstitialAd(context);
         //LayoutInflater.from(context).inflate(R.layout.ads_wrapper, this, true);
         initInterstitialAd();
     }
 
     public void initInterstitialAd(){
-        mInterstitialAd.setAdUnitId("ca-app-pub-6407484780907805/2241325672");
         requestNewInterstitial();
     }
 
@@ -55,17 +51,9 @@ public class AdWrapper extends FrameLayout {
     }
 
     private void requestNewInterstitial() {
-        if(null != mInterstitialAd){
-            mInterstitialAd.loadAd(new AdRequest.Builder().build());
-        }
     }
 
     private void showInterstitial() {
-        if(showInterstiatial && null != mInterstitialAd){
-            if(mInterstitialAd.isLoaded()) {
-                mInterstitialAd.show();
-            }
-        }
     }
 
     @Override
@@ -103,12 +91,6 @@ public class AdWrapper extends FrameLayout {
         public void onAdLoaded() {
             super.onAdLoaded();
             mAdView.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        public void onAdFailedToLoad(int errorCode) {
-            super.onAdFailedToLoad(errorCode);
-            mAdView.setVisibility(View.GONE);
         }
     };
 }

@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.3'
+        classpath 'com.android.tools.build:gradle:8.5.1'
     }
 }
 
@@ -12,16 +12,17 @@ apply plugin: 'com.android.application'
 
 dependencies {
     implementation fileTree(include: '*.jar', dir: 'libs')
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.gms:play-services-ads:18.3.0'
+    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.gms:play-services-ads:23.2.0'
     implementation project(':library')
 }
 
 
 android {
-    compileSdkVersion 29
+    compileSdk 34
     useLibrary 'org.apache.http.legacy'
+    namespace 'com.volley.demo'
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -43,6 +44,6 @@ android {
     // Adding new build types or product flavors should be accompanied
     // by a similar customization.
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 21
     }
 }

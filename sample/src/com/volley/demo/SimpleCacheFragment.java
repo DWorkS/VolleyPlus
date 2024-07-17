@@ -138,7 +138,7 @@ public class SimpleCacheFragment extends Fragment implements AdapterView.OnItemC
 						final int columnWidth = (mGridView.getWidth() / numColumns) - mImageThumbSpacing;
 						mAdapter.setNumColumns(numColumns);
 						mAdapter.setItemHeight(columnWidth);
-						if (BuildConfig.DEBUG) {
+						if (BuildConfigs.DEBUG) {
 							Log.d(TAG, "onCreateView - numColumns set to " + numColumns);
 						}
 						if (Utils.hasJellyBean()) {

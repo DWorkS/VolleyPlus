@@ -30,7 +30,7 @@ public class SimpleCacheActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfigs.DEBUG) {
             Utils.enableStrictMode();
         }
         super.onCreate(savedInstanceState);

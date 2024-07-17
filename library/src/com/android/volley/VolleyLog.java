@@ -30,7 +30,7 @@ public class VolleyLog {
 
     public static String TAG = "Volley";
 
-    public static boolean DEBUG = BuildConfig.DEBUG;//Log.isLoggable(TAG, Log.VERBOSE);
+    public static boolean DEBUG = BuildConfigs.DEBUG;//Log.isLoggable(TAG, Log.VERBOSE);
 
     /**
      * Customize the log tag for your application, so that other apps

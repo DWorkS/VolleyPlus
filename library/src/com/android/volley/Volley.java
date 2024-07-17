@@ -204,7 +204,7 @@ public class Volley {
     public <T> void addToRequestQueue(Request<T> req, String tag) {
         // set the default tag if tag is empty
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
-        if(BuildConfig.DEBUG) {
+        if(BuildConfigs.DEBUG) {
             VolleyLog.d("Adding request to queue: %s", req.getUrl());
         }
         getRequestQueue().add(req);
@@ -213,7 +213,7 @@ public class Volley {
     public <T> void updateToRequestQueue(Request<T> req, String tag) {
         // set the default tag if tag is empty
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
-        if(BuildConfig.DEBUG) {
+        if(BuildConfigs.DEBUG) {
             VolleyLog.d("Adding request to queue: %s", req.getUrl());
         }
         getRequestQueue().cancelAll(tag);

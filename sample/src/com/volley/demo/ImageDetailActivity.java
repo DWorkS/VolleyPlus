@@ -50,7 +50,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnClickLis
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfigs.DEBUG) {
             Utils.enableStrictMode();
         }
         super.onCreate(savedInstanceState);

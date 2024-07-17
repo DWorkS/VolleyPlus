@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
 
-import com.android.volley.BuildConfig;
+import com.android.volley.BuildConfigs;
 import com.android.volley.Cache;
 import com.android.volley.VolleyLog;
 import com.android.volley.cache.DiskBasedCache.CacheHeader;
@@ -124,7 +124,7 @@ public class DiskLruBasedCache implements Cache {
                 try {
                     final DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
                     if (snapshot != null) {
-                        if (BuildConfig.DEBUG) {
+                        if (BuildConfigs.DEBUG) {
                             Log.d(TAG, "Disk cache hit");
                         }
                         inputStream = snapshot.getInputStream(DISK_CACHE_INDEX);
@@ -169,7 +169,7 @@ public class DiskLruBasedCache implements Cache {
 	}
 
 	public void clearCache() {
-		if (BuildConfig.DEBUG) {
+		if (BuildConfigs.DEBUG) {
 			Log.d("cache_test_DISK_", "disk cache CLEARED");
 		}
 		try {
@@ -201,7 +201,7 @@ public class DiskLruBasedCache implements Cache {
                     if (Utils.getUsableSpace(diskCacheDir) > mCacheParams.diskCacheSize) {
                         try {
                             mDiskLruCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, mCacheParams.diskCacheSize);
-                            if (BuildConfig.DEBUG) {
+                            if (BuildConfigs.DEBUG) {
                             	VolleyLog.d("Disk cache initialized");
                             }
                         } catch (final IOException e) {
@@ -364,7 +364,7 @@ public class DiskLruBasedCache implements Cache {
                 try {
                     final DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
                     if (snapshot != null) {
-                        if (BuildConfig.DEBUG) {
+                        if (BuildConfigs.DEBUG) {
                             Log.d(TAG, "Disk cache hit");
                         }
                         inputStream = snapshot.getInputStream(DISK_CACHE_INDEX);
@@ -480,7 +480,7 @@ public class DiskLruBasedCache implements Cache {
             if (mDiskLruCache != null && !mDiskLruCache.isClosed()) {
                 try {
                     mDiskLruCache.delete();
-                    if (BuildConfig.DEBUG) {
+                    if (BuildConfigs.DEBUG) {
                         Log.d(TAG, "Disk cache cleared");
                     }
                 } catch (IOException e) {
@@ -501,7 +501,7 @@ public class DiskLruBasedCache implements Cache {
             if (mDiskLruCache != null) {
                 try {
                     mDiskLruCache.flush();
-                    if (BuildConfig.DEBUG) {
+                    if (BuildConfigs.DEBUG) {
                         Log.d(TAG, "Disk cache flushed");
                     }
                 } catch (IOException e) {
@@ -522,7 +522,7 @@ public class DiskLruBasedCache implements Cache {
                     if (!mDiskLruCache.isClosed()) {
                         mDiskLruCache.close();
                         mDiskLruCache = null;
-                        if (BuildConfig.DEBUG) {
+                        if (BuildConfigs.DEBUG) {
                             Log.d(TAG, "Disk cache closed");
                         }
                     }
